@@ -7,7 +7,7 @@ object LogFileTokenTypes {
     override fun parseContents(chameleon: com.intellij.lang.ASTNode): com.intellij.lang.ASTNode {
       return com.intellij.lang.ASTFactory.leaf(com.intellij.ideolog.psi.LogFileTokenTypes.LOG_CONTENT, chameleon.chars)
     }
-    }
+  }
 
-    val LOG_CONTENT = com.intellij.psi.tree.IElementType("LOG_CONTENT", LogLanguage)
+  val LOG_CONTENT = com.intellij.psi.tree.IElementType("LOG_CONTENT", LogLanguage)
 }

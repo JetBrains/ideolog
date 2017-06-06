@@ -41,7 +41,7 @@ class LogHighlightingPatternSettingsDialog(val item: LogHighlightingPattern) : D
 
     constraints.gridy = 1
     val actionSelection = JComboBox<LogHighlightingAction>(arrayOf(LogHighlightingAction.HIGHLIGHT_MATCH, LogHighlightingAction.HIGHLIGHT_FIELD, LogHighlightingAction.HIGHLIGHT_LINE))
-    actionSelection.renderer = object: DefaultListCellRenderer() {
+    actionSelection.renderer = object : DefaultListCellRenderer() {
       override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
         text = (value as LogHighlightingAction).printableName()
         return this
@@ -107,12 +107,12 @@ class LogHighlightingPatternSettingsDialog(val item: LogHighlightingPattern) : D
 
   override fun doOKAction() {
     myPatternText?.let { item.pattern = it.text }
-    myActionCombo?. let { item.action = it.selectedItem as LogHighlightingAction }
+    myActionCombo?.let { item.action = it.selectedItem as LogHighlightingAction }
     myForegroundCheck?.let {
-      item.foregroundColor = if(it.isSelected) myForegroundColor?.selectedColor else null
+      item.foregroundColor = if (it.isSelected) myForegroundColor?.selectedColor else null
     }
     myBackgroundCheck?.let {
-      item.backgroundColor = if(it.isSelected) myBackgroundColor?.selectedColor else null
+      item.backgroundColor = if (it.isSelected) myBackgroundColor?.selectedColor else null
     }
     myBoldCheck?.let { item.bold = it.isSelected }
     myItalicCheck?.let { item.italic = it.isSelected }

@@ -9,7 +9,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 
-class ResetHiddenItemsIntention: IntentionAction {
+class ResetHiddenItemsIntention : IntentionAction {
   override fun getText() = "Restore all hidden lines"
 
   override fun getFamilyName() = "Logs"
@@ -26,7 +26,7 @@ class ResetHiddenItemsIntention: IntentionAction {
   override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
     editor.document.putUserData(hiddenItemsKey, null)
     LogHideThisIntention.lastLaunchedTask?.myCancel = true
-    ProgressManager.getInstance().run(FoldingCalculatorTask(project, editor, file?.name ?: "?").apply {LogHideThisIntention.lastLaunchedTask = this})
+    ProgressManager.getInstance().run(FoldingCalculatorTask(project, editor, file?.name ?: "?").apply { LogHideThisIntention.lastLaunchedTask = this })
   }
 
   override fun startInWriteAction() = false

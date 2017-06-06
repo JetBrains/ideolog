@@ -14,7 +14,7 @@ import java.util.*
 
 val hiddenItemsKey = Key.create<HashSet<Pair<Int, String>>>("Log.HiddenColumnValues")
 
-class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: String): Task.Backgroundable(project, "Calculating foldings for $fileName", true) {
+class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: String) : Task.Backgroundable(project, "Calculating foldings for $fileName", true) {
   val foldings = ArrayList<Pair<Int, Int>>()
   val settings = LogHighlightingSettingsStore.getInstance()
   val hiddenItems = editor.document.getUserData(hiddenItemsKey) ?: emptySet<Pair<Int, String>>()
@@ -33,26 +33,26 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
     var lastVisibleLine = -1
     var lastLineWasVisible = false
     var i = 0
-    while(i < document.lineCount) {
-      if(indicator.isCanceled || myCancel)
+    while (i < document.lineCount) {
+      if (indicator.isCanceled || myCancel)
         return
       indicator.fraction = i / document.lineCount.toDouble()
       val start = document.getLineStartOffset(i)
       val end = document.getLineEndOffset(i)
       val line = document.charsSequence.subSequence(start, end)
 
-      if(if(fileType.isLineEventStart(line)) isLineVisible(line) else lastLineWasVisible) {
+      if (if (fileType.isLineEventStart(line)) isLineVisible(line) else lastLineWasVisible) {
         lastLineWasVisible = true
-        if(i - lastVisibleLine > 1) {
+        if (i - lastVisibleLine > 1) {
           foldings.add(lastVisibleLine + 1 to i - 1)
-          if(foldings.size >= 100) {
+          if (foldings.size >= 100) {
             ApplicationManager.getApplication().invokeAndWait {
-              editor.foldingModel.runBatchFoldingOperation( {
+              editor.foldingModel.runBatchFoldingOperation({
                 val lastNewFoldingOffset = editor.document.getLineEndOffset(foldings.last().second)
                 val allFoldings = editor.foldingModel.allFoldRegions
                 allFoldings.forEach {
-                  if(it.startOffset > lastAddedFoldingEndOffset) {
-                    if(it.startOffset > lastNewFoldingOffset)
+                  if (it.startOffset > lastAddedFoldingEndOffset) {
+                    if (it.startOffset > lastNewFoldingOffset)
                       return@forEach
                     editor.foldingModel.removeFoldRegion(it)
                   }
@@ -80,7 +80,7 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
       }
       i++
     }
-    if(document.lineCount - lastVisibleLine > 1)
+    if (document.lineCount - lastVisibleLine > 1)
       foldings.add(lastVisibleLine + 1 to document.lineCount - 1)
   }
 
@@ -90,8 +90,8 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
       val allFoldings = editor.foldingModel.allFoldRegions
 
       allFoldings.forEach {
-        if(it.startOffset > lastAddedFoldingEndOffset) {
-          if(it.startOffset > lastNewFoldingOffset)
+        if (it.startOffset > lastAddedFoldingEndOffset) {
+          if (it.startOffset > lastNewFoldingOffset)
             return@forEach
           editor.foldingModel.removeFoldRegion(it)
         }
@@ -114,14 +114,14 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
   private fun isLineVisible(line: CharSequence): Boolean {
     @Suppress("LoopToCallChain")
     for (pattern in settings.myState.hidden)
-      if(line.contains(pattern, true))
+      if (line.contains(pattern, true))
         return false
 
-    if(hiddenItems.isNotEmpty()) {
+    if (hiddenItems.isNotEmpty()) {
       tokens.clear()
       fileType.tokenize(line, tokens, true)
       hiddenItems.forEach { (first, second) ->
-        if(first < tokens.size && second == tokens[first].takeFrom(line).toString())
+        if (first < tokens.size && second == tokens[first].takeFrom(line).toString())
           return false
       }
     }

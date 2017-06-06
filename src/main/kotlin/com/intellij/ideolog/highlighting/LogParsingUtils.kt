@@ -10,27 +10,28 @@ import java.util.*
 import kotlin.concurrent.getOrSet
 
 data class SeparatorScanState(var lastOffset: Int, var goodSeparators: Boolean, var lastLineWithSeparator: Int, var lastLine: Int)
+
 val mySeparatorScanKey = Key.create<SeparatorScanState>("LogSeparatorScanState")
 
-fun Editor.shouldFindTrueEventStart() : Boolean {
+fun Editor.shouldFindTrueEventStart(): Boolean {
   val scanState = document.getUserData(mySeparatorScanKey) ?: SeparatorScanState(0, true, -1, -1)
 
-  if(!scanState.goodSeparators)
+  if (!scanState.goodSeparators)
     return false
 
   val fileType = detectLogFileFormat(this)
 
   val chars = document.charsSequence
-  if(scanState.lastOffset < chars.length) {
+  if (scanState.lastOffset < chars.length) {
     var currentOffset = scanState.lastOffset
-    while(currentOffset < chars.length) {
-      if(currentOffset == 0 || chars[currentOffset - 1] == '\n') {
+    while (currentOffset < chars.length) {
+      if (currentOffset == 0 || chars[currentOffset - 1] == '\n') {
         scanState.lastLine++
         val contains = fileType.isLineEventStart(chars.subSequence(currentOffset, chars.length))
-        if(contains) {
+        if (contains) {
           scanState.lastLineWithSeparator = scanState.lastLine
         } else {
-          if(scanState.lastLine - scanState.lastLineWithSeparator > 50000) {
+          if (scanState.lastLine - scanState.lastLineWithSeparator > 50000) {
             scanState.goodSeparators = false
             break
           }
@@ -63,7 +64,7 @@ object LogParsingUtils {
     fileType.tokenize(event, myTokens)
 
     myTokens.asSequence().filter { !it.isSeparator }.forEachIndexed { index, (startOffset, endOffset) ->
-      if(inEventTargetOffset in startOffset..endOffset)
+      if (inEventTargetOffset in startOffset..endOffset)
         return index
     }
 
@@ -84,7 +85,7 @@ object LogParsingUtils {
     fileType.tokenize(event, myTokens)
 
     myTokens.asSequence().filter { !it.isSeparator }.forEachIndexed { _, logToken ->
-      if(logToken.startOffset <= inEventTargetOffset && logToken.endOffset >= inEventTargetOffset)
+      if (logToken.startOffset <= inEventTargetOffset && logToken.endOffset >= inEventTargetOffset)
         return logToken.takeFrom(event)
     }
 
@@ -96,7 +97,6 @@ object LogParsingUtils {
   }
 
 
-
   private fun getEventColumnCount(findTrueEventStart: Boolean, fileType: LogFileFormat, lineSet: Document, data: CharSequence, offset: Int, startIndex: Int = 0, endIndex: Int = data.length): Int {
     val (event, _) = getEvent(findTrueEventStart, fileType, lineSet, data, offset, startIndex, endIndex)
 
@@ -106,7 +106,7 @@ object LogParsingUtils {
     return myTokens.asSequence().filter { !it.isSeparator }.count()
   }
 
-  fun getEvent(editor: Editor, offset : Int = editor.caretModel.offset): Pair<CharSequence, Int> {
+  fun getEvent(editor: Editor, offset: Int = editor.caretModel.offset): Pair<CharSequence, Int> {
     return getEvent(editor.shouldFindTrueEventStart(), detectLogFileFormat(editor), editor.document, editor.document.charsSequence, offset)
   }
 
@@ -115,24 +115,24 @@ object LogParsingUtils {
     var nextEventStartOffset = eventStartOffset
     do {
       nextEventStartOffset++
-    } while(!(nextEventStartOffset >= endIndex || data[nextEventStartOffset - 1] == '\n' && (!findTrueEventStart || fileType.isLineEventStart(data.subSequence(nextEventStartOffset, endIndex)))))
+    } while (!(nextEventStartOffset >= endIndex || data[nextEventStartOffset - 1] == '\n' && (!findTrueEventStart || fileType.isLineEventStart(data.subSequence(nextEventStartOffset, endIndex)))))
 
     return data.subSequence(eventStartOffset, Math.min(nextEventStartOffset, endIndex)) to eventStartOffset
   }
 
-  fun findEventStartOffset(findTrueEventStart: Boolean, fileType: LogFileFormat, data: CharSequence, lineSet: Document, offset: Int, startIndex: Int = 0, endIndex: Int = data.length) : Int {
+  fun findEventStartOffset(findTrueEventStart: Boolean, fileType: LogFileFormat, data: CharSequence, lineSet: Document, offset: Int, startIndex: Int = 0, endIndex: Int = data.length): Int {
     var lineStartOffset = offset
 
-    var lineIndex = lineSet.getLineNumber(if(lineStartOffset < 0) 0 else lineStartOffset)
+    var lineIndex = lineSet.getLineNumber(if (lineStartOffset < 0) 0 else lineStartOffset)
 
     do {
       lineStartOffset = lineSet.getLineStartOffset(lineIndex)
 
-      if(lineIndex == 0 || lineStartOffset <= startIndex || !findTrueEventStart || fileType.isLineEventStart(data.subSequence(lineStartOffset, endIndex)))
+      if (lineIndex == 0 || lineStartOffset <= startIndex || !findTrueEventStart || fileType.isLineEventStart(data.subSequence(lineStartOffset, endIndex)))
         break
 
       lineIndex--
-    } while(true)
+    } while (true)
 
     return lineStartOffset
   }

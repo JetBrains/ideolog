@@ -11,10 +11,10 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 import java.util.*
 
-class LogHighlightValueIntention: IntentionAction {
+class LogHighlightValueIntention : IntentionAction {
   var lastSelection = ""
   override fun getText(): String {
-    return "Highlight '${if(lastSelection.length > 25) lastSelection.substring(0, 25) + "..." else lastSelection}'"
+    return "Highlight '${if (lastSelection.length > 25) lastSelection.substring(0, 25) + "..." else lastSelection}'"
   }
 
   override fun getFamilyName() = "Logs"
@@ -31,7 +31,7 @@ class LogHighlightValueIntention: IntentionAction {
       while (selectionStart > 0 && doc[selectionStart - 1].isLetterOrDigit())
         selectionStart--
 
-      while(selectionEnd < doc.length && doc[selectionEnd].isLetterOrDigit())
+      while (selectionEnd < doc.length && doc[selectionEnd].isLetterOrDigit())
         selectionEnd++
     }
 
@@ -47,7 +47,7 @@ class LogHighlightValueIntention: IntentionAction {
 
     val text = getText(editor)
     val enabled = text != null
-    if(enabled)
+    if (enabled)
       lastSelection = text.toString()
     return enabled
 

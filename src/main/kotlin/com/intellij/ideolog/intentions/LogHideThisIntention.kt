@@ -11,7 +11,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import com.intellij.util.containers.HashSet
 
-class LogHideThisIntention: IntentionAction {
+class LogHideThisIntention : IntentionAction {
   var lastText: String = ""
 
   override fun getText(): String {
@@ -30,7 +30,7 @@ class LogHideThisIntention: IntentionAction {
     val currentColumn = LogParsingUtils.getColumnByOffset(editor)
 
     val visible = currentColumn >= 0 && currentColumn != columnCount - 1
-    if(visible) {
+    if (visible) {
       val columnValue = LogParsingUtils.getColumnValueByOffset(editor) ?: "?"
       lastText = columnValue.toString().trim()
     }

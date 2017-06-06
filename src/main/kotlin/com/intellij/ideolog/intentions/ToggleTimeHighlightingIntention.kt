@@ -11,7 +11,7 @@ import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 
-class ToggleTimeHighlightingIntention: IntentionAction {
+class ToggleTimeHighlightingIntention : IntentionAction {
   override fun getText(): String {
     return "Toggle time highlighting"
   }

@@ -10,7 +10,7 @@ import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 
-class LogRemoveHighlightingsIntention: IntentionAction {
+class LogRemoveHighlightingsIntention : IntentionAction {
   override fun getText() = "Remove all highlightings"
 
   override fun getFamilyName() = "Logs"

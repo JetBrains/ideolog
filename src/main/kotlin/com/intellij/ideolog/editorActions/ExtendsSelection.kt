@@ -12,24 +12,23 @@ import java.util.*
 
 
 class ExtendsSelection : ExtendWordSelectionHandlerBase() {
-    override fun canSelect(e: PsiElement): Boolean {
-        return e  is LogPsiFile || e.parent is LogPsiFile
+  override fun canSelect(e: PsiElement): Boolean {
+    return e is LogPsiFile || e.parent is LogPsiFile
+  }
+
+  override fun select(e: PsiElement, editorText: CharSequence, cursorOffset: Int, editor: Editor): List<TextRange>? {
+    val (evt, evtOffset) = LogParsingUtils.getEvent(editor, editor.selectionModel.selectionStart)
+
+    val fileType = detectLogFileFormat(editor)
+    val tokens = ArrayList<LogToken>()
+    fileType.tokenize(evt, tokens, true)
+
+    for ((startOffset, endOffset) in tokens) {
+      if (evtOffset + startOffset < editor.selectionModel.selectionStart && evtOffset + endOffset > editor.selectionModel.selectionEnd) {
+        return listOf(TextRange(evtOffset + startOffset, evtOffset + endOffset))
+      }
     }
 
-    override fun select(e: PsiElement, editorText: CharSequence, cursorOffset: Int, editor: Editor): List<TextRange>? {
-        val (evt, evtOffset) = LogParsingUtils.getEvent(editor, editor.selectionModel.selectionStart)
-
-        val fileType = detectLogFileFormat(editor)
-        val tokens = ArrayList<LogToken>()
-        fileType.tokenize(evt, tokens, true)
-
-        for ((startOffset, endOffset) in tokens) {
-            if (evtOffset + startOffset < editor.selectionModel.selectionStart && evtOffset + endOffset > editor.selectionModel.selectionEnd)
-            {
-                return listOf(TextRange(evtOffset + startOffset, evtOffset + endOffset))
-            }
-        }
-
-        return listOf(TextRange(evtOffset, evtOffset + evt.length))
-    }
+    return listOf(TextRange(evtOffset, evtOffset + evt.length))
+  }
 }

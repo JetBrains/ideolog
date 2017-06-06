@@ -24,7 +24,7 @@ class LogHighlightingConfigurable : com.intellij.openapi.options.BaseConfigurabl
         patternTableModel.addNewPattern(result)
       }.setRemoveAction {
         val selectedIndex = patternsTable.selectedRow
-        if(selectedIndex >= 0)
+        if (selectedIndex >= 0)
           patternTableModel.removePattern(selectedIndex)
       }.setEditAction {
         val selectedIndex = patternsTable.selectedRow
@@ -54,17 +54,17 @@ class LogHighlightingConfigurable : com.intellij.openapi.options.BaseConfigurabl
 
   override fun isModified(): Boolean {
     val originalState = LogHighlightingSettingsStore.getInstance()
-    if(myLogHighlightingStore.patterns.size != originalState.myState.patterns.size)
+    if (myLogHighlightingStore.patterns.size != originalState.myState.patterns.size)
       return true
     myLogHighlightingStore.patterns.forEachIndexed { index, pattern ->
-      if(pattern != originalState.myState.patterns[index])
+      if (pattern != originalState.myState.patterns[index])
         return true
     }
 
-    if(myLogHighlightingStore.hidden.size != originalState.myState.hidden.size)
+    if (myLogHighlightingStore.hidden.size != originalState.myState.hidden.size)
       return true
     myLogHighlightingStore.hidden.forEachIndexed { index, pattern ->
-      if(pattern != originalState.myState.hidden[index])
+      if (pattern != originalState.myState.hidden[index])
         return true
     }
 
@@ -80,7 +80,7 @@ class LogHighlightingConfigurable : com.intellij.openapi.options.BaseConfigurabl
   override fun getDisplayName(): String = "Log Highlighting"
 }
 
-class LogFilterTableModel(var state: LogHighlightingSettingsStore.State): AbstractTableModel() {
+class LogFilterTableModel(var state: LogHighlightingSettingsStore.State) : AbstractTableModel() {
   override fun getRowCount(): Int {
     return state.hidden.size
   }
@@ -92,8 +92,7 @@ class LogFilterTableModel(var state: LogHighlightingSettingsStore.State): Abstra
   }
 
   fun removeItem(index: Int) {
-    if(index in 0..(state.hidden.size - 1))
-    {
+    if (index in 0..(state.hidden.size - 1)) {
       state.hidden.removeAt(index)
       fireTableRowsDeleted(index, index)
     }

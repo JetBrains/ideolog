@@ -16,9 +16,9 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   }
 
   var myState = State(arrayListOf(
-      LogHighlightingPattern(true, "^\\s*e(rror)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color.RED.rgb, null, true, false, true),
-      LogHighlightingPattern(true, "^\\s*w(arning)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0xff, 0xaa, 0).rgb, null, true, false, false),
-      LogHighlightingPattern(true, "^\\s*i(nfo)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0x3f, 0xbf, 0x3f).rgb, null, false, false, false)
+    LogHighlightingPattern(true, "^\\s*e(rror)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color.RED.rgb, null, true, false, true),
+    LogHighlightingPattern(true, "^\\s*w(arning)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0xff, 0xaa, 0).rgb, null, true, false, false),
+    LogHighlightingPattern(true, "^\\s*i(nfo)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0x3f, 0xbf, 0x3f).rgb, null, false, false, false)
   ), arrayListOf())
 
   override fun getState(): LogHighlightingSettingsStore.State {
@@ -45,15 +45,15 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   }
 
   data class State(
-      @AbstractCollection(surroundWithTag = true)
-      @Tag("Patterns")
-      val patterns: ArrayList<LogHighlightingPattern>,
-      @AbstractCollection(surroundWithTag = true)
-      @Tag("hidden")
-      val hidden: ArrayList<String>
-  ): Cloneable {
+    @AbstractCollection(surroundWithTag = true)
+    @Tag("Patterns")
+    val patterns: ArrayList<LogHighlightingPattern>,
+    @AbstractCollection(surroundWithTag = true)
+    @Tag("hidden")
+    val hidden: ArrayList<String>
+  ) : Cloneable {
     @Suppress("unused")
-    constructor(): this(ArrayList(), ArrayList())
+    constructor() : this(ArrayList(), ArrayList())
 
     public override fun clone(): State {
       val result = State(ArrayList(), ArrayList())
@@ -69,21 +69,25 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
 }
 
 @Tag("LogHighlightingPattern")
-data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean, @Attribute("pattern") var pattern: String,  @Attribute("action") var action: LogHighlightingAction,
+data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean, @Attribute("pattern") var pattern: String, @Attribute("action") var action: LogHighlightingAction,
                                   @Attribute("fg") var fgRgb: Int?, @Attribute("bg") var bgRgb: Int?,
                                   @Attribute("bold") var bold: Boolean, @Attribute("italic") var italic: Boolean,
                                   @Attribute("stripe") var showOnStripe: Boolean) : Cloneable {
 
   @Suppress("unused")
-  constructor(): this(true, "", LogHighlightingAction.HIGHLIGHT_FIELD, null, null, false, false, false)
+  constructor() : this(true, "", LogHighlightingAction.HIGHLIGHT_FIELD, null, null, false, false, false)
 
   var foregroundColor: Color?
     @Transient get() = fgRgb?.let { Color(it) }
-    @Transient set(value) { fgRgb = value?.rgb }
+    @Transient set(value) {
+      fgRgb = value?.rgb
+    }
 
   var backgroundColor: Color?
-    @Transient get() = bgRgb?. let { Color(it) }
-    @Transient set(value) { bgRgb = value?.rgb }
+    @Transient get() = bgRgb?.let { Color(it) }
+    @Transient set(value) {
+      bgRgb = value?.rgb
+    }
 
   public override fun clone(): LogHighlightingPattern {
     return LogHighlightingPattern(enabled, pattern, action, fgRgb, bgRgb, bold, italic, showOnStripe)
@@ -95,7 +99,8 @@ enum class LogHighlightingAction {
   HIGHLIGHT_FIELD,
   HIGHLIGHT_LINE,
   HIDE;
-  fun printableName() = when(this) {
+
+  fun printableName() = when (this) {
     HIGHLIGHT_MATCH -> "Highlight match"
     HIGHLIGHT_FIELD -> "Highlight field"
     HIGHLIGHT_LINE -> "Highlight line"
