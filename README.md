@@ -1,0 +1,13 @@
+Interactive viewer for '.log' files.
+
+Features:
+
+* Code highlighting based of log level: error, warn, info, etc.
+* Intention to highlight columns (time, category, threads, stack frames) in log file editor.
+* Folding of uninteresting events
+* Hyperlinks of stack traces in log
+* Navigation to source code that emit log events (F7).
+* Go to next error action (Shift + F7)
+* Extends selection
+* Intention tp highlight distance between events (marks time as red)
+* Advanced error stripe (heat map)

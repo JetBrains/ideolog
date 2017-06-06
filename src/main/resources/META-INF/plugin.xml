@@ -1,0 +1,80 @@
+<!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
+<idea-plugin>
+  <id>com.intellij.ideolog</id>
+  <name>Ideolog</name>
+  <vendor>JetBrains</vendor>
+  <depends>com.intellij.modules.lang</depends>
+  <idea-version since-build="171.0" />
+  <description><![CDATA[
+    Interactive viewer for '.log' files.
+  ]]></description>
+
+  <version>0.1</version>
+
+  <application-components>
+    <component><implementation-class>com.intellij.ideolog.intentions.LogIntentionLoaderComponent</implementation-class></component>
+  </application-components>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <applicationService serviceImplementation="com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore"/>
+    <applicationConfigurable displayName="Log Highlighting" instance="com.intellij.ideolog.highlighting.settings.LogHighlightingConfigurable" id="LogHighlighting" groupId="editor"/>
+    <fileTypeFactory implementation="com.intellij.ideolog.fileType.LogFileTypeFactory" />
+    <editorHighlighterProvider filetype="Log" implementationClass="com.intellij.ideolog.highlighting.LogFileEditorHighlighterProvider" />
+    <extendWordSelectionHandler implementation="com.intellij.ideolog.editorActions.ExtendsSelection"/>
+    <fileEditorProvider implementation="com.intellij.ideolog.file.LogFileEditorProvider" />
+    <!--suppress PluginXmlValidity -->
+    <lang.parserDefinition language="LOG" implementationClass="com.intellij.ideolog.psi.LogFileParserDefinition"/>
+
+    <intentionAction>
+      <className>com.intellij.ideolog.intentions.LogHighlightColumnIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
+
+    <intentionAction>
+      <className>com.intellij.ideolog.intentions.LogHighlightValueIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
+
+    <intentionAction>
+      <className>com.intellij.ideolog.intentions.LogJumpToSourceIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
+
+    <intentionAction>
+      <className>com.intellij.ideolog.intentions.LogRemoveHighlightingsIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
+
+    <intentionAction>
+      <className>com.intellij.ideolog.intentions.LogHideThisIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
+
+    <intentionAction>
+      <className>com.intellij.ideolog.intentions.ResetHiddenItemsIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
+
+    <intentionAction>
+      <className>com.intellij.ideolog.intentions.ToggleTimeHighlightingIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
+  </extensions>
+
+  <actions>
+    <action id="Log.JumpToSource" class="com.intellij.ideolog.editorActions.JumpToSourceAction" text="Jump To Source">
+      <keyboard-shortcut first-keystroke="F7" keymap="$default"/>
+    </action>
+
+    <action id="Log.GoToNextError" class="com.intellij.ideolog.editorActions.GoToNextErrorAction" text="Jump To Source">
+      <keyboard-shortcut first-keystroke="shift F7" keymap="$default"/>
+    </action>
+  </actions>
+</idea-plugin>
