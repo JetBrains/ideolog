@@ -275,7 +275,7 @@ class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor
 
 
   private fun tryHighlightStacktrace(event: CharSequence, eventOffset: Int) {
-    if(highlightingStacktrace || !ApplicationManager.getApplication().isDispatchThread || event.indexOf('\n').let { it < 0 || it >= event.length - 1 })
+    if(highlightingStacktrace || !ApplicationManager.getApplication().isDispatchThread || event.indexOf('\n').let { it < 0 || it >= event.length - 1 } || myEditor.project == null)
       return
     highlightingStacktrace = true
     fun offsetVisible(offset: Int) : Boolean {

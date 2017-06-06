@@ -52,6 +52,8 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       @Tag("hidden")
       val hidden: ArrayList<String>
   ): Cloneable {
+    @Suppress("unused")
+    constructor(): this(ArrayList(), ArrayList())
 
     public override fun clone(): State {
       val result = State(ArrayList(), ArrayList())
@@ -71,6 +73,9 @@ data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean, @A
                                   @Attribute("fg") var fgRgb: Int?, @Attribute("bg") var bgRgb: Int?,
                                   @Attribute("bold") var bold: Boolean, @Attribute("italic") var italic: Boolean,
                                   @Attribute("stripe") var showOnStripe: Boolean) : Cloneable {
+
+  @Suppress("unused")
+  constructor(): this(true, "", LogHighlightingAction.HIGHLIGHT_FIELD, null, null, false, false, false)
 
   var foregroundColor: Color?
     @Transient get() = fgRgb?.let { Color(it) }
