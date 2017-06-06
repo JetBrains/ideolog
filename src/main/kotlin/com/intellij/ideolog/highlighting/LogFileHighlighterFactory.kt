@@ -126,6 +126,7 @@ class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor
   }
 
   fun parseNextEvent() {
+    val lastStart = eventPieces[0].offsetStart
     var nextStart = eventPieces.last().offsetEnd + 1
     if(nextStart >= myText.length) {
       eventPieces.clear()
@@ -139,6 +140,11 @@ class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor
 
 
     val (event, offset) = LogParsingUtils.getEvent(myEditor.shouldFindTrueEventStart(), detectLogFileFormat(myEditor), myEditor.document, myText, nextStart)
+
+    if(offset == lastStart) {
+      eventPieces.clear()
+      return
+    }
 
     reparsePieces(curEvent, event, offset)
 
