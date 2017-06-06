@@ -112,7 +112,7 @@ class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor
   private var curEvent: CharSequence = ""
 
   init {
-    val (event, offset) = LogParsingUtils.getEvent(myEditor.shouldFindTrueEventStart(), detectLogFileFormat(myEditor), myEditor.document, myText, startOffset)
+    val (event, offset) = LogParsingUtils.getEvent(myEditor.shouldFindTrueEventStart(), detectLogFileFormat(myEditor), myEditor.document, myEditor.document.charsSequence, startOffset)
     val (prevEvent, _) = LogParsingUtils.getEvent(myEditor, offset - 1)
 
     reparsePieces(prevEvent, event, offset)
