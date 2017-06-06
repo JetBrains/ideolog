@@ -1,5 +1,6 @@
 package com.intellij.ideolog.file
 
+import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.*
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider
@@ -14,6 +15,8 @@ class TotallyNotTextEditorProvider: TextEditorProvider(), DumbAware {
   override fun createEditor(project: Project, file: VirtualFile): FileEditor {
     return LogFileEditor(project, file, this)
   }
+
+  override fun accept(project: Project, file: VirtualFile) = TextEditorProvider.isTextFile(file) && file.fileType.name == LogFileType.name
 
   override fun getTextEditor(editor: Editor): TextEditor {
     return super.getTextEditor(editor)
