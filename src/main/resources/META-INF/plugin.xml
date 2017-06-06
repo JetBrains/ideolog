@@ -6,18 +6,21 @@
   <depends>com.intellij.modules.lang</depends>
   <idea-version since-build="171.0" />
   <description><![CDATA[
-    Interactive viewer for '.log' files.
-
-    Features:
-    - Code highlighting based of log level: error, warn, info, etc.
-    - Intention to highlight columns (time, category, threads, stack frames) in log file editor.
-    - Folding of uninteresting events
-    - Hyperlinks of stack traces in log
-    - Navigation to source code that emit log events (F7).
-    - Go to next error action (Shift + F7)
-    - Extends selection
-    - Intention tp highlight distance between events (marks time as red)
-    - Advanced error stripe (heat map)
+    <h1>Interactive viewer for '.log' files.</h1>
+    <p>
+      Features:
+      <ul>
+        <li>Code highlighting based of log level: error, warn, info, etc.</li>
+        <li>Intention to highlight columns (time, category, threads, stack frames) in log file editor.</li>
+        <li>Folding of uninteresting events</li>
+        <li>Hyperlinks of stack traces in log</li>
+        <li>Navigation to source code that emit log events (F7).</li>
+        <li>Go to next error action (Shift + F7)</li>
+        <li>Extends selection</li>
+        <li>Intention tp highlight distance between events (marks time as red)</li>
+        <li>Advanced error stripe (heat map)</li>
+      </ul>
+    </p>
   ]]></description>
 
   <version>0.1</version>
