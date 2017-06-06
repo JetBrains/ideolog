@@ -1,0 +1,5 @@
+00:00:00 | ERROR | This is an error
+  This is more of that error
+00:00:01 | INFO | Something happened
+00:00:02 | WARNING | Be careful!
+00:00:03 | DEBUG | A debug message.
