@@ -1,12 +1,15 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.openapi.options.BaseConfigurable
 import com.intellij.openapi.ui.Messages
 import javax.swing.table.AbstractTableModel
 
-class LogHighlightingConfigurable : com.intellij.openapi.options.BaseConfigurable() {
+class LogHighlightingConfigurable : BaseConfigurable() {
   private var myLogHighlightingStore: LogHighlightingSettingsStore.State = LogHighlightingSettingsStore.getInstance().myState.clone()
   private val patternTableModel = LogPatternTableModel(myLogHighlightingStore)
   private val filterTableModel = LogFilterTableModel(myLogHighlightingStore)
+
+  override fun getHelpTopic() = "ideolog"
 
   override fun createComponent(): javax.swing.JComponent? {
     val patternsTable = com.intellij.ui.table.JBTable(patternTableModel).apply {
@@ -98,25 +101,17 @@ class LogFilterTableModel(var state: LogHighlightingSettingsStore.State) : Abstr
     }
   }
 
-  override fun getColumnCount(): Int {
-    return 1
-  }
+  override fun getColumnCount() = 1
 
-  override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
-    return state.hidden[rowIndex]
-  }
+  override fun getValueAt(rowIndex: Int, columnIndex: Int) = state.hidden[rowIndex]
 
-  override fun isCellEditable(rowIndex: Int, columnIndex: Int): Boolean {
-    return true
-  }
+  override fun isCellEditable(rowIndex: Int, columnIndex: Int) = true
 
   override fun setValueAt(aValue: Any?, rowIndex: Int, columnIndex: Int) {
     state.hidden[rowIndex] = aValue as String
   }
 
-  override fun getColumnClass(columnIndex: Int): Class<*> {
-    return java.lang.String::class.java
-  }
+  override fun getColumnClass(columnIndex: Int) = java.lang.String::class.java
 
   fun updateStore(store: LogHighlightingSettingsStore.State) {
     state = store

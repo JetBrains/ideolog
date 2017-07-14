@@ -5,12 +5,13 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+       //noinspection DifferentKotlinGradleVersion
+       classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '0.2.11'
+    id 'org.jetbrains.intellij' version '0.2.14'
 }
 
 group 'ideolog'
@@ -19,7 +20,7 @@ version buildNumber
 apply plugin: 'kotlin'
 
 intellij {
-    version '2017.1.3'
+    version '2017.1'
     pluginName 'ideolog'
     intellijRepo 'http://jetbrains-com-mirror.labs.intellij.net/intellij-repository'
 }
