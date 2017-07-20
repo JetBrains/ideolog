@@ -2,6 +2,7 @@ package com.intellij.ideolog.file
 
 import com.intellij.ideolog.highlighting.LogFileMapRenderer
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.fileEditor.FileEditorState
 import com.intellij.openapi.fileEditor.FileEditorStateLevel
 import com.intellij.openapi.fileEditor.impl.text.PsiAwareTextEditorImpl
@@ -17,6 +18,7 @@ class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorPro
   init {
     LogFileMapRenderer.GetOrCreateLogFileMapRenderer(this)
     editor.settings.isUseSoftWraps = false
+    (editor as EditorEx).isViewer = true
     editor.putUserData(Key.create("forced.soft.wraps"), java.lang.Boolean.FALSE)
   }
 

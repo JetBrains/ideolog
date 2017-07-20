@@ -153,7 +153,10 @@ class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor
 
   fun parsePreviousEvent() {
     val prevEnd = eventPieces[0].offsetStart - 1
-    if (prevEnd < 0) return
+    if (prevEnd < 0) {
+      eventPieces.clear()
+      return
+    }
 
     val (event, offset) = LogParsingUtils.getEvent(myEditor.shouldFindTrueEventStart(), detectLogFileFormat(myEditor), myEditor.document, myText, prevEnd)
     val (prevEvent, _) = LogParsingUtils.getEvent(myEditor, offset - 1)
