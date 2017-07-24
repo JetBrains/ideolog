@@ -55,8 +55,7 @@ class LogEditorHighlighter(colors: EditorColorsScheme) : EditorHighlighter {
 
   override fun createIterator(startOffset: Int): HighlighterIterator {
     if (myEditor == null)
-      return EmptyEditorHighlighter(TextAttributes(null, null, null, null, 0)).createIterator(startOffset)
-
+      return EmptyEditorHighlighter(TextAttributes()).apply { setText(myText) }.createIterator(startOffset)
 
     return LogHighlightingIterator(startOffset, myEditor as Editor, { myText }, { myColors }, myFilters)
   }
