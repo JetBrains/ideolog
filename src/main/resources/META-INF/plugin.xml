@@ -19,7 +19,11 @@
         <li>Extends selection</li>
         <li>Intention tp highlight distance between events (marks time as red)</li>
         <li>Advanced error stripe (heat map)</li>
+        <li>Custom log format more info: <a href="https://github.com/JetBrains/ideolog/wiki/Custom-Log-Formats">https://github.com/JetBrains/ideolog/wiki/Custom-Log-Formats</a></li>
       </ul>
+    </p>
+    <p>
+      Issue tracker: <a href="https://github.com/JetBrains/ideolog/issues">https://github.com/JetBrains/ideolog/issues</a>
     </p>
   ]]></description>
 
