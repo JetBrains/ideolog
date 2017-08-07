@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.ColorPanel
 import com.intellij.ui.EditorTextField
@@ -40,7 +41,7 @@ class LogHighlightingPatternSettingsDialog(val item: LogHighlightingPattern) : D
     panel.add(patternText, constraints)
 
     constraints.gridy = 1
-    val actionSelection = JComboBox<LogHighlightingAction>(arrayOf(LogHighlightingAction.HIGHLIGHT_MATCH, LogHighlightingAction.HIGHLIGHT_FIELD, LogHighlightingAction.HIGHLIGHT_LINE))
+    val actionSelection = ComboBox<LogHighlightingAction>(arrayOf(LogHighlightingAction.HIGHLIGHT_MATCH, LogHighlightingAction.HIGHLIGHT_FIELD, LogHighlightingAction.HIGHLIGHT_LINE))
     actionSelection.renderer = object : DefaultListCellRenderer() {
       override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
         text = (value as LogHighlightingAction).printableName()

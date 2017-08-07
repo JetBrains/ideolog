@@ -71,59 +71,34 @@ class LogFileLexer(val tokenCache: MutableList<IElementType>, var findEventStart
   }
 
   companion object {
-    fun lexPipeLine(event: CharSequence, output: MutableList<LogToken>, onlyValues: Boolean) {
-      var offset = 0
-      val firstThousand = event.subSequence(0, Math.min(event.length, 100))
-      firstThousand.splitToSequence('|').forEach {
-        output.add(LogToken(offset, offset + it.length, false))
-        offset += it.length
-        if (!onlyValues)
-          output.add(LogToken(offset, offset + 1, true))
-        offset++
-      }
-      if (!onlyValues && output.size > 0)
-        output.removeAt(output.size - 1)
-      if (output.size > 0 && event.length >= 100)
-        output.last().endOffset = event.length
-    }
-
-    fun lexYoutrackLine(event: CharSequence, output: MutableList<LogToken>, onlyValues: Boolean) {
-      val closingSq = event.indexOf(']')
-      if (closingSq == -1) {
-        output.add(LogToken(0, event.length, false))
-        return
-      }
-      val colon = event.indexOf(':', closingSq)
-      if (colon == -1) {
+    fun lexRegex(event: CharSequence, output: MutableList<LogToken>, onlyValues: Boolean, parser: RegexLogParser) {
+      val matcher = parser.regex.matcher(event)
+      if (!matcher.find()) {
         output.add(LogToken(0, event.length, false))
         return
       }
 
-      if (!onlyValues)
-        output.add(LogToken(0, 1, true))
+      var lastGroupEnd = 0
+      for(i in 1 .. matcher.groupCount()) {
+        val start = matcher.start(i)
+        val end = matcher.end(i)
 
-      output.add(LogToken(1, closingSq, false))
-      if (!onlyValues)
-        output.add(LogToken(closingSq, closingSq + 1, true))
+        if(start < 0 || end < 0)
+          continue
 
-      output.add(LogToken(closingSq + 1, colon, false))
+        if(start > lastGroupEnd) {
+          if(!onlyValues)
+            output.add(LogToken(lastGroupEnd, start, true))
+        }
 
-      val catStart = event.indexOf('[', colon)
-      val catEnd = event.indexOf(']', colon)
+        output.add(LogToken(start, end, false))
 
-      if (catStart == -1 || catEnd == -1) {
-        output.add(LogToken(colon + 1, event.length, false))
-        return
+        lastGroupEnd = end
       }
 
-      if (!onlyValues)
-        output.add(LogToken(colon, catStart + 1, true))
-
-      output.add(LogToken(catStart + 1, catEnd, false))
-      if (!onlyValues)
-        output.add(LogToken(catEnd, catEnd + 1, true))
-
-      output.add(LogToken(catEnd + 1, event.length, false))
+      if(lastGroupEnd < matcher.end() && !onlyValues) {
+        output.add(LogToken(lastGroupEnd, matcher.end(), true))
+      }
     }
 
     fun lexPlainLog(event: CharSequence, output: MutableList<LogToken>, onlyValues: Boolean) {

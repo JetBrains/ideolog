@@ -2,28 +2,40 @@ package com.intellij.ideolog.highlighting.settings
 
 import com.intellij.openapi.options.BaseConfigurable
 import com.intellij.openapi.ui.Messages
-import javax.swing.table.AbstractTableModel
+import com.intellij.ui.IdeBorderFactory
+import com.intellij.ui.OnePixelSplitter
+import com.intellij.ui.ToolbarDecorator
+import com.intellij.ui.table.JBTable
+import com.intellij.util.ui.JBUI
+import java.awt.BorderLayout
+import javax.swing.JComponent
+import javax.swing.JPanel
 
 class LogHighlightingConfigurable : BaseConfigurable() {
   private var myLogHighlightingStore: LogHighlightingSettingsStore.State = LogHighlightingSettingsStore.getInstance().myState.clone()
   private val patternTableModel = LogPatternTableModel(myLogHighlightingStore)
   private val filterTableModel = LogFilterTableModel(myLogHighlightingStore)
+  private val formatsTableModel = LogFormatTableModel(myLogHighlightingStore)
 
-  override fun getHelpTopic() = "ideolog"
+  override fun getHelpTopic() = null
 
-  override fun createComponent(): javax.swing.JComponent? {
-    val patternsTable = com.intellij.ui.table.JBTable(patternTableModel).apply {
-      preferredScrollableViewportSize = com.intellij.util.ui.JBUI.size(10)
-      getColumn(getColumnName(0)).maxWidth = com.intellij.util.ui.JBUI.Fonts.label().size * 10
-      getColumn(getColumnName(1)).width = com.intellij.util.ui.JBUI.scale(50)
+  override fun createComponent(): JComponent? {
+    val patternsTable = JBTable(patternTableModel).apply {
+      preferredScrollableViewportSize = JBUI.size(10)
+      getColumn(getColumnName(0)).maxWidth = JBUI.Fonts.label().size * 15
+      getColumn(getColumnName(1)).width = JBUI.scale(50)
       getColumn(getColumnName(2)).cellRenderer = LogPatternActionRenderer()
     }
-    val filtersTable = com.intellij.ui.table.JBTable().apply { preferredScrollableViewportSize = com.intellij.util.ui.JBUI.size(10) }
+    val filtersTable = JBTable(filterTableModel).apply { preferredScrollableViewportSize = JBUI.size(10) }
+    val formatsTable = JBTable(formatsTableModel).apply {
+      preferredScrollableViewportSize = JBUI.size(10)
+      getColumn(getColumnName(0)).maxWidth = JBUI.Fonts.label().size * 15
+    }
 
     val patternsPanel = javax.swing.JPanel(java.awt.BorderLayout()).apply {
-      border = com.intellij.ui.IdeBorderFactory.createTitledBorder("Patterns")
-      add(com.intellij.ui.ToolbarDecorator.createDecorator(patternsTable).setAddAction {
-        val result = com.intellij.openapi.ui.Messages.showInputDialog("Enter new pattern (regex supported):", "New highlighting pattern", null) ?: return@setAddAction
+      border = IdeBorderFactory.createTitledBorder("Patterns")
+      add(ToolbarDecorator.createDecorator(patternsTable).setAddAction {
+        val result = Messages.showInputDialog("Enter new pattern (regex supported):", "New highlighting pattern", null) ?: return@setAddAction
         patternTableModel.addNewPattern(result)
       }.setRemoveAction {
         val selectedIndex = patternsTable.selectedRow
@@ -33,22 +45,46 @@ class LogHighlightingConfigurable : BaseConfigurable() {
         val selectedIndex = patternsTable.selectedRow
         if (selectedIndex >= 0)
           LogHighlightingPatternSettingsDialog(patternTableModel.getValueAt(selectedIndex, 2) as LogHighlightingPattern).show()
-      }.createPanel(), java.awt.BorderLayout.CENTER)
+      }.createPanel(), BorderLayout.CENTER)
     }
 
     val filtersPanel = javax.swing.JPanel(java.awt.BorderLayout()).apply {
-      border = com.intellij.ui.IdeBorderFactory.createTitledBorder("Filters")
-      add(com.intellij.ui.ToolbarDecorator.createDecorator(filtersTable).setAddAction {
+      border = IdeBorderFactory.createTitledBorder("Filters")
+      add(ToolbarDecorator.createDecorator(filtersTable).setAddAction {
         val string = Messages.showInputDialog("Enter new pattern (exact match)", "New filter pattern", null) ?: return@setAddAction
         filterTableModel.addItem(string)
       }.setRemoveAction {
-        val selectedIndex = patternsTable.selectedRow
+        val selectedIndex = filtersTable.selectedRow
         if (selectedIndex >= 0)
           filterTableModel.removeItem(selectedIndex)
       }.createPanel(), java.awt.BorderLayout.CENTER)
     }
 
-    return com.intellij.util.ui.FormBuilder.createFormBuilder().addComponentFillVertically(patternsPanel, 0).addComponentFillVertically(filtersPanel, 0).panel
+    val formatsPanel = JPanel(BorderLayout()).apply {
+      border = IdeBorderFactory.createTitledBorder("Log Formats")
+      add(ToolbarDecorator.createDecorator(formatsTable).apply {
+        setAddAction {
+          val result = Messages.showInputDialog("Enter new format name:", "New log format", null) ?: return@setAddAction
+          formatsTableModel.addNewFormat(result)
+        }
+        setRemoveAction {
+          val selectedIndex = formatsTable.selectedRow
+          if (selectedIndex >= 0)
+            formatsTableModel.removeFormat(selectedIndex)
+        }
+        setEditAction {
+          val selectedIndex = formatsTable.selectedRow
+          if (selectedIndex >= 0)
+            LogParsingPatternSettingsDialog(formatsTableModel.getValueAt(selectedIndex, -1) as LogParsingPattern).show()
+        }
+      }.createPanel(), BorderLayout.CENTER)
+    }
+
+    val topPanel = OnePixelSplitter(false, "Ideolog.Settings.TopProportion", 0.5f)
+    topPanel.firstComponent = patternsPanel
+    topPanel.secondComponent = filtersPanel
+
+    return com.intellij.util.ui.FormBuilder.createFormBuilder().addComponentFillVertically(formatsPanel, 0).addComponentFillVertically(topPanel, 0).panel
   }
 
   override fun apply() {
@@ -57,7 +93,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
 
   override fun isModified(): Boolean {
     val originalState = LogHighlightingSettingsStore.getInstance()
-    if (myLogHighlightingStore.patterns.size != originalState.myState.patterns.size)
+    /*if (myLogHighlightingStore.patterns.size != originalState.myState.patterns.size)
       return true
     myLogHighlightingStore.patterns.forEachIndexed { index, pattern ->
       if (pattern != originalState.myState.patterns[index])
@@ -71,50 +107,17 @@ class LogHighlightingConfigurable : BaseConfigurable() {
         return true
     }
 
-    return false
+    return false*/
+    return originalState.myState != myLogHighlightingStore
   }
 
   override fun reset() {
     myLogHighlightingStore = LogHighlightingSettingsStore.getInstance().myState.clone()
     patternTableModel.updateStore(myLogHighlightingStore)
     filterTableModel.updateStore(myLogHighlightingStore)
+    formatsTableModel.updateStore(myLogHighlightingStore)
   }
 
   override fun getDisplayName(): String = "Log Highlighting"
 }
 
-class LogFilterTableModel(var state: LogHighlightingSettingsStore.State) : AbstractTableModel() {
-  override fun getRowCount(): Int {
-    return state.hidden.size
-  }
-
-  fun addItem(item: String) {
-    state.hidden.add(item)
-    val stateSize = state.hidden.size - 1
-    fireTableRowsInserted(stateSize, stateSize)
-  }
-
-  fun removeItem(index: Int) {
-    if (index in 0..(state.hidden.size - 1)) {
-      state.hidden.removeAt(index)
-      fireTableRowsDeleted(index, index)
-    }
-  }
-
-  override fun getColumnCount() = 1
-
-  override fun getValueAt(rowIndex: Int, columnIndex: Int) = state.hidden[rowIndex]
-
-  override fun isCellEditable(rowIndex: Int, columnIndex: Int) = true
-
-  override fun setValueAt(aValue: Any?, rowIndex: Int, columnIndex: Int) {
-    state.hidden[rowIndex] = aValue as String
-  }
-
-  override fun getColumnClass(columnIndex: Int) = java.lang.String::class.java
-
-  fun updateStore(store: LogHighlightingSettingsStore.State) {
-    state = store
-    fireTableDataChanged()
-  }
-}

@@ -1,13 +1,12 @@
 package com.intellij.ideolog.fileType
 
-class LogFileTypeFactory : com.intellij.openapi.fileTypes.FileTypeFactory() {
-  private val extList = listOf("log")
-  private val matchers = extList.map { com.intellij.openapi.fileTypes.ExtensionFileNameMatcher(it) }
+import com.intellij.openapi.fileTypes.FileTypeConsumer
+import com.intellij.openapi.fileTypes.FileTypeFactory
 
-  override fun createFileTypes(consumer: com.intellij.openapi.fileTypes.FileTypeConsumer) {
-    for (matcher in matchers) {
-      consumer.consume(LogFileType, matcher)
-    }
-    consumer.consume(LogFileType)
+class LogFileTypeFactory : FileTypeFactory() {
+  private val LOG_FILE_EXTENSIONS = "log" // add more extensions separated with ;
+
+  override fun createFileTypes(consumer: FileTypeConsumer) {
+    consumer.consume(LogFileType, LOG_FILE_EXTENSIONS)
   }
 }

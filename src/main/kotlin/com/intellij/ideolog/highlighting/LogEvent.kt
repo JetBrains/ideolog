@@ -25,7 +25,6 @@ class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFil
 
   val messageTrigrams: THashSet<Int> = THashSet()
 
-
   init {
     val tokens: MutableList<LogToken> = ArrayList()
     fileType.tokenize(rawText, tokens)
@@ -47,8 +46,6 @@ class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFil
     }
 
     message = fullMessage.split('\n').first().trim()
-
-
 
     levelIdEntry = IdIndexEntry(level, false)
     categoryIdEntry = IdIndexEntry(category, false)

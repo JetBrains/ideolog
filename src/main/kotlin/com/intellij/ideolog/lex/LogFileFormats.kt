@@ -1,8 +1,14 @@
 package com.intellij.ideolog.lex
 
+import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
+import com.intellij.ideolog.highlighting.settings.LogParsingPattern
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.Key
+import java.text.DateFormat
+import java.text.ParseException
+import java.text.SimpleDateFormat
 import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
 
 data class LogToken(val startOffset: Int, var endOffset: Int, val isSeparator: Boolean) {
   fun takeFrom(rawMessage: CharSequence): CharSequence {
@@ -10,85 +16,87 @@ data class LogToken(val startOffset: Int, var endOffset: Int, val isSeparator: B
   }
 }
 
-enum class LogFileFormat {
-  PIPE_SEPARATED,
-  YOUTRACK,
-  PLAIN;
+class RegexLogParser(val regex: Pattern, val lineRegex: Pattern, val otherParsingSettings: LogParsingPattern, val timeFormat: DateFormat)
 
+class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
   fun isLineEventStart(line: CharSequence): Boolean {
-    return when (this) {
-      LogFileFormat.PIPE_SEPARATED -> line.isNotEmpty() && line[0].isDigit() && pipePattern.matcher(line).find()
-      LogFileFormat.YOUTRACK -> line.isNotEmpty() && line[0] == '[' && youTrackPattern.matcher(line).find()
-      LogFileFormat.PLAIN -> line.isNotEmpty() && !line[0].isWhitespace()
-    }
+    return myRegexLogParser?.lineRegex?.matcher(line)?.find() ?: line.isNotEmpty() && !line[0].isWhitespace()
   }
 
   fun getTimeFieldIndex(): Int {
-    return when (this) {
-      LogFileFormat.PIPE_SEPARATED -> 0
-      LogFileFormat.YOUTRACK -> 0
-      LogFileFormat.PLAIN -> 0
-    }
+    return myRegexLogParser?.otherParsingSettings?.timeColumnId ?: 0
   }
 
   fun tokenize(event: CharSequence, output: MutableList<LogToken>, onlyValues: Boolean = false) {
-    when (this) {
-      LogFileFormat.PIPE_SEPARATED -> LogFileLexer.lexPipeLine(event, output, onlyValues)
-      LogFileFormat.YOUTRACK -> LogFileLexer.lexYoutrackLine(event, output, onlyValues)
-      LogFileFormat.PLAIN -> LogFileLexer.lexPlainLog(event, output, onlyValues)
+    if(myRegexLogParser == null) {
+      LogFileLexer.lexPlainLog(event, output, onlyValues)
+    } else {
+      LogFileLexer.lexRegex(event, output, onlyValues, myRegexLogParser)
     }
   }
 
   fun extractDate(tokens: List<LogToken>): LogToken? {
-    return when (this) {
-      LogFileFormat.PIPE_SEPARATED -> if (tokens.size > 1) tokens[0] else null
-      LogFileFormat.YOUTRACK -> if ((tokens.size > 1) && (!tokens[0].isSeparator)) tokens[0] else {
-        if ((tokens.size > 2) && (tokens[0].isSeparator) && (!tokens[1].isSeparator)) tokens[1] else null
-      }
-      LogFileFormat.PLAIN -> if (tokens.size > 1) tokens[0] else null
-    }
+    val idx = myRegexLogParser?.otherParsingSettings?.timeColumnId ?: return null
+    if(tokens.size > idx + 1)
+      return tokens.asSequence().filter { !it.isSeparator }.elementAt(idx)
+    return null
   }
 
   fun extractSeverity(tokens: List<LogToken>): LogToken? {
-    return when (this) {
-      LogFileFormat.PIPE_SEPARATED -> if (tokens.size > 2) tokens[1] else null
-      LogFileFormat.YOUTRACK -> if (tokens.size > 2) tokens[1] else null
-      LogFileFormat.PLAIN -> null
-    }
+    val idx = myRegexLogParser?.otherParsingSettings?.severityColumnId ?: return null
+    if(tokens.size > idx + 1)
+      return tokens.asSequence().filter { !it.isSeparator }.elementAt(idx)
+    return null
   }
 
   fun extractCategory(tokens: List<LogToken>): LogToken? {
-    return when (this) {
-      LogFileFormat.PIPE_SEPARATED -> if (tokens.size > 3) tokens[2] else null
-      LogFileFormat.YOUTRACK -> if (tokens.size > 3) tokens[2] else null
-      LogFileFormat.PLAIN -> null
-    }
+    val idx = myRegexLogParser?.otherParsingSettings?.categoryColumnId ?: return null
+    if(tokens.size > idx + 1)
+      return tokens.asSequence().filter { !it.isSeparator }.elementAt(idx)
+    return null
   }
 
   fun extractMessage(tokens: List<LogToken>): LogToken {
     return tokens.last { !it.isSeparator }
   }
+
+  fun parseLogEventTimeSeconds(time: CharSequence): Long? {
+    return myRegexLogParser?.let {
+      try {
+        return@let it.timeFormat.parse(time.toString()).time
+      } catch (e: ParseException) {
+        // silently ignore it
+      } catch (e: NumberFormatException) {
+
+      }
+      return@let null
+    }
+  }
 }
 
 val logFormatKey = Key.create<LogFileFormat>("LogFile.Format")
-val youTrackPattern = Pattern.compile("""^\[\d\d:\d\d:\d\d]+.:""")!!
-val pipePattern = Pattern.compile("^[0-9:.\\-]+\\s*\\|")!!
 
 fun detectLogFileFormat(editor: Editor): LogFileFormat {
   val existingKey = editor.getUserData(logFormatKey)
   if (existingKey != null)
     return existingKey
 
-  val doc = editor.document.charsSequence
-  val firstLines = doc.lineSequence().take(10)
-  val pipes = firstLines.sumBy { if (pipePattern.matcher(it).find()) 1 else 0 }
-  val youTrackPatterns = firstLines.sumBy { if (youTrackPattern.matcher(it).find()) 1 else 0 }
+  val regexMatchers = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.mapNotNull {
+    if (!it.enabled)
+      return@mapNotNull null
 
-  val result = when {
-    youTrackPatterns > 1 -> LogFileFormat.YOUTRACK
-    pipes > 1 -> LogFileFormat.PIPE_SEPARATED
-    else -> LogFileFormat.PLAIN
+    try {
+      return@mapNotNull RegexLogParser(Pattern.compile(it.pattern, Pattern.DOTALL), Pattern.compile(it.lineStartPattern), it, SimpleDateFormat(it.timePattern))
+    } catch(e: PatternSyntaxException){
+      return@mapNotNull null
+    }
   }
+
+  val doc = editor.document.charsSequence
+  val firstLines = doc.lineSequence().take(25)
+  val sumByMatcher = regexMatchers.map { it to firstLines.count { line -> it.regex.matcher(line).find() } }
+
+  val result = LogFileFormat(sumByMatcher.filter { it.second > 5 }.maxBy { it.second }?.first)
 
   editor.putUserData(logFormatKey, result)
 

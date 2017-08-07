@@ -2,6 +2,7 @@ package com.intellij.ideolog.highlighting
 
 import com.intellij.ideolog.file.LogFileEditor
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
+import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.ex.EditorEx
@@ -126,6 +127,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
             }
 
             val offsetLimit = myLogFileEditor.editor.document.textLength
+            val fileFormat = detectLogFileFormat(myLogFileEditor.editor)
             var offs = 0
             val isRenderingTimeHighlighting = myIsRenderingTimeHighlighting
             val customPatterns = LogHighlightingSettingsStore.getInstance().myState.patterns.filter { it.enabled && it.showOnStripe }.map { Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it }.toTypedArray()
@@ -134,10 +136,10 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
             val colorDefaultBackground = myLogFileEditor.editor.colorsScheme.defaultBackground
 
             var nBucketCur = 0
-            var nCurBucketMaxTimeDelta = 0
+            var nCurBucketMaxTimeDelta = 0L
             var isCurBucketError = false
             var colorCurCustomHighlighter: Color? = null
-            var timestampPrev: Int? = null
+            var timestampPrev: Long? = null
 
             fun CommitBucket() {
               if (nBucketCur >= NumBuckets)
@@ -171,7 +173,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
               offs += logEvent.rawText.length
 
               // Attrs of this entry
-              val timestamp = if (isRenderingTimeHighlighting) (logEvent.date.let { parseLogEventTimeSeconds(it) } ?: timestampPrev) else 0
+              val timestamp = if (isRenderingTimeHighlighting) (logEvent.date.let { fileFormat.parseLogEventTimeSeconds(it) } ?: timestampPrev) else 0
               val timeDelta = if ((timestamp != null) && (timestampPrev != null)) timestamp - timestampPrev else 0
               timestampPrev = timestamp
               val isError = logEvent.level == "ERROR"

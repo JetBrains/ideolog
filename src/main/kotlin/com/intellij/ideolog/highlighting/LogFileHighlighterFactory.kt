@@ -85,14 +85,7 @@ class LogEditorHighlighter(colors: EditorColorsScheme) : EditorHighlighter {
 }
 
 val markupHighlightedExceptionsKey = Key.create<HashSet<Int>>("Log.ParsedExceptions")
-val timePattern = Pattern.compile("(\\d\\d):(\\d\\d):(\\d\\d)")!!
-val timeDifferenceToRed = 15
-
-fun parseLogEventTimeSeconds(s: CharSequence): Int? {
-  val matcher = timePattern.matcher(s)
-  matcher.find() || return -1
-  return matcher.group(1).toInt() * 3600 + matcher.group(2).toInt() * 60 + matcher.group(3).toInt()
-}
+val timeDifferenceToRed = 15000L
 
 private var highlightingStacktrace = false // todo: ewww, globals!
 
@@ -170,9 +163,10 @@ class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor
     curEvent = event
 
     parsedTokens.clear()
-    val fileType = detectLogFileFormat(myEditor)
+    val fileFormat = detectLogFileFormat(myEditor)
+    val fileType = fileFormat
     fileType.tokenize(prevEvent, parsedTokens)
-    val prevTime = detectLogFileFormat(myEditor).extractDate(parsedTokens)?.takeFrom(prevEvent)?.let { parseLogEventTimeSeconds(it) }
+    val prevTime = fileFormat.extractDate(parsedTokens)?.takeFrom(prevEvent)?.let { fileFormat.parseLogEventTimeSeconds(it) }
 
     eventPieces.clear()
     var lineForeground = myColors.defaultForeground
@@ -182,7 +176,7 @@ class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor
 
     parsedTokens.clear()
     fileType.tokenize(event, parsedTokens)
-    val currentTime = fileType.extractDate(parsedTokens)?.takeFrom(event)?.let { parseLogEventTimeSeconds(it) }
+    val currentTime = fileType.extractDate(parsedTokens)?.takeFrom(event)?.let { fileFormat.parseLogEventTimeSeconds(it) }
 
     val columnValues = parsedTokens.filter { !it.isSeparator }.map { it.takeFrom(event) }
     val numColumns = columnValues.size
@@ -221,7 +215,7 @@ class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor
 
     var valueIndex = 0
     val timeIndex = fileType.getTimeFieldIndex()
-    parsedTokens.forEachIndexed { _, token ->
+    parsedTokens.forEach { token ->
       val value = token.takeFrom(event)
       var valueForeground = lineForeground
       var valueBackground = lineBackground
