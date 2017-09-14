@@ -1,9 +1,11 @@
 package com.intellij.ideolog.highlighting.settings
 
 import com.intellij.ide.BrowserUtil
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBIntSpinner
+import org.intellij.lang.regexp.RegExpFileType
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import javax.swing.JComponent
@@ -52,12 +54,12 @@ class LogParsingPatternSettingsDialog(val item: LogParsingPattern) : DialogWrapp
     panel.add(nameText, constraints)
     constraints.gridy++
 
-    val patternText = EditorTextField(item.pattern)
+    val patternText = EditorTextField(item.pattern, ProjectManager.getInstance().defaultProject, RegExpFileType.INSTANCE)
     myParsingPatternText = patternText
     panel.add(patternText, constraints)
     constraints.gridy++
 
-    val linePatternText = EditorTextField(item.lineStartPattern)
+    val linePatternText = EditorTextField(item.lineStartPattern, ProjectManager.getInstance().defaultProject, RegExpFileType.INSTANCE)
     myLineStartPatternText = linePatternText
     panel.add(linePatternText, constraints)
     constraints.gridy++
