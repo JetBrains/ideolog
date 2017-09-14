@@ -28,6 +28,8 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
   val ComposedBuckets: Array<Color?> = arrayOfNulls(NumBuckets)
   var myHighlighters: Array<RangeHighlighter>? = null
 
+  val settingsStore = LogHighlightingSettingsStore.getInstance()
+
   private val myMarkupModel: MarkupModelEx = (myLogFileEditor.editor as EditorEx).markupModel
 
   init {
@@ -227,19 +229,23 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
     val highlighters = myHighlighters ?: RecreateHighlighters()
 
     for (nBucket in 0 until NumBuckets) {
-      val newColor: Color
-
-      // User highlighter immediately wins
-      if (HighlighterBuckets[nBucket] != null) {
-        newColor = HighlighterBuckets[nBucket]!!
+      val newColor: Color?
+      
+      newColor = if (HighlighterBuckets[nBucket] != null) {
+        // User highlighter immediately wins
+        HighlighterBuckets[nBucket]!!
       } else {
+        if(settingsStore.myState.errorStripeMode == "heatmap") {
+          val hue = HeatMapBuckets[nBucket] * -1.0 / 3.0 + 1.0 / 3.0 // Should go between green and red
+          val bri = BreadcrumbBuckets[nBucket] * .35 + .60 // Not too dark, up to almost full
+          val sat = .5
 
-        val hue = HeatMapBuckets[nBucket] * -1.0 / 3.0 + 1.0 / 3.0 // Should go between green and red
-        val bri = BreadcrumbBuckets[nBucket] * .35 + .60 // Not too dark, up to almost full
-        val sat = .5
-
-        newColor = Color.getHSBColor(hue.toFloat(), sat.toFloat(), bri.toFloat())
+          Color.getHSBColor(hue.toFloat(), sat.toFloat(), bri.toFloat())
+        } else {
+          null
+        }
       }
+
       if (ComposedBuckets[nBucket] != newColor) {
         ComposedBuckets[nBucket] = newColor
         myMarkupModel.setRangeHighlighterAttributes(highlighters[nBucket], TextAttributes().apply { setAttributes(null, null, null, newColor, EffectType.BOXED, Font.PLAIN) })

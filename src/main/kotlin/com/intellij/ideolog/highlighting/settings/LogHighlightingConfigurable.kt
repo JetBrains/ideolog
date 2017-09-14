@@ -8,6 +8,7 @@ import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
+import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JPanel
 
@@ -20,6 +21,11 @@ class LogHighlightingConfigurable : BaseConfigurable() {
   override fun getHelpTopic() = null
 
   override fun createComponent(): JComponent? {
+    val heatmapCheckbox = JCheckBox("Display heat map on error stripe/scrollbar", myLogHighlightingStore.errorStripeMode == "heatmap")
+    heatmapCheckbox.addChangeListener {
+      myLogHighlightingStore.errorStripeMode = if(heatmapCheckbox.isSelected) "heatmap" else "normal"
+    }
+
     val patternsTable = JBTable(patternTableModel).apply {
       preferredScrollableViewportSize = JBUI.size(10)
       getColumn(getColumnName(0)).maxWidth = JBUI.Fonts.label().size * 15
@@ -84,7 +90,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     topPanel.firstComponent = patternsPanel
     topPanel.secondComponent = filtersPanel
 
-    return com.intellij.util.ui.FormBuilder.createFormBuilder().addComponentFillVertically(formatsPanel, 0).addComponentFillVertically(topPanel, 0).panel
+    return com.intellij.util.ui.FormBuilder.createFormBuilder().addComponent(heatmapCheckbox).addComponentFillVertically(formatsPanel, 0).addComponentFillVertically(topPanel, 0).panel
   }
 
   override fun apply() {
@@ -93,21 +99,6 @@ class LogHighlightingConfigurable : BaseConfigurable() {
 
   override fun isModified(): Boolean {
     val originalState = LogHighlightingSettingsStore.getInstance()
-    /*if (myLogHighlightingStore.patterns.size != originalState.myState.patterns.size)
-      return true
-    myLogHighlightingStore.patterns.forEachIndexed { index, pattern ->
-      if (pattern != originalState.myState.patterns[index])
-        return true
-    }
-
-    if (myLogHighlightingStore.hidden.size != originalState.myState.hidden.size)
-      return true
-    myLogHighlightingStore.hidden.forEachIndexed { index, pattern ->
-      if (pattern != originalState.myState.hidden[index])
-        return true
-    }
-
-    return false*/
     return originalState.myState != myLogHighlightingStore
   }
 

@@ -15,7 +15,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   companion object {
     fun getInstance() = ServiceManager.getService(LogHighlightingSettingsStore::class.java)!!
 
-    val CURRENT_SETTINGS_VERSION = "1"
+    val CURRENT_SETTINGS_VERSION = "2"
 
     @Language("RegExp")
     val cleanState = State(arrayListOf(
@@ -26,7 +26,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       LogParsingPattern(true, "Pipe-separated", "^(?s)([^|]*)\\|([^|]*)\\|([^|]*)\\|(.*)$", "HH:mm:ss.SSS", "^\\d", 0, 1, 2),
       LogParsingPattern(true, "IntelliJ IDEA", "^([^\\[]+)(\\[[\\s\\d]+])\\s*(\\w*)\\s*-\\s*(\\S*)\\s*-(.+)$", "yyyy-MM-dd HH:mm:ss,SSS", "^\\d", 0, 2, 3),
       LogParsingPattern(true, "TeamCity build log", "^\\[([^]]+)](.):\\s*(\\[[^]]+])?(.*)$", "HH:mm:ss", "^\\[", 0, 1, 2)
-    ), CURRENT_SETTINGS_VERSION)
+    ), CURRENT_SETTINGS_VERSION, "3", "heatmap")
 
     val settingsUpgraders = mapOf<String, (State) -> State>(
       "-1" to { _ -> cleanState.clone() },
@@ -34,6 +34,13 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         val newState = oldState.clone()
         newState.version = "1"
         newState.parsingPatterns.addAll(cleanState.parsingPatterns)
+        return@lambda newState
+      },
+      "1" to lambda@{ oldState ->
+        val newState = oldState.clone()
+        newState.errorStripeMode = "heatmap"
+        newState.lastAddedDefaultFormat = "3"
+        newState.version = "2"
         return@lambda newState
       }
     )
@@ -56,6 +63,11 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       } else {
         myState = upgrader(myState)
       }
+    }
+
+    if(myState.lastAddedDefaultFormat.toInt() < cleanState.parsingPatterns.size) {
+      myState.parsingPatterns.addAll(cleanState.parsingPatterns.subList(myState.lastAddedDefaultFormat.toInt(), cleanState.parsingPatterns.size))
+      myState.lastAddedDefaultFormat = cleanState.parsingPatterns.size.toString()
     }
   }
 
@@ -85,16 +97,20 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     @Tag("parsing")
     val parsingPatterns: ArrayList<LogParsingPattern>,
     @Tag("settingsVersion", textIfEmpty = "0")
-    var version: String
+    var version: String,
+    @Tag("lastAddedDefaultFormat", textIfEmpty = "2")
+    var lastAddedDefaultFormat: String,
+    @Tag("errorStripeModel", textIfEmpty = "heatmap")
+    var errorStripeMode: String
   ) : Cloneable {
     @Suppress("unused")
-    constructor() : this(ArrayList(), ArrayList(), ArrayList(), "-1")
+    constructor() : this(ArrayList(), ArrayList(), ArrayList(), "-1", "-1", "heatmap")
 
     @Suppress("unused")
-    constructor(patterns: ArrayList<LogHighlightingPattern>, hidden: ArrayList<String>, parsingPatterns: ArrayList<LogParsingPattern>) : this(patterns, hidden, parsingPatterns, "-1")
+    constructor(patterns: ArrayList<LogHighlightingPattern>, hidden: ArrayList<String>, parsingPatterns: ArrayList<LogParsingPattern>) : this(patterns, hidden, parsingPatterns, "-1", "-1", "heatmap")
 
     public override fun clone(): State {
-      val result = State(ArrayList(), ArrayList(), ArrayList(), version)
+      val result = State(ArrayList(), ArrayList(), ArrayList(), version, lastAddedDefaultFormat, errorStripeMode)
       patterns.forEach {
         result.patterns.add(it.clone())
       }
