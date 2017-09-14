@@ -19,6 +19,6 @@ class LogPsiFile(fileViewProvider: FileViewProvider) :
 
   override fun accept(visitor: PsiElementVisitor) {}
 
-  override fun isWritable() = false
+  override fun isWritable() = true
 }
 
