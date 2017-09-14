@@ -2,12 +2,11 @@ package com.intellij.ideolog.intentions
 
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.ideolog.fileType.LogFileType
-import com.intellij.ideolog.foldings.FoldingCalculatorTask
-import com.intellij.ideolog.foldings.hiddenItemsKey
+import com.intellij.ideolog.foldings.*
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
+import com.intellij.util.containers.isNullOrEmpty
 
 class ResetHiddenItemsIntention : IntentionAction {
   override fun getText() = "Restore all hidden lines"
@@ -18,15 +17,21 @@ class ResetHiddenItemsIntention : IntentionAction {
     if (file?.fileType != LogFileType)
       return false
 
-    val hasHiddenItems = editor.document.getUserData(hiddenItemsKey)?.isNotEmpty() ?: false
+    val hasHiddenItems = !editor.document.getUserData(hiddenItemsKey).isNullOrEmpty()
+    val hasHiddenSubstrings = !editor.document.getUserData(hiddenSubstringsKey).isNullOrEmpty()
+    val hasWhitelistedItems = !editor.document.getUserData(whitelistedItemsKey).isNullOrEmpty()
 
-    return hasHiddenItems
+    return hasHiddenItems || hasHiddenSubstrings || hasWhitelistedItems || editor.document.getUserData(hideLinesAboveKey) != null || editor.getUserData(hideLinesBelowKey) != null
   }
 
   override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
     editor.document.putUserData(hiddenItemsKey, null)
-    LogHideThisIntention.lastLaunchedTask?.myCancel = true
-    ProgressManager.getInstance().run(FoldingCalculatorTask(project, editor, file?.name ?: "?").apply { LogHideThisIntention.lastLaunchedTask = this })
+    editor.document.putUserData(hiddenSubstringsKey, null)
+    editor.document.putUserData(whitelistedItemsKey, null)
+    editor.document.putUserData(hideLinesBelowKey, null)
+    editor.document.putUserData(hideLinesAboveKey, null)
+
+    FoldingCalculatorTask.restartFoldingCalculator(project, editor, file)
   }
 
   override fun startInWriteAction() = false

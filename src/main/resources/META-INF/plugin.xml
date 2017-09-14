@@ -84,6 +84,30 @@
       <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
       <categoryKey>intention.category.log</categoryKey>
     </intentionAction>
+
+    <intentionAction>
+      <className>com.intellij.ideolog.intentions.HideLinesAboveIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
+
+    <intentionAction>
+      <className>com.intellij.ideolog.intentions.HideLinesBelowIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
+
+    <intentionAction>
+      <className>com.intellij.ideolog.intentions.HideLinesContainingSubstringIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
+
+    <intentionAction>
+      <className>com.intellij.ideolog.intentions.LogWhitelistThisIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
   </extensions>
 
   <actions>
@@ -91,7 +115,7 @@
       <keyboard-shortcut first-keystroke="F7" keymap="$default"/>
     </action>
 
-    <action id="Log.GoToNextError" class="com.intellij.ideolog.editorActions.GoToNextErrorAction" text="Jump To Source">
+    <action id="Log.GoToNextError" class="com.intellij.ideolog.editorActions.GoToNextErrorAction" text="Go To Next Error in Log">
       <keyboard-shortcut first-keystroke="shift F7" keymap="$default"/>
     </action>
   </actions>
