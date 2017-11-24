@@ -19,14 +19,16 @@ class ResetHiddenItemsIntention : IntentionAction {
 
     val hasHiddenItems = !editor.document.getUserData(hiddenItemsKey).isNullOrEmpty()
     val hasHiddenSubstrings = !editor.document.getUserData(hiddenSubstringsKey).isNullOrEmpty()
+    val hasWhitelistedSubstrings = !editor.document.getUserData(whitelistedSubstringsKey).isNullOrEmpty()
     val hasWhitelistedItems = !editor.document.getUserData(whitelistedItemsKey).isNullOrEmpty()
 
-    return hasHiddenItems || hasHiddenSubstrings || hasWhitelistedItems || editor.document.getUserData(hideLinesAboveKey) != null || editor.getUserData(hideLinesBelowKey) != null
+    return hasHiddenItems || hasHiddenSubstrings || hasWhitelistedSubstrings || hasWhitelistedItems || editor.document.getUserData(hideLinesAboveKey) != null || editor.getUserData(hideLinesBelowKey) != null
   }
 
   override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
     editor.document.putUserData(hiddenItemsKey, null)
     editor.document.putUserData(hiddenSubstringsKey, null)
+    editor.document.putUserData(whitelistedSubstringsKey, null)
     editor.document.putUserData(whitelistedItemsKey, null)
     editor.document.putUserData(hideLinesBelowKey, null)
     editor.document.putUserData(hideLinesAboveKey, null)

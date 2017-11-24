@@ -104,6 +104,12 @@
     </intentionAction>
 
     <intentionAction>
+      <className>com.intellij.ideolog.intentions.HideLinesNotContainingSubstringIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
+
+    <intentionAction>
       <className>com.intellij.ideolog.intentions.LogWhitelistThisIntention</className>
       <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
       <categoryKey>intention.category.log</categoryKey>
