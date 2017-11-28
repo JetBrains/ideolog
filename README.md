@@ -9,5 +9,5 @@ Features:
 * Navigation to source code that emit log events (F7).
 * Go to next error action (Shift + F7)
 * Extends selection
-* Intention tp highlight distance between events (marks time as red)
+* Intention to highlight distance between events (marks time as red)
 * Advanced error stripe (heat map)
