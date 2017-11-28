@@ -15,7 +15,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   companion object {
     fun getInstance() = ServiceManager.getService(LogHighlightingSettingsStore::class.java)!!
 
-    val CURRENT_SETTINGS_VERSION = "2"
+    val CURRENT_SETTINGS_VERSION = "3"
 
     @Language("RegExp")
     val cleanState = State(arrayListOf(
@@ -26,7 +26,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       LogParsingPattern(true, "Pipe-separated", "^(?s)([^|]*)\\|([^|]*)\\|([^|]*)\\|(.*)$", "HH:mm:ss.SSS", "^\\d", 0, 1, 2),
       LogParsingPattern(true, "IntelliJ IDEA", "^([^\\[]+)(\\[[\\s\\d]+])\\s*(\\w*)\\s*-\\s*(\\S*)\\s*-(.+)$", "yyyy-MM-dd HH:mm:ss,SSS", "^\\d", 0, 2, 3),
       LogParsingPattern(true, "TeamCity build log", "^\\[([^]]+)](.):\\s*(\\[[^]]+])?(.*)$", "HH:mm:ss", "^\\[", 0, 1, 2)
-    ), CURRENT_SETTINGS_VERSION, "3", "heatmap")
+    ), CURRENT_SETTINGS_VERSION, "3", "heatmap", "16")
 
     val settingsUpgraders = mapOf<String, (State) -> State>(
       "-1" to { _ -> cleanState.clone() },
@@ -41,6 +41,12 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         newState.errorStripeMode = "heatmap"
         newState.lastAddedDefaultFormat = "3"
         newState.version = "2"
+        return@lambda newState
+      },
+      "2" to lambda@{ oldState ->
+        val newState = oldState.clone()
+        newState.version = "3"
+        newState.readonlySizeThreshold = "16"
         return@lambda newState
       }
     )
@@ -101,16 +107,18 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     @Tag("lastAddedDefaultFormat", textIfEmpty = "2")
     var lastAddedDefaultFormat: String,
     @Tag("errorStripeModel", textIfEmpty = "heatmap")
-    var errorStripeMode: String
+    var errorStripeMode: String,
+    @Tag("readonlySizeThreshold", textIfEmpty = "1024")
+    var readonlySizeThreshold: String
   ) : Cloneable {
     @Suppress("unused")
-    constructor() : this(ArrayList(), ArrayList(), ArrayList(), "-1", "-1", "heatmap")
+    constructor() : this(ArrayList(), ArrayList(), ArrayList(), "-1", "-1", "heatmap", "16")
 
     @Suppress("unused")
-    constructor(patterns: ArrayList<LogHighlightingPattern>, hidden: ArrayList<String>, parsingPatterns: ArrayList<LogParsingPattern>) : this(patterns, hidden, parsingPatterns, "-1", "-1", "heatmap")
+    constructor(patterns: ArrayList<LogHighlightingPattern>, hidden: ArrayList<String>, parsingPatterns: ArrayList<LogParsingPattern>) : this(patterns, hidden, parsingPatterns, "-1", "-1", "heatmap", "16")
 
     public override fun clone(): State {
-      val result = State(ArrayList(), ArrayList(), ArrayList(), version, lastAddedDefaultFormat, errorStripeMode)
+      val result = State(ArrayList(), ArrayList(), ArrayList(), version, lastAddedDefaultFormat, errorStripeMode, readonlySizeThreshold)
       patterns.forEach {
         result.patterns.add(it.clone())
       }

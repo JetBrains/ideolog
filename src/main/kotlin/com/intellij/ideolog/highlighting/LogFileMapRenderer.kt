@@ -30,6 +30,8 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
 
   val settingsStore = LogHighlightingSettingsStore.getInstance()
 
+  var detachedFromEditor = false
+
   private val myMarkupModel: MarkupModelEx = (myLogFileEditor.editor as EditorEx).markupModel
 
   init {
@@ -49,7 +51,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
     var timer: TimerTask? = null
     timer = Timer().scheduleAtFixedRate(1000.toLong(), (interval * 1000).toLong(),
       {
-        if (myLogFileEditor.editor.isDisposed)
+        if (myLogFileEditor.editor.isDisposed || detachedFromEditor)
           timer!!.cancel()
         else {
           ApplicationManager.getApplication().invokeLater({
@@ -57,7 +59,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
             @Suppress("RemoveEmptyParenthesesFromLambdaCall")
             ApplicationManager.getApplication().runReadAction()
             {
-              if ((myIsEnabledBreadcrumbs) && (!myLogFileEditor.editor.isDisposed) && (myLogFileEditor.editor.component.isVisible) && (myLogFileEditor.editor.caretModel.isUpToDate)) {
+              if ((myIsEnabledBreadcrumbs) && (!myLogFileEditor.editor.isDisposed && !detachedFromEditor) && (myLogFileEditor.editor.component.isVisible) && (myLogFileEditor.editor.caretModel.isUpToDate)) {
                 // Get buckets hit by visible range
                 val area = myLogFileEditor.editor.scrollingModel.visibleAreaOnScrollingFinished
                 val offsStart = myLogFileEditor.editor.logicalPositionToOffset(myLogFileEditor.editor.xyToLogicalPosition(area.location))
@@ -114,7 +116,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
     var timer: TimerTask? = null
     timer = Timer().scheduleAtFixedRate(1000.toLong(), (interval * 1000).toLong(),
       {
-        if (myLogFileEditor.editor.isDisposed)
+        if (myLogFileEditor.editor.isDisposed || detachedFromEditor)
           timer!!.cancel()
         else {
           try {
@@ -253,6 +255,14 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
     }
   }
 
+  fun detachFromEditor() {
+    myHighlighters?.forEach {
+      myMarkupModel.removeHighlighter(it)
+    }
+    myLogFileEditor.editor.putUserData(LogFileMapRendererKey, null)
+    detachedFromEditor = true
+  }
+
   fun BeginInvokeComposeBuckets() {
     // Compiler bug
     @Suppress("RemoveEmptyParenthesesFromLambdaCall")
@@ -260,13 +270,16 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
     {
       ApplicationManager.getApplication().runReadAction()
       {
-        if ((!myLogFileEditor.editor.isDisposed) && (myLogFileEditor.editor.component.isVisible) && (myLogFileEditor.editor.caretModel.isUpToDate))
+        if ((!myLogFileEditor.editor.isDisposed && !detachedFromEditor) && (myLogFileEditor.editor.component.isVisible) && (myLogFileEditor.editor.caretModel.isUpToDate))
           ComposeBuckets()
       }
     }
   }
 
   fun RecreateHighlighters(): Array<RangeHighlighter> {
+    if (detachedFromEditor || myLogFileEditor.editor.isDisposed)
+      return arrayOf()
+
     if (myHighlighters != null)
       for (h in myHighlighters!!)
         myMarkupModel.removeHighlighter(h)
