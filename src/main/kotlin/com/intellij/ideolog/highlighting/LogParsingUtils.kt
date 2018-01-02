@@ -31,7 +31,7 @@ fun Editor.shouldFindTrueEventStart(): Boolean {
         if (contains) {
           scanState.lastLineWithSeparator = scanState.lastLine
         } else {
-          if (scanState.lastLine - scanState.lastLineWithSeparator > 50000) {
+          if (scanState.lastLine - scanState.lastLineWithSeparator > 5000) {
             scanState.goodSeparators = false
             break
           }
@@ -112,10 +112,17 @@ object LogParsingUtils {
 
   fun getEvent(findTrueEventStart: Boolean, fileType: LogFileFormat, lineSet: Document, data: CharSequence, offset: Int, startIndex: Int = 0, endIndex: Int = data.length): Pair<CharSequence, Int> {
     val eventStartOffset = findEventStartOffset(findTrueEventStart, fileType, data, lineSet, offset, startIndex, endIndex)
-    var nextEventStartOffset = eventStartOffset
+    var nextEventStartOffset: Int
+    var eventLineNumber = lineSet.getLineNumber(eventStartOffset)
     do {
-      nextEventStartOffset++
-    } while (!(nextEventStartOffset >= endIndex || data[nextEventStartOffset - 1] == '\n' && (!findTrueEventStart || fileType.isLineEventStart(data.subSequence(nextEventStartOffset, endIndex)))))
+      eventLineNumber++
+      if(eventLineNumber >= lineSet.lineCount - 1) {
+        nextEventStartOffset = endIndex
+        break
+      }
+      nextEventStartOffset = lineSet.getLineStartOffset(eventLineNumber)
+      assert(data[nextEventStartOffset - 1] == '\n')
+    } while (!(nextEventStartOffset >= endIndex || !findTrueEventStart || fileType.isLineEventStart(data.subSequence(nextEventStartOffset, endIndex))))
 
     return data.subSequence(eventStartOffset, Math.min(nextEventStartOffset, endIndex)) to eventStartOffset
   }
