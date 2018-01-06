@@ -35,7 +35,7 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <applicationService serviceImplementation="com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore"/>
-    <applicationConfigurable displayName="Log Highlighting" instance="com.intellij.ideolog.highlighting.settings.LogHighlightingConfigurable" id="LogHighlighting" groupId="editor"/>
+    <applicationConfigurable displayName="Log Highlighting (Ideolog)" instance="com.intellij.ideolog.highlighting.settings.LogHighlightingConfigurable" id="LogHighlighting" groupId="editor"/>
     <fileTypeFactory implementation="com.intellij.ideolog.fileType.LogFileTypeFactory" />
     <editorHighlighterProvider filetype="Log" implementationClass="com.intellij.ideolog.highlighting.LogFileEditorHighlighterProvider" />
     <extendWordSelectionHandler implementation="com.intellij.ideolog.editorActions.ExtendsSelection"/>
@@ -111,6 +111,12 @@
 
     <intentionAction>
       <className>com.intellij.ideolog.intentions.LogWhitelistThisIntention</className>
+      <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
+      <categoryKey>intention.category.log</categoryKey>
+    </intentionAction>
+
+    <intentionAction>
+      <className>com.intellij.ideolog.intentions.ShowIdeologSettingsIntention</className>
       <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
       <categoryKey>intention.category.log</categoryKey>
     </intentionAction>
