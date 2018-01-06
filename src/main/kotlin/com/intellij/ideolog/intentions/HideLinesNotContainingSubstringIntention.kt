@@ -4,6 +4,6 @@ import com.intellij.ideolog.foldings.whitelistedSubstringsKey
 
 class HideLinesNotContainingSubstringIntention : HideLinesIntention(whitelistedSubstringsKey) {
 
-  override fun getText() = "Hide lines not containing '$shortSelection'"
+  override fun getText() = "Show only lines containing '$shortSelection'"
 
 }
