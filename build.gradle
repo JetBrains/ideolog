@@ -19,7 +19,7 @@ version buildNumber
 apply plugin: 'kotlin'
 
 intellij {
-    version '173-SNAPSHOT'
+    version '2017.3'
     pluginName 'ideolog'
     intellijRepo 'http://jetbrains-com-mirror.labs.intellij.net/intellij-repository'
 }
