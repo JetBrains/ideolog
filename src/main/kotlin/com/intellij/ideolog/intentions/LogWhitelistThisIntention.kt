@@ -14,7 +14,7 @@ class LogWhitelistThisIntention : IntentionAction {
   var lastText: String = ""
 
   override fun getText(): String {
-    return "Hide all lines except lines with '$lastText' in this field"
+    return "Show only lines with '$lastText' in this field"
   }
 
   override fun getFamilyName(): String {

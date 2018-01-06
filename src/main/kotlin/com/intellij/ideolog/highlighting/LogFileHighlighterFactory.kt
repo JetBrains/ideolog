@@ -32,6 +32,7 @@ import java.awt.Color
 import java.awt.Font
 import java.util.*
 import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
 
 val LOG_TOKEN_SEPARATOR = IElementType("LOG_TOKEN_SEPARATOR", LogLanguage)
 
@@ -96,7 +97,13 @@ class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor
   val myColors: EditorColorsScheme
     get() = colorGetter()
 
-  val myPatterns = LogHighlightingSettingsStore.getInstance().myState.patterns.filter { it.enabled }.map { Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it } // todo: detect invalid patterns
+  val myPatterns = LogHighlightingSettingsStore.getInstance().myState.patterns.filter { it.enabled }.mapNotNull {
+    try {
+      Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it
+    } catch(e: PatternSyntaxException) {
+      null
+    }
+  } // todo: notify user about invalid patterns
 
   private var parsedTokens = ArrayList<LogToken>()
   private val eventPieces = ArrayList<EventPiece>()

@@ -1,8 +1,10 @@
 package com.intellij.ideolog.highlighting.settings
 
 import com.intellij.openapi.options.BaseConfigurable
+import com.intellij.openapi.options.SearchableConfigurable
 import com.intellij.openapi.ui.Messages
 import com.intellij.ui.IdeBorderFactory
+import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.OnePixelSplitter
 import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.table.JBTable
@@ -10,6 +12,7 @@ import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
 import javax.swing.JCheckBox
 import javax.swing.JComponent
+import javax.swing.JLabel
 import javax.swing.JPanel
 
 class LogHighlightingConfigurable : BaseConfigurable() {
@@ -24,6 +27,11 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     val heatmapCheckbox = JCheckBox("Display heat map on error stripe/scrollbar", myLogHighlightingStore.errorStripeMode == "heatmap")
     heatmapCheckbox.addChangeListener {
       myLogHighlightingStore.errorStripeMode = if(heatmapCheckbox.isSelected) "heatmap" else "normal"
+    }
+
+    val logSizeSpinner = JBIntSpinner(myLogHighlightingStore.readonlySizeThreshold.toInt(), 0, 1024*1024)
+    logSizeSpinner.addChangeListener {
+      myLogHighlightingStore.readonlySizeThreshold = logSizeSpinner.value.toString()
     }
 
     val patternsTable = JBTable(patternTableModel).apply {
@@ -90,7 +98,12 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     topPanel.firstComponent = patternsPanel
     topPanel.secondComponent = filtersPanel
 
-    return com.intellij.util.ui.FormBuilder.createFormBuilder().addComponent(heatmapCheckbox).addComponentFillVertically(formatsPanel, 0).addComponentFillVertically(topPanel, 0).panel
+    return com.intellij.util.ui.FormBuilder.createFormBuilder()
+      .addComponent(heatmapCheckbox)
+      .addLabeledComponent("Allow editing log files smaller than (KB, editing can cause performance issues):", logSizeSpinner)
+      .addComponentFillVertically(formatsPanel, 0)
+      .addComponentFillVertically(topPanel, 0)
+      .panel
   }
 
   override fun apply() {
@@ -109,6 +122,6 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     formatsTableModel.updateStore(myLogHighlightingStore)
   }
 
-  override fun getDisplayName(): String = "Log Highlighting"
+  override fun getDisplayName(): String = "Log Highlighting (ideolog)"
 }
 

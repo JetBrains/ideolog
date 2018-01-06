@@ -20,7 +20,7 @@ class RegexLogParser(val regex: Pattern, val lineRegex: Pattern, val otherParsin
 
 class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
   fun isLineEventStart(line: CharSequence): Boolean {
-    return myRegexLogParser?.lineRegex?.matcher(line)?.find() ?: line.isNotEmpty() && !line[0].isWhitespace()
+    return myRegexLogParser?.lineRegex?.matcher(line)?.find() ?: (line.isNotEmpty() && !line[0].isWhitespace())
   }
 
   fun getTimeFieldIndex(): Int {
