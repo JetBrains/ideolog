@@ -68,6 +68,8 @@ class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
         // silently ignore it
       } catch (e: NumberFormatException) {
 
+      } catch (e: ArrayIndexOutOfBoundsException) {
+        // apparently this one is also randomly thrown by parsing
       }
       return@let null
     }
