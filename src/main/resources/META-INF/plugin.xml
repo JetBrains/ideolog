@@ -42,7 +42,6 @@
     <fileEditorProvider implementation="com.intellij.ideolog.file.LogFileEditorProvider" />
     <!--suppress PluginXmlValidity -->
     <lang.parserDefinition language="LOG" implementationClass="com.intellij.ideolog.psi.LogFileParserDefinition"/>
-    <editorNotificationProvider implementation="com.intellij.ideolog.file.LogFileNotificationProvider"/>
 
     <intentionAction>
       <className>com.intellij.ideolog.intentions.LogHighlightColumnIntention</className>
