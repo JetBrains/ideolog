@@ -75,10 +75,6 @@ class LogEditorHighlighter(colors: EditorColorsScheme) : EditorHighlighter {
     myColors = scheme
   }
 
-  override fun beforeDocumentChange(event: DocumentEvent?) {
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
   override fun documentChanged(event: DocumentEvent) {
     myText = event.document.charsSequence
     myEditor?.repaint(0, myText.length)
