@@ -3,8 +3,8 @@ package com.intellij.ideolog.file
 import com.intellij.ideolog.foldings.hideLinesAboveKey
 import com.intellij.ideolog.foldings.hideLinesBelowKey
 import com.intellij.ideolog.highlighting.LogFileMapRenderer
+import com.intellij.ideolog.highlighting.LogHeavyFilterService
 import com.intellij.ideolog.highlighting.logSeparatorScanKey
-import com.intellij.ideolog.highlighting.markupHighlightedExceptionsKey
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.lex.logFormatKey
 import com.intellij.openapi.diagnostic.Logger
@@ -34,7 +34,7 @@ class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorPro
     } else {
       fun resetIdeologStoredData() {
         editor.putUserData(logSeparatorScanKey, null)
-        editor.putUserData(markupHighlightedExceptionsKey, null)
+        editor.putUserData(LogHeavyFilterService.markupHighlightedExceptionsKey, null) // don't reset the hyperlink support, that one is safe
         editor.putUserData(hideLinesAboveKey, null)
         editor.putUserData(hideLinesBelowKey, null)
         editor.putUserData(logFormatKey, null)

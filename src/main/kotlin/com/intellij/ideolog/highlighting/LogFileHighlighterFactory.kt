@@ -1,9 +1,5 @@
 package com.intellij.ideolog.highlighting
 
-import com.intellij.execution.filters.ConsoleFilterProvider
-import com.intellij.execution.filters.Filter
-import com.intellij.execution.filters.FilterMixin
-import com.intellij.execution.impl.EditorHyperlinkSupport
 import com.intellij.ideolog.fileType.LogLanguage
 import com.intellij.ideolog.highlighting.settings.LogHighlightingAction
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
@@ -19,8 +15,6 @@ import com.intellij.openapi.editor.ex.util.EmptyEditorHighlighter
 import com.intellij.openapi.editor.highlighter.EditorHighlighter
 import com.intellij.openapi.editor.highlighter.HighlighterClient
 import com.intellij.openapi.editor.highlighter.HighlighterIterator
-import com.intellij.openapi.editor.impl.DocumentImpl
-import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileTypes.EditorHighlighterProvider
 import com.intellij.openapi.fileTypes.FileType
@@ -52,13 +46,13 @@ class LogEditorHighlighter(colors: EditorColorsScheme) : EditorHighlighter {
   private var myColors: EditorColorsScheme = colors
   private var myText: CharSequence = ""
   private var myEditor: HighlighterClient? = null
-  private var myFilters: List<Filter> = emptyList()
+
 
   override fun createIterator(startOffset: Int): HighlighterIterator {
     if (myEditor == null)
       return EmptyEditorHighlighter(TextAttributes()).apply { setText(myText) }.createIterator(startOffset)
 
-    return LogHighlightingIterator(startOffset, myEditor as Editor, { myText }, { myColors }, myFilters)
+    return LogHighlightingIterator(startOffset, myEditor as Editor, { myText }, { myColors })
   }
 
   override fun setText(text: CharSequence) {
@@ -67,8 +61,6 @@ class LogEditorHighlighter(colors: EditorColorsScheme) : EditorHighlighter {
 
   override fun setEditor(editor: HighlighterClient) {
     myEditor = editor
-    val project = editor.project ?: return
-    myFilters = ConsoleFilterProvider.FILTER_PROVIDERS.extensions.flatMap { it.getDefaultFilters(project).asIterable() }
   }
 
   override fun setColorScheme(scheme: EditorColorsScheme) {
@@ -81,12 +73,11 @@ class LogEditorHighlighter(colors: EditorColorsScheme) : EditorHighlighter {
   }
 }
 
-val markupHighlightedExceptionsKey = Key.create<HashSet<Int>>("Log.ParsedExceptions")
 val timeDifferenceToRed = 15000L
 
 private var highlightingStacktrace = false // todo: ewww, globals!
 
-class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor, val textGetter: () -> CharSequence, val colorGetter: () -> EditorColorsScheme, val filters: List<Filter>) : HighlighterIterator {
+class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor, val textGetter: () -> CharSequence, val colorGetter: () -> EditorColorsScheme) : HighlighterIterator {
   val myText: CharSequence
     get() = textGetter()
 
@@ -274,7 +265,8 @@ class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor
 
 
   private fun tryHighlightStacktrace(event: CharSequence, eventOffset: Int) {
-    if (highlightingStacktrace || !ApplicationManager.getApplication().isDispatchThread || event.indexOf('\n').let { it < 0 || it >= event.length - 1 } || myEditor.project == null)
+    val project = myEditor.project ?: return
+    if (highlightingStacktrace || !ApplicationManager.getApplication().isDispatchThread || event.indexOf('\n').let { it < 0 || it >= event.length - 1 })
       return
     highlightingStacktrace = true
     fun offsetVisible(offset: Int): Boolean {
@@ -288,45 +280,7 @@ class LogHighlightingIterator(private val startOffset: Int, val myEditor: Editor
     }
     highlightingStacktrace = false
 
-    val markupModel = myEditor.markupModel
-
-    val set = markupModel.getUserData(markupHighlightedExceptionsKey) ?: HashSet()
-
-    if (set.contains(eventOffset))
-      return
-
-    set.add(eventOffset)
-    markupModel.putUserData(markupHighlightedExceptionsKey, set)
-
-    val hyperlinkSupport = EditorHyperlinkSupport(myEditor, myEditor.project!!)
-
-    fun consumeResult(result: Filter.Result?, addOffset: Boolean) {
-      result ?: return
-      val extraOffset = if (addOffset) eventOffset else 0
-      result.resultItems.forEach {
-        val hyperlinkInfo = it.getHyperlinkInfo()
-        if (hyperlinkInfo != null)
-          hyperlinkSupport.createHyperlink(it.getHighlightStartOffset() + extraOffset, it.getHighlightEndOffset() + extraOffset, it.getHighlightAttributes(), hyperlinkInfo)
-        else
-          markupModel.addRangeHighlighter(it.getHighlightStartOffset() + extraOffset, it.getHighlightEndOffset() + extraOffset, it.highlighterLayer, it.getHighlightAttributes(), HighlighterTargetArea.EXACT_RANGE)
-      }
-    }
-
-    val lines = event.split('\n')
-    var offset = 0
-    val subDoc = DocumentImpl(event)
-    lines.forEachIndexed { index, line ->
-      offset += line.length
-      filters.forEach { filter ->
-        if (filter is FilterMixin && filter.shouldRunHeavy()) {
-          filter.applyHeavyFilter(subDoc, 0, index) {
-            consumeResult(it, true)
-          }
-        } else
-          consumeResult(filter.applyFilter(line, eventOffset + offset), false)
-      }
-      offset += 1
-    }
+    LogHeavyFilterService.getInstance(project).enqueueHeavyFiltering(myEditor, eventOffset, event)
   }
 
   fun getFont(bold: Boolean, italic: Boolean): Int {
