@@ -1,17 +1,9 @@
 package com.intellij.ideolog.intentions
 
 import com.intellij.codeInsight.intention.IntentionManager
-import com.intellij.openapi.components.ApplicationComponent
 
-class LogIntentionLoaderComponent : ApplicationComponent {
-  override fun getComponentName(): String {
-    return javaClass.name
-  }
-
-  override fun initComponent() {
+class LogIntentionLoaderComponent {
+  init {
     IntentionManager.getInstance()
-  }
-
-  override fun disposeComponent() {
   }
 }

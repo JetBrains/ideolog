@@ -8,7 +8,6 @@ import com.intellij.ideolog.highlighting.LogParsingUtils
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
-import com.intellij.util.containers.HashSet
 
 class LogWhitelistThisIntention : IntentionAction {
   var lastText: String = ""
