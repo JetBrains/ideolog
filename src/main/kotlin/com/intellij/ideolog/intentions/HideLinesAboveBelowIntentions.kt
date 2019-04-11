@@ -3,17 +3,16 @@ package com.intellij.ideolog.intentions
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.foldings.FoldingCalculatorTask
-import com.intellij.ideolog.foldings.hideLinesAboveKey
-import com.intellij.ideolog.foldings.hideLinesBelowKey
+import com.intellij.ideolog.util.IdeologDocumentContext
+import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiFile
 
 /**
  * @author Nikolay.Kuznetsov
  */
-abstract class HideLinesAboveBelowIntentionBase(val key: Key<Int>, val directionText: String) : IntentionAction {
+abstract class HideLinesAboveBelowIntentionBase(val setter: (IdeologDocumentContext, Int) -> Unit, val directionText: String) : IntentionAction {
   override fun getText(): String {
     return "Hide lines $directionText"
   }
@@ -30,7 +29,7 @@ abstract class HideLinesAboveBelowIntentionBase(val key: Key<Int>, val direction
   }
 
   override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
-    editor.document.putUserData(key, editor.caretModel.logicalPosition.line)
+    setter(editor.document.ideologContext, editor.caretModel.logicalPosition.line)
 
     FoldingCalculatorTask.restartFoldingCalculator(project, editor, file)
   }
@@ -40,5 +39,5 @@ abstract class HideLinesAboveBelowIntentionBase(val key: Key<Int>, val direction
   }
 }
 
-class HideLinesAboveIntention: HideLinesAboveBelowIntentionBase(hideLinesAboveKey, "above")
-class HideLinesBelowIntention: HideLinesAboveBelowIntentionBase(hideLinesBelowKey, "below")
+class HideLinesAboveIntention: HideLinesAboveBelowIntentionBase({ context, line -> context.hideLinesAbove = line }, "above")
+class HideLinesBelowIntention: HideLinesAboveBelowIntentionBase({ context, line -> context.hideLinesBelow = line }, "below")

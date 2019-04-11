@@ -2,6 +2,7 @@ package com.intellij.ideolog.lex
 
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.highlighting.settings.LogParsingPattern
+import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.Key
 import java.text.DateFormat
@@ -76,31 +77,4 @@ class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
   }
 }
 
-val logFormatKey = Key.create<LogFileFormat>("LogFile.Format")
-
-fun detectLogFileFormat(editor: Editor): LogFileFormat {
-  val existingKey = editor.getUserData(logFormatKey)
-  if (existingKey != null)
-    return existingKey
-
-  val regexMatchers = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.mapNotNull {
-    if (!it.enabled)
-      return@mapNotNull null
-
-    try {
-      return@mapNotNull RegexLogParser(Pattern.compile(it.pattern, Pattern.DOTALL), Pattern.compile(it.lineStartPattern), it, SimpleDateFormat(it.timePattern))
-    } catch(e: PatternSyntaxException){
-      return@mapNotNull null
-    }
-  }
-
-  val doc = editor.document.charsSequence
-  val firstLines = doc.lineSequence().take(25)
-  val sumByMatcher = regexMatchers.map { it to firstLines.count { line -> it.regex.matcher(line).find() } }
-
-  val result = LogFileFormat(sumByMatcher.filter { it.second > 5 }.maxBy { it.second }?.first)
-
-  editor.putUserData(logFormatKey, result)
-
-  return result
-}
+fun detectLogFileFormat(editor: Editor) = editor.document.ideologContext.detectLogFileFormat()

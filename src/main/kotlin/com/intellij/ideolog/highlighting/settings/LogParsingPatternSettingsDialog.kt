@@ -3,11 +3,19 @@ package com.intellij.ideolog.highlighting.settings
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBIntSpinner
+import net.miginfocom.swing.MigLayout
 import org.intellij.lang.regexp.RegExpFileType
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
+import java.lang.IllegalArgumentException
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
+import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -21,9 +29,11 @@ class LogParsingPatternSettingsDialog(val item: LogParsingPattern) : DialogWrapp
   private var myTimeColumnId: JBIntSpinner? = null
   private var mySeverityColumnId: JBIntSpinner? = null
   private var myCategoryColumnId: JBIntSpinner? = null
+  private var myOnlyFirstLineRegexCheckbox: JCheckBox? = null
 
   init {
     init()
+    initValidation()
   }
 
   override fun createCenterPanel(): JComponent? {
@@ -82,6 +92,13 @@ class LogParsingPatternSettingsDialog(val item: LogParsingPattern) : DialogWrapp
     val categorySpinner = JBIntSpinner(item.categoryColumnId + 1, 0, 100)
     myCategoryColumnId = categorySpinner
     panel.add(categorySpinner, constraints)
+    constraints.gridy++
+
+    val firstLineRegexCheckbox = JCheckBox("Apply message pattern to all message lines", item.regexMatchFullEvent)
+    myOnlyFirstLineRegexCheckbox = firstLineRegexCheckbox
+    constraints.gridx = 0
+    constraints.gridwidth = 2
+    panel.add(firstLineRegexCheckbox, constraints)
 
     return panel
   }
@@ -100,6 +117,32 @@ class LogParsingPatternSettingsDialog(val item: LogParsingPattern) : DialogWrapp
     mySeverityColumnId?.let { item.severityColumnId = it.number - 1 }
     myCategoryColumnId?.let { item.categoryColumnId = it.number - 1 }
 
+    myOnlyFirstLineRegexCheckbox?.let { item.regexMatchFullEvent = it.isSelected }
+
     super.doOKAction()
+  }
+
+  override fun doValidateAll(): MutableList<ValidationInfo> {
+    val results = ArrayList<ValidationInfo>()
+
+    try {
+      myParsingPatternText?.let { Pattern.compile(it.text) }
+    } catch(e : PatternSyntaxException) {
+      results.add(ValidationInfo(e.localizedMessage, myParsingPatternText))
+    }
+
+    try {
+      myLineStartPatternText?.let { Pattern.compile(it.text) }
+    } catch(e : PatternSyntaxException) {
+      results.add(ValidationInfo(e.localizedMessage, myLineStartPatternText))
+    }
+
+    try {
+      myTimePatternText?.let { SimpleDateFormat(it.text) }
+    } catch(e : IllegalArgumentException) {
+      results.add(ValidationInfo(e.localizedMessage, myTimePatternText))
+    }
+
+    return results
   }
 }

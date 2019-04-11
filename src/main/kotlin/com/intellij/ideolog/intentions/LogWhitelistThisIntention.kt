@@ -3,8 +3,8 @@ package com.intellij.ideolog.intentions
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.foldings.FoldingCalculatorTask
-import com.intellij.ideolog.foldings.whitelistedItemsKey
 import com.intellij.ideolog.highlighting.LogParsingUtils
+import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
@@ -37,12 +37,11 @@ class LogWhitelistThisIntention : IntentionAction {
   }
 
   override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
-    val set = editor.document.getUserData(whitelistedItemsKey) ?: HashSet()
+    val set = editor.document.ideologContext.whitelistedItems
     val currentColumn = LogParsingUtils.getColumnByOffset(editor)
     val columnValue = LogParsingUtils.getColumnValueByOffset(editor) ?: "?"
 
     set.add(currentColumn to columnValue.toString())
-    editor.document.putUserData(whitelistedItemsKey, set)
 
     FoldingCalculatorTask.restartFoldingCalculator(project, editor, file)
   }

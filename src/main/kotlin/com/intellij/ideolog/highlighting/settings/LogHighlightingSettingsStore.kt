@@ -23,9 +23,9 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       LogHighlightingPattern(true, "^\\s*w(arning)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0xff, 0xaa, 0).rgb, null, true, false, false),
       LogHighlightingPattern(true, "^\\s*i(nfo)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0x3f, 0xbf, 0x3f).rgb, null, false, false, false)
     ), arrayListOf(), arrayListOf(
-      LogParsingPattern(true, "Pipe-separated", "^(?s)([^|]*)\\|([^|]*)\\|([^|]*)\\|(.*)$", "HH:mm:ss.SSS", "^\\d", 0, 1, 2),
-      LogParsingPattern(true, "IntelliJ IDEA", "^([^\\[]+)(\\[[\\s\\d]+])\\s*(\\w*)\\s*-\\s*(\\S*)\\s*-(.+)$", "yyyy-MM-dd HH:mm:ss,SSS", "^\\d", 0, 2, 3),
-      LogParsingPattern(true, "TeamCity build log", "^\\[([^]]+)](.):\\s*(\\[[^]]+])?(.*)$", "HH:mm:ss", "^\\[", 0, 1, 2)
+      LogParsingPattern(true, "Pipe-separated", "^(?s)([^|]*)\\|([^|]*)\\|([^|]*)\\|(.*)$", "HH:mm:ss.SSS", "^\\d", 0, 1, 2, false),
+      LogParsingPattern(true, "IntelliJ IDEA", "^([^\\[]+)(\\[[\\s\\d]+])\\s*(\\w*)\\s*-\\s*(\\S*)\\s*-(.+)$", "yyyy-MM-dd HH:mm:ss,SSS", "^\\d", 0, 2, 3, false),
+      LogParsingPattern(true, "TeamCity build log", "^\\[([^]]+)](.):\\s*(\\[[^]]+])?(.*)$", "HH:mm:ss", "^\\[", 0, 1, 2, false)
     ), CURRENT_SETTINGS_VERSION, "3", "heatmap", "16")
 
     val settingsUpgraders = mapOf<String, (State) -> State>(
@@ -136,13 +136,14 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
 @Tag("LogParsingPattern")
 data class LogParsingPattern(@Attribute("enabled") var enabled: Boolean, @Attribute("name") var name: String, @Attribute("pattern") var pattern: String,
                              @Attribute("timePattern") var timePattern: String, @Attribute("linePattern") var lineStartPattern: String, @Attribute("timeId") var timeColumnId: Int,
-                             @Attribute("severityId") var severityColumnId: Int, @Attribute("categoryId") var categoryColumnId: Int): Cloneable {
+                             @Attribute("severityId") var severityColumnId: Int, @Attribute("categoryId") var categoryColumnId: Int,
+                             @Attribute("fullmatch") var regexMatchFullEvent: Boolean): Cloneable {
 
   @Suppress("unused")
-  constructor(): this(true, "", "", "", "", -1, -1, -1)
+  constructor(): this(true, "", "", "", "", -1, -1, -1, false)
 
   public override fun clone(): Any {
-    return LogParsingPattern(enabled, name, pattern, timePattern, lineStartPattern, timeColumnId, severityColumnId, categoryColumnId)
+    return LogParsingPattern(enabled, name, pattern, timePattern, lineStartPattern, timeColumnId, severityColumnId, categoryColumnId, regexMatchFullEvent)
   }
 }
 

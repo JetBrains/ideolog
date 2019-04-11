@@ -1,15 +1,16 @@
-package com.intellij.ideolog.intentions
+package com.intellij.ideolog.intentions.base
 
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.foldings.FoldingCalculatorTask
+import com.intellij.ideolog.util.IdeologDocumentContext
+import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 
-abstract class HideLinesIntention(private val key: Key<HashSet<String>>) : IntentionAction {
+abstract class HideLinesIntention(private val setAccessor: (IdeologDocumentContext) -> HashSet<String>) : IntentionAction {
   var lastSelection = ""
   val shortSelection: String
     get() = if (lastSelection.length > 25) lastSelection.substring(0, 25) + "..." else lastSelection
@@ -53,9 +54,8 @@ abstract class HideLinesIntention(private val key: Key<HashSet<String>>) : Inten
   override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
     val selection = getText(editor) ?: return
 
-    val set = editor.document.getUserData(key) ?: HashSet()
+    val set = setAccessor(editor.document.ideologContext)
     set.add(selection.toString())
-    editor.document.putUserData(key, set)
 
     FoldingCalculatorTask.restartFoldingCalculator(project, editor, file)
   }

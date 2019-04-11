@@ -59,7 +59,7 @@ class LogFormatTableModel(var state: LogHighlightingSettingsStore.State) : Abstr
   }
 
   fun addNewFormat(name: String) {
-    state.parsingPatterns.add(LogParsingPattern(false, name, "", "", "", -1, -1, -1))
+    state.parsingPatterns.add(LogParsingPattern(false, name, "", "", "", -1, -1, -1, false))
     val index = state.parsingPatterns.size - 1
     fireTableRowsInserted(index, index)
   }

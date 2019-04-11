@@ -3,6 +3,7 @@ package com.intellij.ideolog.foldings
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.lex.LogToken
 import com.intellij.ideolog.lex.detectLogFileFormat
+import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.FoldRegion
@@ -13,13 +14,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiFile
 import java.util.*
-
-val hiddenItemsKey = Key.create<HashSet<Pair<Int, String>>>("Log.HiddenColumnValues")
-val hiddenSubstringsKey = Key.create<HashSet<String>>("Log.HiddenSubStrings")
-val whitelistedSubstringsKey = Key.create<HashSet<String>>("Log.WhitelistedSubStrings")
-val whitelistedItemsKey = Key.create<HashSet<Pair<Int, String>>>("Log.WhitelistedColumnValues")
-val hideLinesAboveKey= Key.create<Int>("Log.HideLinesAbove")
-val hideLinesBelowKey= Key.create<Int>("Log.HideLinesBelow")
 
 class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: String) : Task.Backgroundable(project, "Calculating foldings for $fileName", true) {
 
@@ -36,12 +30,13 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
 
   val foldings = ArrayList<Pair<Int, Int>>()
   val settings = LogHighlightingSettingsStore.getInstance()
-  val hiddenItems = editor.document.getUserData(hiddenItemsKey) ?: emptySet<Pair<Int, String>>()
-  val hiddenSubstrings = editor.document.getUserData(hiddenSubstringsKey) ?: emptySet<String>()
-  val whitelistedSubstrings = editor.document.getUserData(whitelistedSubstringsKey) ?: emptySet<String>()
-  val whitelistedItems = editor.document.getUserData(whitelistedItemsKey) ?: emptySet<Pair<Int, String>>()
-  val hideLinesAbove: Int = editor.document.getUserData(hideLinesAboveKey) ?: -1
-  val hideLinesBelow: Int = editor.document.getUserData(hideLinesBelowKey) ?: Int.MAX_VALUE
+  val context = editor.document.ideologContext
+  val hiddenItems = context.hiddenItems
+  val hiddenSubstrings = context.hiddenSubstrings
+  val whitelistedSubstrings = context.whitelistedSubstrings
+  val whitelistedItems = context.whitelistedItems
+  val hideLinesAbove: Int = context.hideLinesAbove
+  val hideLinesBelow: Int = context.hideLinesBelow
   val fileType = detectLogFileFormat(editor)
   val tokens = ArrayList<LogToken>()
   var lastAddedFoldingEndOffset = -1

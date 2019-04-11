@@ -3,6 +3,7 @@ package com.intellij.ideolog.intentions
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.foldings.*
+import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
@@ -17,21 +18,24 @@ class ResetHiddenItemsIntention : IntentionAction {
     if (file?.fileType != LogFileType)
       return false
 
-    val hasHiddenItems = !editor.document.getUserData(hiddenItemsKey).isNullOrEmpty()
-    val hasHiddenSubstrings = !editor.document.getUserData(hiddenSubstringsKey).isNullOrEmpty()
-    val hasWhitelistedSubstrings = !editor.document.getUserData(whitelistedSubstringsKey).isNullOrEmpty()
-    val hasWhitelistedItems = !editor.document.getUserData(whitelistedItemsKey).isNullOrEmpty()
+    val context = editor.document.ideologContext
+    val hasHiddenItems = !context.hiddenItems.isNullOrEmpty()
+    val hasHiddenSubstrings = !context.hiddenSubstrings.isNullOrEmpty()
+    val hasWhitelistedSubstrings = !context.whitelistedSubstrings.isNullOrEmpty()
+    val hasWhitelistedItems = !context.whitelistedItems.isNullOrEmpty()
 
-    return hasHiddenItems || hasHiddenSubstrings || hasWhitelistedSubstrings || hasWhitelistedItems || editor.document.getUserData(hideLinesAboveKey) != null || editor.getUserData(hideLinesBelowKey) != null
+    return hasHiddenItems || hasHiddenSubstrings || hasWhitelistedSubstrings || hasWhitelistedItems || context.hideLinesAbove >= 0 || context.hideLinesBelow < Int.MAX_VALUE
   }
 
   override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
-    editor.document.putUserData(hiddenItemsKey, null)
-    editor.document.putUserData(hiddenSubstringsKey, null)
-    editor.document.putUserData(whitelistedSubstringsKey, null)
-    editor.document.putUserData(whitelistedItemsKey, null)
-    editor.document.putUserData(hideLinesBelowKey, null)
-    editor.document.putUserData(hideLinesAboveKey, null)
+    val context = editor.document.ideologContext
+    context.hiddenItems.clear()
+    context.hiddenSubstrings.clear()
+    context.whitelistedItems.clear()
+    context.whitelistedSubstrings.clear()
+
+    context.hideLinesAbove = -1
+    context.hideLinesBelow = Int.MAX_VALUE
 
     FoldingCalculatorTask.restartFoldingCalculator(project, editor, file)
   }

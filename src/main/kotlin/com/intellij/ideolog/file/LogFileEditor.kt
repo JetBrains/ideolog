@@ -1,12 +1,9 @@
 package com.intellij.ideolog.file
 
-import com.intellij.ideolog.foldings.hideLinesAboveKey
-import com.intellij.ideolog.foldings.hideLinesBelowKey
 import com.intellij.ideolog.highlighting.LogFileMapRenderer
 import com.intellij.ideolog.highlighting.LogHeavyFilterService
-import com.intellij.ideolog.highlighting.logSeparatorScanKey
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
-import com.intellij.ideolog.lex.logFormatKey
+import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -33,11 +30,8 @@ class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorPro
       editor.putUserData(Key.create("forced.soft.wraps"), java.lang.Boolean.FALSE)
     } else {
       fun resetIdeologStoredData() {
-        editor.putUserData(logSeparatorScanKey, null)
         editor.putUserData(LogHeavyFilterService.markupHighlightedExceptionsKey, null) // don't reset the hyperlink support, that one is safe
-        editor.putUserData(hideLinesAboveKey, null)
-        editor.putUserData(hideLinesBelowKey, null)
-        editor.putUserData(logFormatKey, null)
+        editor.document.ideologContext.clear()
         LogFileMapRenderer.LogFileMapRendererKey.get(editor)?.detachFromEditor()
         LogFileMapRenderer.GetOrCreateLogFileMapRenderer(this)
       }
