@@ -3,11 +3,8 @@ package com.intellij.ideolog.file
 
 import com.intellij.CommonBundle
 import com.intellij.diagnostic.VMOptions
-import com.intellij.ide.IdeBundle
 import com.intellij.ide.SaveAndSyncHandler
 import com.intellij.ide.actions.EditCustomVmOptionsAction
-import com.intellij.ide.actions.ShowFilePathAction
-import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.actionSystem.ex.ActionUtil
@@ -15,10 +12,8 @@ import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.FileEditor
-import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.fileEditor.TextEditor
-import com.intellij.openapi.fileEditor.impl.text.LargeFileEditorProvider
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Key
@@ -26,17 +21,15 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotifications
-import com.sun.management.VMOption
 import java.io.File
 import java.io.IOException
 import java.util.*
 
-class LogFileNotificationProvider : EditorNotifications.Provider<EditorNotificationPanel>() {
+class LogLargeFileNotificationProvider : EditorNotifications.Provider<EditorNotificationPanel>() {
     companion object {
         private val KEY = Key.create<EditorNotificationPanel>("log.large.file.editor.notification")
         private val HIDDEN_KEY = Key.create<String>("log.large.file.editor.notification.hidden")
@@ -50,14 +43,13 @@ class LogFileNotificationProvider : EditorNotifications.Provider<EditorNotificat
 
     override fun getKey(): Key<EditorNotificationPanel> = KEY
 
-    override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor): EditorNotificationPanel? {
+    override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor, project: Project): EditorNotificationPanel? {
         if (fileEditor !is LogFileEditor) return null
         val editor = (fileEditor as TextEditor).editor
-        val project = editor.project
         val productName = ApplicationNamesInfo.getInstance().productName.toLowerCase(Locale.US)
         val versionName = ApplicationInfo.getInstance().majorVersion
         val isSupported = productName == "rider" && versionName >= "2018"
-        if (project == null || editor.getUserData(HIDDEN_KEY) != null || dontShowAgain || !FileUtilRt.isTooLarge(file.length) || !isSupported) {
+        if (editor.getUserData(HIDDEN_KEY) != null || dontShowAgain || !FileUtilRt.isTooLarge(file.length) || !isSupported) {
             return null
         }
 

@@ -37,68 +37,46 @@ class LogParsingPatternSettingsDialog(val item: LogParsingPattern) : DialogWrapp
   }
 
   override fun createCenterPanel(): JComponent? {
-    val panel = JPanel(GridBagLayout())
-    val constraints = GridBagConstraints().apply {
-      gridx = 0
-      gridy = 0
-      fill = GridBagConstraints.HORIZONTAL
-      anchor = GridBagConstraints.WEST
-    }
+    val panel = JPanel(MigLayout("fill, wrap 2", "[right][fill]"))
 
-    val labels = arrayOf("Name: ", "Message pattern: ", "Message start pattern: ", "Time format: ", "Time capture group: ", "Severity capture group: ", "Category capture group: ")
-
-
-    labels.forEach {
-      panel.add(JLabel(it), constraints)
-      constraints.gridy++
-    }
-
-    constraints.apply {
-      anchor = GridBagConstraints.SOUTHEAST
-      gridx = 1
-      gridy = 0
-    }
-
+    panel.add(JLabel("Name: "))
     val nameText = EditorTextField(item.name)
     myNameText = nameText
-    panel.add(nameText, constraints)
-    constraints.gridy++
+    panel.add(nameText)
 
+    panel.add(JLabel("Message pattern: "))
     val patternText = EditorTextField(item.pattern, ProjectManager.getInstance().defaultProject, RegExpFileType.INSTANCE)
     myParsingPatternText = patternText
-    panel.add(patternText, constraints)
-    constraints.gridy++
+    panel.add(patternText)
 
+    panel.add(JLabel("Message start pattern: "))
     val linePatternText = EditorTextField(item.lineStartPattern, ProjectManager.getInstance().defaultProject, RegExpFileType.INSTANCE)
     myLineStartPatternText = linePatternText
-    panel.add(linePatternText, constraints)
-    constraints.gridy++
+    panel.add(linePatternText)
 
+    panel.add(JLabel("Time format: "))
     val timeFormatText = EditorTextField(item.timePattern)
     myTimePatternText = timeFormatText
-    panel.add(timeFormatText, constraints)
-    constraints.gridy++
+    panel.add(timeFormatText)
 
+    panel.add(JLabel("Time capture group: "))
     val timeSpinner = JBIntSpinner(item.timeColumnId + 1, 0, 100)
     myTimeColumnId = timeSpinner
-    panel.add(timeSpinner, constraints)
-    constraints.gridy++
+    panel.add(timeSpinner)
 
+    panel.add(JLabel("Severity capture group: "))
     val severitySpinner = JBIntSpinner(item.severityColumnId + 1, 0, 100)
     mySeverityColumnId = severitySpinner
-    panel.add(severitySpinner, constraints)
-    constraints.gridy++
+    panel.add(severitySpinner)
 
+    panel.add(JLabel("Category capture group: "))
     val categorySpinner = JBIntSpinner(item.categoryColumnId + 1, 0, 100)
     myCategoryColumnId = categorySpinner
-    panel.add(categorySpinner, constraints)
-    constraints.gridy++
+    panel.add(categorySpinner)
 
     val firstLineRegexCheckbox = JCheckBox("Apply message pattern to all message lines", item.regexMatchFullEvent)
     myOnlyFirstLineRegexCheckbox = firstLineRegexCheckbox
-    constraints.gridx = 0
-    constraints.gridwidth = 2
-    panel.add(firstLineRegexCheckbox, constraints)
+    panel.add(firstLineRegexCheckbox, "span 2, left")
 
     return panel
   }
