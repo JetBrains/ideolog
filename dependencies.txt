@@ -1,0 +1,3 @@
+org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.11
+com.jetbrains:ideaIC:191-SNAPSHOT
+org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.3.11

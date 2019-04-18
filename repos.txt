@@ -1,0 +1,5 @@
+https://repo.maven.apache.org/maven2/;;Repos
+http://jetbrains-com-mirror.labs.intellij.net/intellij-repository/nightly;;Repos
+file:/Users/yaroslavrusskih/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/191-SNAPSHOT/449cece9f012ec56385f7df76def1f12b074104e/ideaIC-191-SNAPSHOT/;;Repos
+https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven;;Repos
+https://repo.maven.apache.org/maven2/;;Buildscript
