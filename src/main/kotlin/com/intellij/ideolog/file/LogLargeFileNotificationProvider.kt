@@ -43,9 +43,10 @@ class LogLargeFileNotificationProvider : EditorNotifications.Provider<EditorNoti
 
     override fun getKey(): Key<EditorNotificationPanel> = KEY
 
-    override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor, project: Project): EditorNotificationPanel? {
+    override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor): EditorNotificationPanel? {
         if (fileEditor !is LogFileEditor) return null
         val editor = (fileEditor as TextEditor).editor
+        val project = editor.project ?: return null
         val productName = ApplicationNamesInfo.getInstance().productName.toLowerCase(Locale.US)
         val versionName = ApplicationInfo.getInstance().majorVersion
         val isSupported = productName == "rider" && versionName >= "2018"

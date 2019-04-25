@@ -25,9 +25,10 @@ class LogFileFormatNotificationProvider : EditorNotifications.Provider<EditorNot
 
   override fun getKey(): Key<EditorNotificationPanel> = KEY
 
-  override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor, project: Project): EditorNotificationPanel? {
+  override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor): EditorNotificationPanel? {
     if (fileEditor !is LogFileEditor) return null
     val editor = (fileEditor as TextEditor).editor
+    val project = editor.project ?: return null
 
     val propertiesComponent = PropertiesComponent.getInstance()
     if (editor.document.ideologContext.detectLogFileFormat().myRegexLogParser != null || propertiesComponent.getBoolean(DONT_SHOW_AGAIN_KEY) || editor.getUserData(HIDDEN_KEY) != null)
