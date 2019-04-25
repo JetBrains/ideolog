@@ -17,7 +17,7 @@ val buildNumber: String by rootProject.extra
 version = buildNumber
 
 intellij {
-  version = "192-SNAPSHOT"
+  version = "2018.3"
   pluginName = "ideolog"
   intellijRepo = "http://jetbrains-com-mirror.labs.intellij.net/intellij-repository"
 }
