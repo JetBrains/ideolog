@@ -19,7 +19,7 @@ version = buildNumber
 intellij {
   version = "192-SNAPSHOT"
   pluginName = "ideolog"
-  intellijRepo = "http://jetbrains-com-mirror.labs.intellij.net/intellij-repository"
+  intellijRepo = "https://jetbrains-com-mirror.labs.intellij.net/intellij-repository"
 }
 
 repositories {
