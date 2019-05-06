@@ -15,12 +15,12 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   companion object {
     fun getInstance() = ServiceManager.getService(LogHighlightingSettingsStore::class.java)!!
 
-    val CURRENT_SETTINGS_VERSION = "3"
+    val CURRENT_SETTINGS_VERSION = "4"
 
     @Language("RegExp")
     val cleanState = State(arrayListOf(
       LogHighlightingPattern(true, "^\\s*e(rror)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color.RED.rgb, null, true, false, true),
-      LogHighlightingPattern(true, "^\\s*w(arning)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0xff, 0xaa, 0).rgb, null, true, false, false),
+      LogHighlightingPattern(true, "^\\s*w(arn(ing)?)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0xff, 0xaa, 0).rgb, null, true, false, false),
       LogHighlightingPattern(true, "^\\s*i(nfo)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0x3f, 0xbf, 0x3f).rgb, null, false, false, false)
     ), arrayListOf(), arrayListOf(
       LogParsingPattern(true, "Pipe-separated", "^(?s)([^|]*)\\|([^|]*)\\|([^|]*)\\|(.*)$", "HH:mm:ss.SSS", "^\\d", 0, 1, 2, false),
@@ -47,6 +47,14 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         val newState = oldState.clone()
         newState.version = "3"
         newState.readonlySizeThreshold = "16"
+        return@lambda newState
+      },
+      "3" to lambda@{ oldState ->
+        val newState = oldState.clone()
+        if (newState.patterns.size >= 3 && newState.patterns[1].pattern == "^\\s*w(arning)?\\s*\$") {
+          newState.patterns[1] = newState.patterns[1].copy(pattern = "^\\s*w(arn(ing)?)?\\s*\$")
+        }
+        newState.version = "4"
         return@lambda newState
       }
     )
