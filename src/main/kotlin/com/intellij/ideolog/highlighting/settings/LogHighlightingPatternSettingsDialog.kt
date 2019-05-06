@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.ColorPanel
@@ -22,6 +23,12 @@ class LogHighlightingPatternSettingsDialog(val item: LogHighlightingPattern) : D
 
   init {
     init()
+  }
+
+  override fun getHelpId() = ""
+
+  override fun doHelpAction() {
+    BrowserUtil.browse("https://github.com/JetBrains/ideolog/wiki/Highlighting-Patterns")
   }
 
   override fun createCenterPanel(): JComponent? {
