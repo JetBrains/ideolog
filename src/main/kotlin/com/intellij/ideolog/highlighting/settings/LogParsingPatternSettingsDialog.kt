@@ -81,6 +81,8 @@ class LogParsingPatternSettingsDialog(val item: LogParsingPattern) : DialogWrapp
     return panel
   }
 
+  override fun getHelpId() = ""
+
   override fun doHelpAction() {
     BrowserUtil.browse("https://github.com/JetBrains/ideolog/wiki/Custom-Log-Formats")
   }

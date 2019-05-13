@@ -1,6 +1,7 @@
 package com.intellij.ideolog.highlighting
 
 import com.intellij.ideolog.fileType.LogLanguage
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.event.DocumentEvent
@@ -38,7 +39,7 @@ class LogEditorHighlighter(colors: EditorColorsScheme) : EditorHighlighter {
 
 
   override fun createIterator(startOffset: Int): HighlighterIterator {
-    if (myEditor == null)
+    if (myEditor == null || !ApplicationManager.getApplication().isDispatchThread)
       return EmptyEditorHighlighter(TextAttributes()).apply { setText(myText) }.createIterator(startOffset)
 
     return LogHighlightingIterator(startOffset, myEditor as Editor, { myText }, { myColors })
