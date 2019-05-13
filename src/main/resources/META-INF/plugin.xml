@@ -26,6 +26,17 @@
       Issue tracker: <a href="https://github.com/JetBrains/ideolog/issues">https://github.com/JetBrains/ideolog/issues</a>
     </p>
   ]]></description>
+  <change-notes>
+    <![CDATA[
+      <p>
+      <ul>
+        <li>Greatly improved performance</li>
+        <li>Improved diagnostics of undetected log format</li>
+        <li>Improved log format editing with validation and help links</li>
+        <li>Minor bug fixes</li>
+      </p>
+    ]]>
+  </change-notes>
 
   <version>0.1</version>
 
