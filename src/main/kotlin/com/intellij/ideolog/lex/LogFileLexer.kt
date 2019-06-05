@@ -76,7 +76,7 @@ class LogFileLexer(val tokenCache: MutableList<IElementType>, var findEventStart
       val dataToMatch = if (parser.otherParsingSettings.regexMatchFullEvent || !eventIsMultiline) event else event.subSequence(0, event.indexOf('\n'))
 
       val matcher = parser.regex.matcher(dataToMatch)
-      if (!matcher.find()) {
+      if (!matcher.find() || matcher.groupCount() == 0) {
         output.add(LogToken(0, event.length, false))
         return
       }
