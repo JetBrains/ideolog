@@ -1,7 +1,10 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.*
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.util.Disposer
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.util.xmlb.annotations.AbstractCollection
 import com.intellij.util.xmlb.annotations.Attribute
@@ -61,6 +64,22 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   }
 
   var myState = cleanState.clone()
+  private val myListeners = HashSet<LogHighlightingSettingsListener>()
+
+  fun addSettingsListener(disposable: Disposable, listener: LogHighlightingSettingsListener) {
+    ApplicationManager.getApplication().assertIsDispatchThread()
+
+    myListeners.add(listener)
+    Disposer.register(disposable, Disposable {
+      myListeners.remove(listener)
+    })
+  }
+
+  private fun fireListeners() {
+    ApplicationManager.getApplication().assertIsDispatchThread()
+
+    myListeners.forEach { it() }
+  }
 
   override fun getState(): LogHighlightingSettingsStore.State {
     return myState
@@ -83,6 +102,8 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       myState.parsingPatterns.addAll(cleanState.parsingPatterns.subList(myState.lastAddedDefaultFormat.toInt(), cleanState.parsingPatterns.size))
       myState.lastAddedDefaultFormat = cleanState.parsingPatterns.size.toString()
     }
+
+    fireListeners()
   }
 
   override fun equals(other: Any?): Boolean {
@@ -134,7 +155,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         result.hidden.add(it)
       }
       parsingPatterns.forEach {
-        result.parsingPatterns.add(it)
+        result.parsingPatterns.add(it.clone())
       }
       return result
     }
@@ -150,7 +171,7 @@ data class LogParsingPattern(@Attribute("enabled") var enabled: Boolean, @Attrib
   @Suppress("unused")
   constructor(): this(true, "", "", "", "", -1, -1, -1, false)
 
-  public override fun clone(): Any {
+  public override fun clone(): LogParsingPattern {
     return LogParsingPattern(enabled, name, pattern, timePattern, lineStartPattern, timeColumnId, severityColumnId, categoryColumnId, regexMatchFullEvent)
   }
 }
