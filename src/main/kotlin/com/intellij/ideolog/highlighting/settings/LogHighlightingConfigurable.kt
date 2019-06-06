@@ -29,6 +29,11 @@ class LogHighlightingConfigurable : BaseConfigurable() {
       myLogHighlightingStore.errorStripeMode = if(heatmapCheckbox.isSelected) "heatmap" else "normal"
     }
 
+    val linksCheckbox = JCheckBox("Highlight links and code references in logs", myLogHighlightingStore.highlightLinks)
+    linksCheckbox.addChangeListener {
+      myLogHighlightingStore.highlightLinks = linksCheckbox.isSelected
+    }
+
     val logSizeSpinner = JBIntSpinner(myLogHighlightingStore.readonlySizeThreshold.toInt(), 0, 1024*1024)
     logSizeSpinner.addChangeListener {
       myLogHighlightingStore.readonlySizeThreshold = logSizeSpinner.value.toString()
@@ -100,6 +105,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
 
     return com.intellij.util.ui.FormBuilder.createFormBuilder()
       .addComponent(heatmapCheckbox)
+      .addComponent(linksCheckbox)
       .addLabeledComponent("Allow editing log files smaller than (KB, editing can cause performance issues):", logSizeSpinner)
       .addComponentFillVertically(formatsPanel, 0)
       .addComponentFillVertically(topPanel, 0)
