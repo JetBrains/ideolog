@@ -1,7 +1,10 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.*
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.util.Disposer
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.util.xmlb.annotations.AbstractCollection
 import com.intellij.util.xmlb.annotations.Attribute
@@ -26,7 +29,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       LogParsingPattern(true, "Pipe-separated", "^(?s)([^|]*)\\|([^|]*)\\|([^|]*)\\|(.*)$", "HH:mm:ss.SSS", "^\\d", 0, 1, 2, false),
       LogParsingPattern(true, "IntelliJ IDEA", "^([^\\[]+)(\\[[\\s\\d]+])\\s*(\\w*)\\s*-\\s*(\\S*)\\s*-(.+)$", "yyyy-MM-dd HH:mm:ss,SSS", "^\\d", 0, 2, 3, false),
       LogParsingPattern(true, "TeamCity build log", "^\\[([^]]+)](.):\\s*(\\[[^]]+])?(.*)$", "HH:mm:ss", "^\\[", 0, 1, 2, false)
-    ), CURRENT_SETTINGS_VERSION, "3", "heatmap", "16")
+    ), CURRENT_SETTINGS_VERSION, "3", "heatmap", "16", true)
 
     val settingsUpgraders = mapOf<String, (State) -> State>(
       "-1" to { _ -> cleanState.clone() },
@@ -61,6 +64,22 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   }
 
   var myState = cleanState.clone()
+  private val myListeners = HashSet<LogHighlightingSettingsListener>()
+
+  fun addSettingsListener(disposable: Disposable, listener: LogHighlightingSettingsListener) {
+    ApplicationManager.getApplication().assertIsDispatchThread()
+
+    myListeners.add(listener)
+    Disposer.register(disposable, Disposable {
+      myListeners.remove(listener)
+    })
+  }
+
+  private fun fireListeners() {
+    ApplicationManager.getApplication().assertIsDispatchThread()
+
+    myListeners.forEach { it() }
+  }
 
   override fun getState(): LogHighlightingSettingsStore.State {
     return myState
@@ -83,6 +102,8 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       myState.parsingPatterns.addAll(cleanState.parsingPatterns.subList(myState.lastAddedDefaultFormat.toInt(), cleanState.parsingPatterns.size))
       myState.lastAddedDefaultFormat = cleanState.parsingPatterns.size.toString()
     }
+
+    fireListeners()
   }
 
   override fun equals(other: Any?): Boolean {
@@ -117,16 +138,18 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     @Tag("errorStripeModel", textIfEmpty = "heatmap")
     var errorStripeMode: String,
     @Tag("readonlySizeThreshold", textIfEmpty = "1024")
-    var readonlySizeThreshold: String
+    var readonlySizeThreshold: String,
+    @Tag("highlight_links", textIfEmpty = "true")
+    var highlightLinks: Boolean
   ) : Cloneable {
     @Suppress("unused")
-    constructor() : this(ArrayList(), ArrayList(), ArrayList(), "-1", "-1", "heatmap", "16")
+    constructor() : this(ArrayList(), ArrayList(), ArrayList(), "-1", "-1", "heatmap", "16", true)
 
     @Suppress("unused")
-    constructor(patterns: ArrayList<LogHighlightingPattern>, hidden: ArrayList<String>, parsingPatterns: ArrayList<LogParsingPattern>) : this(patterns, hidden, parsingPatterns, "-1", "-1", "heatmap", "16")
+    constructor(patterns: ArrayList<LogHighlightingPattern>, hidden: ArrayList<String>, parsingPatterns: ArrayList<LogParsingPattern>) : this(patterns, hidden, parsingPatterns, "-1", "-1", "heatmap", "16", true)
 
     public override fun clone(): State {
-      val result = State(ArrayList(), ArrayList(), ArrayList(), version, lastAddedDefaultFormat, errorStripeMode, readonlySizeThreshold)
+      val result = State(ArrayList(), ArrayList(), ArrayList(), version, lastAddedDefaultFormat, errorStripeMode, readonlySizeThreshold, highlightLinks)
       patterns.forEach {
         result.patterns.add(it.clone())
       }
@@ -134,7 +157,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         result.hidden.add(it)
       }
       parsingPatterns.forEach {
-        result.parsingPatterns.add(it)
+        result.parsingPatterns.add(it.clone())
       }
       return result
     }
@@ -150,7 +173,7 @@ data class LogParsingPattern(@Attribute("enabled") var enabled: Boolean, @Attrib
   @Suppress("unused")
   constructor(): this(true, "", "", "", "", -1, -1, -1, false)
 
-  public override fun clone(): Any {
+  public override fun clone(): LogParsingPattern {
     return LogParsingPattern(enabled, name, pattern, timePattern, lineStartPattern, timeColumnId, severityColumnId, categoryColumnId, regexMatchFullEvent)
   }
 }

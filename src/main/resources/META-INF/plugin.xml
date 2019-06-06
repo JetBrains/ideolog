@@ -30,10 +30,8 @@
     <![CDATA[
       <p>
       <ul>
-        <li>Greatly improved performance</li>
-        <li>Improved diagnostics of undetected log format</li>
-        <li>Improved log format editing with validation and help links</li>
-        <li>Minor bug fixes</li>
+        <li>Fix settings failing to apply/save in some cases; re-detect log formats after changing settings</li>
+        <li>Allow disabling links highlighting in logs (workaround for #56, #61)</li>
       </p>
     ]]>
   </change-notes>

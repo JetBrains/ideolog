@@ -8,7 +8,6 @@ import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.highlighter.HighlighterIterator
 import com.intellij.openapi.editor.markup.TextAttributes
@@ -20,7 +19,6 @@ import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
 val timeDifferenceToRed = 15000L
-private var highlightingStacktrace = false // todo: ewww, globals!
 
 class LogHighlightingIterator(startOffset: Int, val myEditor: Editor, val textGetter: () -> CharSequence, val colorGetter: () -> EditorColorsScheme) : HighlighterIterator {
   val myText: CharSequence
@@ -29,7 +27,8 @@ class LogHighlightingIterator(startOffset: Int, val myEditor: Editor, val textGe
   val myColors: EditorColorsScheme
     get() = colorGetter()
 
-  val myPatterns = LogHighlightingSettingsStore.getInstance().myState.patterns.filter { it.enabled }.mapNotNull {
+  val settingsStore = LogHighlightingSettingsStore.getInstance()
+  val myPatterns = settingsStore.myState.patterns.filter { it.enabled }.mapNotNull {
     try {
       Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it
     } catch(e: PatternSyntaxException) {
@@ -223,19 +222,8 @@ class LogHighlightingIterator(startOffset: Int, val myEditor: Editor, val textGe
 
   private fun tryHighlightStacktrace(event: CharSequence, eventOffset: Int) {
     val project = myEditor.project ?: return
-    if (highlightingStacktrace || !ApplicationManager.getApplication().isDispatchThread || event.indexOf('\n').let { it < 0 || it >= event.length - 1 })
+    if (!settingsStore.myState.highlightLinks || !ApplicationManager.getApplication().isDispatchThread || event.indexOf('\n').let { it < 0 || it >= event.length - 1 })
       return
-//    highlightingStacktrace = true
-//    fun offsetVisible(offset: Int): Boolean {
-//      val lineNumber = document.getLineNumber(offset)
-//      val vp = myEditor.logicalToVisualPosition(LogicalPosition(lineNumber, 0))
-//      return myEditor.scrollingModel.visibleAreaOnScrollingFinished.contains(myEditor.visualPositionToXY(vp))
-//    }
-//    if (!offsetVisible(eventOffset) && !offsetVisible(eventOffset + event.length)) {
-//      highlightingStacktrace = false
-//      return
-//    }
-//    highlightingStacktrace = false
 
     LogHeavyFilterService.getInstance(project).enqueueHeavyFiltering(myEditor, eventOffset, event)
   }
