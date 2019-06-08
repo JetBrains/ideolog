@@ -29,9 +29,9 @@
   <change-notes>
     <![CDATA[
       <p>
-      <ul>
-        <li>Fix settings failing to apply/save in some cases; re-detect log formats after changing settings</li>
-        <li>Allow disabling links highlighting in logs (workaround for #56, #61)</li>
+        <ul>
+          <li>Update version compatibility with the latest IDEA 2019.2 build</li>
+        </ul>
       </p>
     ]]>
   </change-notes>
