@@ -1,4 +1,3 @@
-<!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
 <idea-plugin>
   <id>com.intellij.ideolog</id>
   <name>Ideolog</name>
@@ -30,7 +29,7 @@
     <![CDATA[
       <p>
         <ul>
-          <li>Update version compatibility with the latest IDEA 2019.2 build</li>
+          <li>Update version compatibility with the latest IDEA 2019.3 build</li>
         </ul>
       </p>
     ]]>
@@ -46,12 +45,13 @@
     <applicationService serviceImplementation="com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore"/>
     <projectService serviceImplementation="com.intellij.ideolog.highlighting.LogHeavyFilterService" />
     <applicationConfigurable displayName="Log Highlighting (Ideolog)" instance="com.intellij.ideolog.highlighting.settings.LogHighlightingConfigurable" id="LogHighlighting" groupId="editor"/>
-    <fileTypeFactory implementation="com.intellij.ideolog.fileType.LogFileTypeFactory" />
     <editorHighlighterProvider filetype="Log" implementationClass="com.intellij.ideolog.highlighting.LogFileEditorHighlighterProvider" />
     <extendWordSelectionHandler implementation="com.intellij.ideolog.editorActions.ExtendsSelection"/>
     <fileEditorProvider implementation="com.intellij.ideolog.file.LogFileEditorProvider" />
     <!--suppress PluginXmlValidity -->
     <lang.parserDefinition language="LOG" implementationClass="com.intellij.ideolog.psi.LogFileParserDefinition"/>
+    <!--suppress PluginXmlValidity -->
+    <fileType name="Log" language="LOG" implementationClass="com.intellij.ideolog.fileType.LogFileType" fieldName="INSTANCE"/>
     <editorNotificationProvider implementation="com.intellij.ideolog.file.LogLargeFileNotificationProvider"/>
     <editorNotificationProvider implementation="com.intellij.ideolog.file.LogFileFormatNotificationProvider"/>
 

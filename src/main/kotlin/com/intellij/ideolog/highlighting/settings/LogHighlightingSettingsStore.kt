@@ -6,10 +6,10 @@ import com.intellij.openapi.components.*
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.util.Disposer
 import com.intellij.util.xmlb.XmlSerializerUtil
-import com.intellij.util.xmlb.annotations.AbstractCollection
 import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.Tag
 import com.intellij.util.xmlb.annotations.Transient
+import com.intellij.util.xmlb.annotations.XCollection
 import org.intellij.lang.annotations.Language
 import java.awt.Color
 
@@ -122,13 +122,13 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   }
 
   data class State(
-    @AbstractCollection(surroundWithTag = true)
+    @XCollection(style = XCollection.Style.v2)
     @Tag("Patterns")
     val patterns: ArrayList<LogHighlightingPattern>,
-    @AbstractCollection(surroundWithTag = true)
+    @XCollection(style = XCollection.Style.v2)
     @Tag("hidden")
     val hidden: ArrayList<String>,
-    @AbstractCollection(surroundWithTag = true)
+    @XCollection(style = XCollection.Style.v2)
     @Tag("parsing")
     val parsingPatterns: ArrayList<LogParsingPattern>,
     @Tag("settingsVersion", textIfEmpty = "0")
