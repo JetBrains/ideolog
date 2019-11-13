@@ -6,10 +6,7 @@ import com.intellij.openapi.components.*
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.util.Disposer
 import com.intellij.util.xmlb.XmlSerializerUtil
-import com.intellij.util.xmlb.annotations.Attribute
-import com.intellij.util.xmlb.annotations.Tag
-import com.intellij.util.xmlb.annotations.Transient
-import com.intellij.util.xmlb.annotations.XCollection
+import com.intellij.util.xmlb.annotations.*
 import org.intellij.lang.annotations.Language
 import java.awt.Color
 
@@ -122,13 +119,13 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   }
 
   data class State(
-    @XCollection(style = XCollection.Style.v2)
+    @AbstractCollection(surroundWithTag = true)
     @Tag("Patterns")
     val patterns: ArrayList<LogHighlightingPattern>,
-    @XCollection(style = XCollection.Style.v2)
+    @AbstractCollection(surroundWithTag = true)
     @Tag("hidden")
     val hidden: ArrayList<String>,
-    @XCollection(style = XCollection.Style.v2)
+    @AbstractCollection(surroundWithTag = true)
     @Tag("parsing")
     val parsingPatterns: ArrayList<LogParsingPattern>,
     @Tag("settingsVersion", textIfEmpty = "0")
@@ -147,6 +144,26 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
 
     @Suppress("unused")
     constructor(patterns: ArrayList<LogHighlightingPattern>, hidden: ArrayList<String>, parsingPatterns: ArrayList<LogParsingPattern>) : this(patterns, hidden, parsingPatterns, "-1", "-1", "heatmap", "16", true)
+
+    // settings migration to XCollection: store settings in new format, then drop the old one when most users migrate
+    // to migrate: remove old annotations from original properties, add annotations from these, drop these
+    var patternsV2: ArrayList<LogHighlightingPattern>
+      @XCollection(style = XCollection.Style.v2)
+      @Tag("highlightingPatterns")
+      get() = patterns
+      set(value) {}
+
+    var hiddenV2: ArrayList<String>
+      @XCollection(style = XCollection.Style.v2)
+      @Tag("hiddenSubstrings")
+      get() = hidden
+      set(value) {}
+
+    var parsingV2: ArrayList<LogParsingPattern>
+      @XCollection(style = XCollection.Style.v2)
+      @Tag("parsingPatterns")
+      get() = parsingPatterns
+      set(value) {}
 
     public override fun clone(): State {
       val result = State(ArrayList(), ArrayList(), ArrayList(), version, lastAddedDefaultFormat, errorStripeMode, readonlySizeThreshold, highlightLinks)
