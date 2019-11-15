@@ -9,7 +9,7 @@ buildscript {
   }
 }
 
-plugins { id("org.jetbrains.intellij") version "0.4.8" }
+plugins { id("org.jetbrains.intellij") version "0.4.13" }
 apply(plugin = "kotlin")
 
 group = "ideolog"
