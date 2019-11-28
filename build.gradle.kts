@@ -9,7 +9,7 @@ buildscript {
   }
 }
 
-plugins { id("org.jetbrains.intellij") version "0.4.10" }
+plugins { id("org.jetbrains.intellij") version "0.4.13" }
 apply(plugin = "kotlin")
 
 group = "ideolog"
@@ -17,7 +17,7 @@ val buildNumber: String by rootProject.extra
 version = buildNumber
 
 intellij {
-  version = "193-SNAPSHOT"
+  version = "192-SNAPSHOT"
   pluginName = "ideolog"
   intellijRepo = "https://jetbrains-com-mirror.labs.intellij.net/intellij-repository"
 }

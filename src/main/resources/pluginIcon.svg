@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <g id="pluginIcon" fill="none" fill-rule="evenodd" stroke="none" stroke-width="1">
+    <g id="Group-8" opacity=".5" transform="translate(4 23)">
+      <polygon id="Fill-2" fill="#FF6C69" points="9.612 0 0 0 1 3 10.612 3"/>
+      <polygon id="Fill-4" fill="#EDAA2D" points="17.612 5 0 5 1 8 18.613 8"/>
+      <polygon id="Fill-6" fill="#69A3FF" points="25.612 10 0 10 1 13 26.613 13"/>
+    </g>
+    <g id="Group" transform="translate(14 4)">
+      <polygon id="Fill-9" fill="#FF6C69" points="4.333 21 1.667 22 0 17 6 17"/>
+      <path id="Fill-10" fill="#7C8EB3" d="M1,3 C1,2.449 1.449,2 2,2 C2.551,2 3,2.449 3,3 L3,16 L6,16 L6,3 C6,1.343 4.657,0 3,0 C1.343,0 0,1.343 0,3 L0,16 L1,16 L1,3 Z"/>
+      <polygon id="Fill-12" fill="#EDAA2D" points="12.333 26 9.667 27 8 22 14 22"/>
+      <path id="Fill-14" fill="#7C8EB3" d="M9,8 C9,7.449 9.449,7 10,7 C10.551,7 11,7.449 11,8 L11,21 L14,21 L14,8 C14,6.343 12.657,5 11,5 C9.343,5 8,6.343 8,8 L8,21 L9,21 L9,8 Z"/>
+      <polygon id="Fill-16" fill="#69A3FF" points="20.333 31 17.667 32 16 27 22 27"/>
+      <path id="Fill-18" fill="#7C8EB3" d="M17,13 C17,12.449 17.449,12 18,12 C18.551,12 19,12.449 19,13 L19,26 L22,26 L22,13 C22,11.343 20.657,10 19,10 C17.343,10 16,11.343 16,13 L16,26 L17,26 L17,13 Z"/>
+    </g>
+  </g>
+</svg>
