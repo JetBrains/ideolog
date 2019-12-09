@@ -7,17 +7,24 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 
 class JumpToSourceAction : AnAction() {
+  override fun update(e: AnActionEvent) {
+    e.presentation.isEnabled = canExecute(e)
+  }
+
+  private fun canExecute(e: AnActionEvent): Boolean {
+    val psiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return false
+
+    return psiFile.fileType == LogFileType
+  }
+
   override fun actionPerformed(e: AnActionEvent) {
     val editor = e.dataContext.getData(CommonDataKeys.EDITOR) ?: return
-    val psiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
     val project = e.dataContext.getData(CommonDataKeys.PROJECT) ?: return
 
+    if(!canExecute(e))
+      return
 
-    val enabled = psiFile.fileType == LogFileType
-    e.presentation.isEnabled = enabled
-    if (enabled) {
-      LogJumpToSourceIntention.doIt(project, editor)
-    }
+    LogJumpToSourceIntention.doIt(project, editor)
   }
 
 }
