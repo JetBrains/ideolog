@@ -1,5 +1,5 @@
 buildscript {
-  val kotlinVersion = "1.3.30"
+  val kotlinVersion = "1.3.61"
 
   repositories {
     mavenCentral()
@@ -9,7 +9,10 @@ buildscript {
   }
 }
 
-plugins { id("org.jetbrains.intellij") version "0.4.13" }
+plugins {
+  id("me.filippov.gradle.jvm.wrapper") version "0.9.3"
+  id("org.jetbrains.intellij") version "0.4.16"
+}
 apply(plugin = "kotlin")
 
 group = "ideolog"
@@ -17,9 +20,14 @@ val buildNumber: String by rootProject.extra
 version = buildNumber
 
 intellij {
-  version = "201-SNAPSHOT"
+  version = "2019.3"
   pluginName = "ideolog"
-  intellijRepo = "https://jetbrains-com-mirror.labs.intellij.net/intellij-repository"
+  tasks {
+    withType<org.jetbrains.intellij.tasks.PatchPluginXmlTask> {
+      updateSinceUntilBuild = true
+      setUntilBuild("")
+    }
+  }
 }
 
 repositories {
