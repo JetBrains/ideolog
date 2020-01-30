@@ -1,15 +1,11 @@
 package com.intellij.ideolog.lex
 
-import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.highlighting.settings.LogParsingPattern
 import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.util.Key
 import java.text.DateFormat
 import java.text.ParseException
-import java.text.SimpleDateFormat
 import java.util.regex.Pattern
-import java.util.regex.PatternSyntaxException
 
 data class LogToken(val startOffset: Int, var endOffset: Int, val isSeparator: Boolean) {
   fun takeFrom(rawMessage: CharSequence): CharSequence {

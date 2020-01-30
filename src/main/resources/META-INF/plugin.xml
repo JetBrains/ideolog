@@ -3,7 +3,7 @@
   <name>Ideolog</name>
   <vendor>JetBrains</vendor>
   <depends>com.intellij.modules.lang</depends>
-  <idea-version since-build="171.0" />
+  <idea-version since-build="193.0" />
   <description><![CDATA[
     <h1>Interactive viewer for '.log' files.</h1>
     <p>
@@ -34,8 +34,6 @@
       </p>
     ]]>
   </change-notes>
-
-  <version>0.1</version>
 
   <application-components>
     <component><implementation-class>com.intellij.ideolog.intentions.LogIntentionLoaderComponent</implementation-class></component>

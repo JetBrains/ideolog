@@ -18,7 +18,7 @@ class LogFileFormatNotificationProvider : EditorNotifications.Provider<EditorNot
   companion object {
     private val KEY = Key.create<EditorNotificationPanel>("log.file.format.editor.notification")
     private val HIDDEN_KEY = Key.create<Any>("log.file.format.editor.notification.hidden")
-    private val DONT_SHOW_AGAIN_KEY = "log.file.format.editor.notification.disabled"
+    private const val DONT_SHOW_AGAIN_KEY = "log.file.format.editor.notification.disabled"
 
     fun update(file: VirtualFile, project: Project) = EditorNotifications.getInstance(project).updateNotifications(file)
   }

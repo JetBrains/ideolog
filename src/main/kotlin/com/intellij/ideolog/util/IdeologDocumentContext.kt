@@ -15,7 +15,7 @@ private val documentContextKey = Key.create<IdeologDocumentContext>("IdeologDocu
 val Document.ideologContext : IdeologDocumentContext
   get() = getUserData(documentContextKey) ?: run {
     putUserData(documentContextKey, IdeologDocumentContext(this))
-    getUserData(documentContextKey)!! // get again in case of multithreaded writes (UDH is thread-safe)
+    getUserData(documentContextKey)!! // get again in case of multi-threaded writes (UDH is thread-safe)
   }
 
 class IdeologDocumentContext(val document: Document) {

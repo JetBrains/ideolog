@@ -133,7 +133,7 @@ class LogHighlightingIterator(startOffset: Int, val myEditor: Editor, val textGe
     val highlightColumn = myEditor.getUserData(highlightingUserKey) ?: -1
     if (highlightColumn in 0..(numColumns - 1)) {
       val columnValue = columnValues[highlightColumn]
-      lineBackground = Companion.getLineBackground(columnValue, myColors.defaultBackground) ?: lineBackground
+      lineBackground = getLineBackground(columnValue, myColors.defaultBackground) ?: lineBackground
     }
     val highlightingSet = myEditor.getUserData(highlightingSetUserKey) ?: emptySet<String>()
 
@@ -154,7 +154,7 @@ class LogHighlightingIterator(startOffset: Int, val myEditor: Editor, val textGe
     @Suppress("LoopToCallChain")
     for (word in highlightingSet) {
       if (event.contains(word)) {
-        lineBackground = Companion.getLineBackground(word, myColors.defaultBackground) ?: lineBackground
+        lineBackground = getLineBackground(word, myColors.defaultBackground) ?: lineBackground
       }
     }
 

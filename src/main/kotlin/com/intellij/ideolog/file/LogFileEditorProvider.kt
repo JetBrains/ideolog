@@ -16,11 +16,7 @@ class TotallyNotTextEditorProvider: TextEditorProvider(), DumbAware {
     return LogFileEditor(project, file, this)
   }
 
-  override fun accept(project: Project, file: VirtualFile) = TextEditorProvider.isTextFile(file) && file.fileType.name == LogFileType.name
-
-  override fun getTextEditor(editor: Editor): TextEditor {
-    return super.getTextEditor(editor)
-  }
+  override fun accept(project: Project, file: VirtualFile) = isTextFile(file) && file.fileType.name == LogFileType.name
 
   override fun getPolicy(): FileEditorPolicy {
     return FileEditorPolicy.HIDE_DEFAULT_EDITOR

@@ -60,7 +60,7 @@ class LogHighlightValueIntention : IntentionAction {
     set.add(selection.toString())
     editor.putUserData(highlightingSetUserKey, set)
     (editor as EditorEx).repaint(0, editor.document.textLength)
-    LogFileMapRenderer.GetLogFileMapRenderer(editor)?.invalidateHighlighters()
+    LogFileMapRenderer.getLogFileMapRenderer(editor)?.invalidateHighlighters()
   }
 
   override fun startInWriteAction() = false

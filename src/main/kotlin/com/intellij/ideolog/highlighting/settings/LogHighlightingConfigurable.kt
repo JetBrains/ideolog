@@ -1,7 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
 import com.intellij.openapi.options.BaseConfigurable
-import com.intellij.openapi.options.SearchableConfigurable
 import com.intellij.openapi.ui.Messages
 import com.intellij.ui.IdeBorderFactory
 import com.intellij.ui.JBIntSpinner
@@ -12,7 +11,6 @@ import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
 import javax.swing.JCheckBox
 import javax.swing.JComponent
-import javax.swing.JLabel
 import javax.swing.JPanel
 
 class LogHighlightingConfigurable : BaseConfigurable() {
@@ -21,7 +19,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
   private val filterTableModel = LogFilterTableModel(myLogHighlightingStore)
   private val formatsTableModel = LogFormatTableModel(myLogHighlightingStore)
 
-  override fun getHelpTopic() = null
+  override fun getHelpTopic(): Nothing? = null
 
   override fun createComponent(): JComponent? {
     val heatmapCheckbox = JCheckBox("Display heat map on error stripe/scrollbar", myLogHighlightingStore.errorStripeMode == "heatmap")
@@ -51,7 +49,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
       getColumn(getColumnName(0)).maxWidth = JBUI.Fonts.label().size * 15
     }
 
-    val patternsPanel = javax.swing.JPanel(java.awt.BorderLayout()).apply {
+    val patternsPanel = JPanel(BorderLayout()).apply {
       border = IdeBorderFactory.createTitledBorder("Patterns")
       add(ToolbarDecorator.createDecorator(patternsTable).setAddAction {
         val result = Messages.showInputDialog("Enter new pattern (regex supported):", "New highlighting pattern", null) ?: return@setAddAction
@@ -67,7 +65,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
       }.createPanel(), BorderLayout.CENTER)
     }
 
-    val filtersPanel = javax.swing.JPanel(java.awt.BorderLayout()).apply {
+    val filtersPanel = JPanel(BorderLayout()).apply {
       border = IdeBorderFactory.createTitledBorder("Filters")
       add(ToolbarDecorator.createDecorator(filtersTable).setAddAction {
         val string = Messages.showInputDialog("Enter new pattern (exact match)", "New filter pattern", null) ?: return@setAddAction
@@ -76,7 +74,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
         val selectedIndex = filtersTable.selectedRow
         if (selectedIndex >= 0)
           filterTableModel.removeItem(selectedIndex)
-      }.createPanel(), java.awt.BorderLayout.CENTER)
+      }.createPanel(), BorderLayout.CENTER)
     }
 
     val formatsPanel = JPanel(BorderLayout()).apply {

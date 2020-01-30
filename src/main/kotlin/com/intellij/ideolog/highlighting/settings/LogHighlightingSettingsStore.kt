@@ -78,20 +78,20 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     myListeners.forEach { it() }
   }
 
-  override fun getState(): LogHighlightingSettingsStore.State {
+  override fun getState(): State {
     return myState
   }
 
-  override fun loadState(state: LogHighlightingSettingsStore.State) {
+  override fun loadState(state: State) {
     XmlSerializerUtil.copyBean(state, myState)
 
     while(myState.version < CURRENT_SETTINGS_VERSION) {
       val upgrader = settingsUpgraders[myState.version]
-      if(upgrader == null) {
+      myState = if(upgrader == null) {
         logger("LogHighlightingSettingsStore").warn("Upgrader for version ${myState.version} not found, performing hard reset of settings")
-        myState = cleanState.clone()
+        cleanState.clone()
       } else {
-        myState = upgrader(myState)
+        upgrader(myState)
       }
     }
 
@@ -119,13 +119,13 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   }
 
   data class State(
-    @AbstractCollection(surroundWithTag = true)
+    @XCollection
     @Tag("Patterns")
     val patterns: ArrayList<LogHighlightingPattern>,
-    @AbstractCollection(surroundWithTag = true)
+    @XCollection
     @Tag("hidden")
     val hidden: ArrayList<String>,
-    @AbstractCollection(surroundWithTag = true)
+    @XCollection
     @Tag("parsing")
     val parsingPatterns: ArrayList<LogParsingPattern>,
     @Tag("settingsVersion", textIfEmpty = "0")
@@ -151,19 +151,19 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       @XCollection(style = XCollection.Style.v2)
       @Tag("highlightingPatterns")
       get() = patterns
-      set(value) {}
+      set(_) {}
 
     var hiddenV2: ArrayList<String>
       @XCollection(style = XCollection.Style.v2)
       @Tag("hiddenSubstrings")
       get() = hidden
-      set(value) {}
+      set(_) {}
 
     var parsingV2: ArrayList<LogParsingPattern>
       @XCollection(style = XCollection.Style.v2)
       @Tag("parsingPatterns")
       get() = parsingPatterns
-      set(value) {}
+      set(_) {}
 
     public override fun clone(): State {
       val result = State(ArrayList(), ArrayList(), ArrayList(), version, lastAddedDefaultFormat, errorStripeMode, readonlySizeThreshold, highlightLinks)

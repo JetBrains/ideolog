@@ -8,10 +8,6 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBIntSpinner
 import net.miginfocom.swing.MigLayout
 import org.intellij.lang.regexp.RegExpFileType
-import java.awt.GridBagConstraints
-import java.awt.GridBagLayout
-import java.lang.IllegalArgumentException
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
