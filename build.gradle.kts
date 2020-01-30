@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 buildscript {
   val kotlinVersion = "1.3.61"
 
@@ -32,6 +34,10 @@ intellij {
 
 repositories {
   mavenCentral()
+}
+
+tasks.withType<KotlinCompile> {
+  kotlinOptions.allWarningsAsErrors = true
 }
 
 dependencies {

@@ -28,7 +28,7 @@ class LogRemoveHighlightingsIntention : IntentionAction {
     editor.putUserData(highlightingUserKey, null)
     editor.putUserData(highlightingSetUserKey, null)
     (editor as EditorEx).repaint(0, editor.document.textLength)
-    LogFileMapRenderer.GetLogFileMapRenderer(editor)?.invalidateHighlighters()
+    LogFileMapRenderer.getLogFileMapRenderer(editor)?.invalidateHighlighters()
   }
 
   override fun startInWriteAction() = false

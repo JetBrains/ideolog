@@ -36,7 +36,7 @@ class ToggleTimeHighlightingIntention : IntentionAction {
     editor.putUserData(highlightTimeKey, newValue)
     (editor as EditorEx).repaint(0, editor.document.textLength)
 
-    LogFileMapRenderer.GetLogFileMapRenderer(editor)?.setIsRenderingTimeHighlighting(newValue)
+    LogFileMapRenderer.getLogFileMapRenderer(editor)?.setIsRenderingTimeHighlighting(newValue)
   }
 
   override fun startInWriteAction() = false

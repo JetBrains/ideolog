@@ -247,7 +247,7 @@ class LogJumpToSourceIntention : IntentionAction {
       println(event)
 
 
-      if (event.message.isNullOrBlank()) return
+      if (event.message.isBlank()) return
 
       val sorted = getFilesToMatch(project, event)
 

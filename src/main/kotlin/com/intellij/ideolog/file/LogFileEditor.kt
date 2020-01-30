@@ -2,7 +2,6 @@ package com.intellij.ideolog.file
 
 import com.intellij.ideolog.highlighting.LogFileMapRenderer
 import com.intellij.ideolog.highlighting.LogHeavyFilterService
-import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsListener
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.diagnostic.Logger
@@ -23,7 +22,7 @@ class LogFileEditor(val project: Project, file: VirtualFile, provider: TextEdito
   private val isReadOnly: Boolean
 
   init {
-    LogFileMapRenderer.GetOrCreateLogFileMapRenderer(this)
+    LogFileMapRenderer.getOrCreateLogFileMapRenderer(this)
     val sizeThreshold = LogHighlightingSettingsStore.getInstance().myState.readonlySizeThreshold.toInt()
     isReadOnly = file.length > sizeThreshold * 1024
     LogHighlightingSettingsStore.getInstance().addSettingsListener(this) {
@@ -48,7 +47,7 @@ class LogFileEditor(val project: Project, file: VirtualFile, provider: TextEdito
     editor.putUserData(LogHeavyFilterService.markupHighlightedExceptionsKey, null) // don't reset the hyperlink support, that one is safe
     editor.document.ideologContext.clear()
     LogFileMapRenderer.LogFileMapRendererKey.get(editor)?.detachFromEditor()
-    LogFileMapRenderer.GetOrCreateLogFileMapRenderer(this)
+    LogFileMapRenderer.getOrCreateLogFileMapRenderer(this)
 
     LogFileFormatNotificationProvider.update(file, project)
   }
@@ -59,9 +58,5 @@ class LogFileEditor(val project: Project, file: VirtualFile, provider: TextEdito
     super.setState(state)
     if (isReadOnly)
       editor.settings.isUseSoftWraps = false
-  }
-
-  override fun getState(level: FileEditorStateLevel): FileEditorState {
-    return super.getState(level)
   }
 }

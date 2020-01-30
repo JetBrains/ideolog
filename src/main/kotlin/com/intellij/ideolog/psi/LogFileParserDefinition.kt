@@ -13,7 +13,7 @@ class LogFileParserDefinition : com.intellij.lang.ParserDefinition {
     throw UnsupportedOperationException("Not supported")
   }
 
-  override fun getFileNodeType() = com.intellij.ideolog.psi.LogFileParserDefinition.Companion.LOG_FILE_ELEMENT_TYPE
+  override fun getFileNodeType() = LOG_FILE_ELEMENT_TYPE
 
   override fun getWhitespaceTokens() = com.intellij.psi.tree.TokenSet.EMPTY!!
 
