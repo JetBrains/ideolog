@@ -4,10 +4,10 @@ import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.highlighting.LogFileMapRenderer
 import com.intellij.ideolog.highlighting.highlightingSetUserKey
+import com.intellij.ideolog.util.getSelectedText
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 import java.util.*
 
@@ -20,25 +20,7 @@ class LogHighlightValueIntention : IntentionAction {
   override fun getFamilyName() = "Logs"
 
   fun getText(editor: Editor): CharSequence? {
-    val selectionModel = editor.selectionModel
-    var selectionStart = selectionModel.selectionStart
-    var selectionEnd = selectionModel.selectionEnd
-
-
-    if (selectionStart == selectionEnd) {
-      val doc = editor.document.charsSequence
-
-      while (selectionStart > 0 && doc[selectionStart - 1].isLetterOrDigit())
-        selectionStart--
-
-      while (selectionEnd < doc.length && doc[selectionEnd].isLetterOrDigit())
-        selectionEnd++
-    }
-
-    if (selectionEnd - selectionStart > 100 || selectionEnd == selectionStart)
-      return null
-
-    return editor.document.getText(TextRange(selectionStart, selectionEnd))
+    return editor.getSelectedText()
   }
 
   override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {

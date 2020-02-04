@@ -1,10 +1,19 @@
 package com.intellij.ideolog.util
 
+import com.intellij.ideolog.fileType.LogFileType
+import com.intellij.ideolog.highlighting.LogEvent
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.lex.LogFileFormat
 import com.intellij.ideolog.lex.RegexLogParser
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.FoldingModel
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.TextRange
+import com.intellij.psi.PsiFile
 import gnu.trove.TIntIntHashMap
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
@@ -135,4 +144,43 @@ class IdeologDocumentContext(val document: Document) {
     updateCache(currentLine, currentLine)
     return currentLine
   }
+}
+
+fun Editor.getSelectedText(): CharSequence? {
+  val selectionModel = this.selectionModel
+  var selectionStart = selectionModel.selectionStart
+  var selectionEnd = selectionModel.selectionEnd
+
+
+  if (selectionStart == selectionEnd) {
+    val doc = this.document.charsSequence
+
+    while (selectionStart > 0 && doc[selectionStart - 1].isLetterOrDigit())
+      selectionStart--
+
+    while (selectionEnd < doc.length && doc[selectionEnd].isLetterOrDigit())
+      selectionEnd++
+  }
+
+  if (selectionEnd - selectionStart > 100 || selectionEnd == selectionStart)
+    return null
+
+  return this.document.getText(TextRange(selectionStart, selectionEnd))
+}
+
+data class GoToActionContext(val event: LogEvent,
+                             val editor: Editor,
+                             val foldingModel: FoldingModel,
+                             val project: Project,
+                             val psiFile: PsiFile)
+
+fun AnActionEvent.getGoToActionContext(): GoToActionContext? {
+  val editor = this.dataContext.getData(CommonDataKeys.EDITOR) ?: return null
+  val psiFile = this.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
+  val project = this.dataContext.getData(CommonDataKeys.PROJECT) ?: return null
+  if (psiFile.fileType != LogFileType) return null
+
+  val foldingModel = editor.foldingModel
+  val event = LogEvent.fromEditor(editor, editor.caretModel.offset)
+  return GoToActionContext(event, editor, foldingModel, project, psiFile)
 }
