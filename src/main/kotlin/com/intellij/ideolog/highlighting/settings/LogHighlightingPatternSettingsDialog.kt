@@ -10,7 +10,7 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import javax.swing.*
 
-class LogHighlightingPatternSettingsDialog(val item: LogHighlightingPattern) : DialogWrapper(null, true, IdeModalityType.PROJECT) {
+class LogHighlightingPatternSettingsDialog(private val item: LogHighlightingPattern) : DialogWrapper(null, true, IdeModalityType.PROJECT) {
   private var myPatternText: EditorTextField? = null
   private var myActionCombo: JComboBox<LogHighlightingAction>? = null
   private var myForegroundCheck: JCheckBox? = null
@@ -48,7 +48,7 @@ class LogHighlightingPatternSettingsDialog(val item: LogHighlightingPattern) : D
     panel.add(patternText, constraints)
 
     constraints.gridy = 1
-    val actionSelection = ComboBox<LogHighlightingAction>(arrayOf(LogHighlightingAction.HIGHLIGHT_MATCH, LogHighlightingAction.HIGHLIGHT_FIELD, LogHighlightingAction.HIGHLIGHT_LINE))
+    val actionSelection = ComboBox(arrayOf(LogHighlightingAction.HIGHLIGHT_MATCH, LogHighlightingAction.HIGHLIGHT_FIELD, LogHighlightingAction.HIGHLIGHT_LINE))
     actionSelection.renderer = object : DefaultListCellRenderer() {
       override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
         text = (value as LogHighlightingAction).printableName()

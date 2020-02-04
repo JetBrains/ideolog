@@ -17,18 +17,20 @@ import java.awt.Font
 import java.util.ArrayList
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
+import kotlin.math.abs
+import kotlin.math.min
 
-val timeDifferenceToRed = 15000L
+const val timeDifferenceToRed = 15000L
 
-class LogHighlightingIterator(startOffset: Int, val myEditor: Editor, val textGetter: () -> CharSequence, val colorGetter: () -> EditorColorsScheme) : HighlighterIterator {
-  val myText: CharSequence
+class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, val textGetter: () -> CharSequence, val colorGetter: () -> EditorColorsScheme) : HighlighterIterator {
+  private val myText: CharSequence
     get() = textGetter()
 
-  val myColors: EditorColorsScheme
+  private val myColors: EditorColorsScheme
     get() = colorGetter()
 
-  val settingsStore = LogHighlightingSettingsStore.getInstance()
-  val myPatterns = settingsStore.myState.patterns.filter { it.enabled }.mapNotNull {
+  private val settingsStore = LogHighlightingSettingsStore.getInstance()
+  private val myPatterns = settingsStore.myState.patterns.filter { it.enabled }.mapNotNull {
     try {
       Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it
     } catch(e: PatternSyntaxException) {
@@ -58,7 +60,7 @@ class LogHighlightingIterator(startOffset: Int, val myEditor: Editor, val textGe
     }
   }
 
-  fun parseNextEvent() {
+  private fun parseNextEvent() {
     var nextStartLine = currentEventLineRange.last + 1
     if (nextStartLine >= myEditor.document.lineCount) {
       eventPieces.clear()
@@ -85,14 +87,14 @@ class LogHighlightingIterator(startOffset: Int, val myEditor: Editor, val textGe
     eventPiecePointer = 0
   }
 
-  fun parsePreviousEvent() {
-    if (currentEventLineRange.start == 0) {
+  private fun parsePreviousEvent() {
+    if (currentEventLineRange.first == 0) {
       eventPieces.clear()
       return
     }
 
-    val prevLineRange = document.ideologContext.getEvent(currentEventLineRange.start - 1)
-    val prevPrevLineRange = document.ideologContext.getEvent(prevLineRange.start - 1)
+    val prevLineRange = document.ideologContext.getEvent(currentEventLineRange.first - 1)
+    val prevPrevLineRange = document.ideologContext.getEvent(prevLineRange.first - 1)
 
     reparsePiecesLines(prevPrevLineRange, prevLineRange)
     currentEventLineRange = prevLineRange
@@ -131,7 +133,7 @@ class LogHighlightingIterator(startOffset: Int, val myEditor: Editor, val textGe
     val columnValues = parsedTokens.filter { !it.isSeparator }.map { it.takeFrom(event) }
     val numColumns = columnValues.size
     val highlightColumn = myEditor.getUserData(highlightingUserKey) ?: -1
-    if (highlightColumn in 0..(numColumns - 1)) {
+    if (highlightColumn in 0 until numColumns) {
       val columnValue = columnValues[highlightColumn]
       lineBackground = getLineBackground(columnValue, myColors.defaultBackground) ?: lineBackground
     }
@@ -172,10 +174,10 @@ class LogHighlightingIterator(startOffset: Int, val myEditor: Editor, val textGe
       var valueBold = bold
       var valueItalic = italic
 
-      if (!token.isSeparator && prevTime != null && currentTime != null && valueIndex == timeIndex && myEditor.getUserData(highlightTimeKey) ?: false) {
-        val diff = Math.abs(prevTime - currentTime)
+      if (!token.isSeparator && prevTime != null && currentTime != null && valueIndex == timeIndex && myEditor.getUserData(highlightTimeKey) == true) {
+        val diff = abs(prevTime - currentTime)
 
-        val diffLtd = Math.min(timeDifferenceToRed, diff)
+        val diffLtd = min(timeDifferenceToRed, diff)
         valueBackground = Color(Color.HSBtoRGB((120 - diffLtd * 120 / timeDifferenceToRed) / 360.0f, if (myHsbVals[2] < 0.5f) 0.9f else 0.2f, if (myHsbVals[2] < 0.5f) 0.3f else 0.9f))
       }
 
@@ -228,7 +230,7 @@ class LogHighlightingIterator(startOffset: Int, val myEditor: Editor, val textGe
     LogHeavyFilterService.getInstance(project).enqueueHeavyFiltering(myEditor, eventOffset, event)
   }
 
-  fun getFont(bold: Boolean, italic: Boolean): Int {
+  private fun getFont(bold: Boolean, italic: Boolean): Int {
     return (if (bold) Font.BOLD else 0) + (if (italic) Font.ITALIC else 0)
   }
 
@@ -277,7 +279,7 @@ class LogHighlightingIterator(startOffset: Int, val myEditor: Editor, val textGe
       if (columnValue == null) {
         return null
       }
-      val hash = Math.abs(columnValue.hashCode()) % 360
+      val hash = abs(columnValue.hashCode()) % 360
       val bgHsl = Color.RGBtoHSB(defaultBackground.red, defaultBackground.green, defaultBackground.blue, myHsbVals)
       bgHsl[0] = hash / 360.0f
       bgHsl[1] = if (bgHsl[2] < 0.5f)

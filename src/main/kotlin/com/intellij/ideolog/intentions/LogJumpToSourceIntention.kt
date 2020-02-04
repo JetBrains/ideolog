@@ -24,14 +24,14 @@ import gnu.trove.TIntObjectHashMap
 import java.util.*
 
 
-class FileMatch(val evt: LogEvent) {
+class FileMatch(private val evt: LogEvent) {
   var levelPresent = 0
   var categoryPresent = 0
   var messageTrigramCount = 0
 
-  var filenameMatch = 0 // 1 - prefix match to category, 2- full match to category
+  private var filenameMatch = 0 // 1 - prefix match to category, 2- full match to category
 
-  lateinit private var _vf: VirtualFile
+  private lateinit var _vf: VirtualFile
   var virtualFile: VirtualFile
     get() = _vf
     set(value) {
@@ -63,7 +63,7 @@ class FileMatch(val evt: LogEvent) {
 
 
   companion object {
-    private val LIMIT = 100
+    private const val LIMIT = 100
     val m = Array(LIMIT) { IntArray(LIMIT) }
   }
 

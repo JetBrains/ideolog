@@ -50,9 +50,9 @@ class LogHeavyFilterService(project: Project) {
         result.resultItems.forEach {
           val hyperlinkInfo = it.getHyperlinkInfo()
           if (hyperlinkInfo != null)
-            hyperlinkSupport.createHyperlink(it.getHighlightStartOffset() + extraOffset, it.getHighlightEndOffset() + extraOffset, it.getHighlightAttributes(), hyperlinkInfo)
+            hyperlinkSupport.createHyperlink(it.highlightStartOffset + extraOffset, it.highlightEndOffset + extraOffset, it.getHighlightAttributes(), hyperlinkInfo)
           else
-            markupModel.addRangeHighlighter(it.getHighlightStartOffset() + extraOffset, it.getHighlightEndOffset() + extraOffset, it.highlighterLayer, it.getHighlightAttributes(), HighlighterTargetArea.EXACT_RANGE)
+            markupModel.addRangeHighlighter(it.highlightStartOffset + extraOffset, it.highlightEndOffset + extraOffset, it.highlighterLayer, it.getHighlightAttributes(), HighlighterTargetArea.EXACT_RANGE)
         }
       }
     }

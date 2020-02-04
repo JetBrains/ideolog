@@ -11,7 +11,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 
 abstract class HideLinesIntention(private val setAccessor: (IdeologDocumentContext) -> HashSet<String>) : IntentionAction {
-  var lastSelection = ""
+  private var lastSelection = ""
   val shortSelection: String
     get() = if (lastSelection.length > 25) lastSelection.substring(0, 25) + "..." else lastSelection
 

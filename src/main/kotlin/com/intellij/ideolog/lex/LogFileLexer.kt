@@ -5,7 +5,7 @@ import com.intellij.ideolog.highlighting.LogTokenElementType
 import com.intellij.lexer.LexerBase
 import com.intellij.psi.tree.IElementType
 
-class LogFileLexer(val tokenCache: MutableList<IElementType>, var findEventStart: Boolean, var fileType: LogFileFormat) : LexerBase() {
+class LogFileLexer(private val tokenCache: MutableList<IElementType>, private var findEventStart: Boolean, var fileType: LogFileFormat) : LexerBase() {
   private var myBuffer: CharSequence = ""
   private var myBufferEnd: Int = -1
   private var myBufferStart: Int = -1
@@ -120,7 +120,7 @@ class LogFileLexer(val tokenCache: MutableList<IElementType>, var findEventStart
     }
   }
 
-  fun getOrMakeElementToken(): IElementType {
+  private fun getOrMakeElementToken(): IElementType {
     while (myColumn >= tokenCache.size) {
       tokenCache.add(LogTokenElementType(tokenCache.size))
     }

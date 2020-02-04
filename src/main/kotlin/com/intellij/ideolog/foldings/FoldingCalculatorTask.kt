@@ -17,7 +17,7 @@ import java.util.*
 class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: String) : Task.Backgroundable(project, "Calculating foldings for $fileName", true) {
 
   companion object {
-    var lastLaunchedTask: FoldingCalculatorTask? = null
+    private var lastLaunchedTask: FoldingCalculatorTask? = null
 
     fun restartFoldingCalculator(project: Project, editor: Editor, file: PsiFile?) {
       lastLaunchedTask?.myCancel = true
@@ -27,18 +27,18 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
     }
   }
 
-  val foldings = ArrayList<Pair<Int, Int>>()
+  private val foldings = ArrayList<Pair<Int, Int>>()
   val settings = LogHighlightingSettingsStore.getInstance()
-  val context = editor.document.ideologContext
-  val hiddenItems = context.hiddenItems
-  val hiddenSubstrings = context.hiddenSubstrings
-  val whitelistedSubstrings = context.whitelistedSubstrings
-  val whitelistedItems = context.whitelistedItems
-  val hideLinesAbove: Int = context.hideLinesAbove
-  val hideLinesBelow: Int = context.hideLinesBelow
+  private val context = editor.document.ideologContext
+  private val hiddenItems = context.hiddenItems
+  private val hiddenSubstrings = context.hiddenSubstrings
+  private val whitelistedSubstrings = context.whitelistedSubstrings
+  private val whitelistedItems = context.whitelistedItems
+  private val hideLinesAbove: Int = context.hideLinesAbove
+  private val hideLinesBelow: Int = context.hideLinesBelow
   val fileType = detectLogFileFormat(editor)
-  val tokens = ArrayList<LogToken>()
-  var lastAddedFoldingEndOffset = -1
+  private val tokens = ArrayList<LogToken>()
+  private var lastAddedFoldingEndOffset = -1
   var myCancel = false
 
   override fun run(indicator: ProgressIndicator) {
@@ -105,9 +105,7 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
   override fun onSuccess() {
     editor.foldingModel.runBatchFoldingOperation({
       val lastNewFoldingOffset = editor.document.charsSequence.length
-      val allFoldings = editor.foldingModel.allFoldRegions
-
-      allFoldings.forEach {
+        editor.foldingModel.allFoldRegions.forEach {
         if (it.startOffset > lastAddedFoldingEndOffset) {
           if (it.startOffset > lastNewFoldingOffset)
             return@forEach

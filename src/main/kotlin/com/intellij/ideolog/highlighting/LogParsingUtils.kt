@@ -10,8 +10,8 @@ import java.util.*
 import kotlin.concurrent.getOrSet
 
 object LogParsingUtils {
-  val myTokensTL = ThreadLocal<ArrayList<LogToken>>()
-  val myTokens: ArrayList<LogToken>
+  private val myTokensTL = ThreadLocal<ArrayList<LogToken>>()
+  private val myTokens: ArrayList<LogToken>
     get() = myTokensTL.getOrSet { ArrayList() }
 
   fun getColumnByOffset(editor: Editor): Int {

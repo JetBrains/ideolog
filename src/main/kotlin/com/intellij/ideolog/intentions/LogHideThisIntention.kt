@@ -10,7 +10,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 
 class LogHideThisIntention : IntentionAction {
-  var lastText: String = ""
+  private var lastText: String = ""
 
   override fun getText(): String {
     return "Hide lines with '$lastText' in this field"

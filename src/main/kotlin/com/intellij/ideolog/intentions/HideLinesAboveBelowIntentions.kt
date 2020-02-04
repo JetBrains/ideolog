@@ -9,7 +9,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 
-abstract class HideLinesAboveBelowIntentionBase(val setter: (IdeologDocumentContext, Int) -> Unit, val directionText: String) : IntentionAction {
+abstract class HideLinesAboveBelowIntentionBase(val setter: (IdeologDocumentContext, Int) -> Unit, private val directionText: String) : IntentionAction {
   override fun getText(): String {
     return "Hide lines $directionText"
   }

@@ -19,10 +19,10 @@ val Document.ideologContext : IdeologDocumentContext
   }
 
 class IdeologDocumentContext(val document: Document) {
-  val eventStartLines = TIntIntHashMap()
-  val eventEndLines = TIntIntHashMap()
+  private val eventStartLines = TIntIntHashMap()
+  private val eventEndLines = TIntIntHashMap()
 
-  val eventParsingLock = Any()
+  private val eventParsingLock = Any()
 
   val hiddenItems = HashSet<Pair<Int, String>>()
   val hiddenSubstrings = HashSet<String>()

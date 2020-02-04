@@ -2,7 +2,7 @@ package com.intellij.ideolog.highlighting.settings
 
 import javax.swing.table.AbstractTableModel
 
-class LogFormatTableModel(var state: LogHighlightingSettingsStore.State) : AbstractTableModel() {
+class LogFormatTableModel(private var state: LogHighlightingSettingsStore.State) : AbstractTableModel() {
   override fun getRowCount(): Int {
     return state.parsingPatterns.size
   }
