@@ -76,16 +76,7 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
                   }
                 }
 
-                val addedFoldings = ArrayList<FoldRegion?>()
-
-                foldings.forEach {
-                  addedFoldings.add(editor.foldingModel.addFoldRegion(editor.document.getLineStartOffset(it.first), editor.document.getLineEndOffset(it.second), " ... ${it.second - it.first + 1} lines hidden ... "))
-                }
-
-                addedFoldings.forEach {
-                  it?.isExpanded = false
-                }
-
+                collapseFoldings()
                 lastAddedFoldingEndOffset = lastNewFoldingOffset
               }, true)
               foldings.clear()
@@ -113,16 +104,20 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
         }
       }
 
-      val addedFoldings = ArrayList<FoldRegion?>()
-
-      foldings.forEach {
-        addedFoldings.add(editor.foldingModel.addFoldRegion(editor.document.getLineStartOffset(it.first), editor.document.getLineEndOffset(it.second), " ... ${it.second - it.first + 1} lines hidden ... "))
-      }
-
-      addedFoldings.forEach {
-        it?.isExpanded = false
-      }
+      collapseFoldings()
     }, true)
+  }
+
+  private fun collapseFoldings() {
+    val addedFoldings = ArrayList<FoldRegion?>()
+
+    foldings.forEach {
+      addedFoldings.add(editor.foldingModel.addFoldRegion(editor.document.getLineStartOffset(it.first), editor.document.getLineEndOffset(it.second), " ... ${it.second - it.first + 1} lines hidden ... "))
+    }
+
+    addedFoldings.forEach {
+      it?.isExpanded = false
+    }
   }
 
   override fun shouldStartInBackground() = true

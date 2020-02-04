@@ -2,6 +2,7 @@ package com.intellij.ideolog.editorActions
 
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.highlighting.LogEvent
+import com.intellij.ideolog.util.getGoToActionContext
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -9,32 +10,19 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor
 
 class GoToPrevEntryAction : AnAction() {
   override fun update(e: AnActionEvent) {
-    e.presentation.isEnabled = canExecute(e)
-  }
-
-  private fun canExecute(e: AnActionEvent): Boolean {
-    val psiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return false
-
-    return psiFile.fileType == LogFileType
+    e.presentation.isEnabled = e.dataContext.getData(CommonDataKeys.PSI_FILE)?.fileType == LogFileType
   }
 
   override fun actionPerformed(e: AnActionEvent) {
-    val editor = e.dataContext.getData(CommonDataKeys.EDITOR) ?: return
-    val psiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-    val project = e.dataContext.getData(CommonDataKeys.PROJECT) ?: return
-
-    if (!canExecute(e)) return
-
-    val foldingModel = editor.foldingModel
-    var event = LogEvent.fromEditor(editor, editor.caretModel.offset)
-    var prevPos = event.startOffset - 1
+    val ctx = e.getGoToActionContext() ?: return
+    var prevPos = ctx.event.startOffset - 1
     while (prevPos >= 0) {
-      val prevEvent = LogEvent.fromEditor(editor, prevPos)
-      if (foldingModel.isOffsetCollapsed(prevEvent.startOffset)) {
-        event = LogEvent.fromEditor(editor, prevPos)
+      val prevEvent = LogEvent.fromEditor(ctx.editor, prevPos)
+      if (ctx.foldingModel.isOffsetCollapsed(prevEvent.startOffset)) {
+        val event = LogEvent.fromEditor(ctx.editor, prevPos)
         prevPos = event.startOffset - 1
       } else {
-        val descriptor = OpenFileDescriptor(project, psiFile.virtualFile, prevEvent.startOffset)
+        val descriptor = OpenFileDescriptor(ctx.project, ctx.psiFile.virtualFile, prevEvent.startOffset)
         val navigable = descriptor.setUseCurrentWindow(true)
         if (navigable.canNavigate()) navigable.navigate(true)
         return

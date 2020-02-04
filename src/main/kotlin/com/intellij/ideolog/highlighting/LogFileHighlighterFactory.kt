@@ -24,7 +24,7 @@ internal val highlightingUserKey = Key.create<Int>("JetLog.HighlightColumn")
 internal val highlightingSetUserKey = Key.create<HashSet<String>>("JetLog.HighlightSet")
 val highlightTimeKey = Key.create<Boolean>("JetLog.HighlightTime")
 
-class LogTokenElementType(private val column: Int) : IElementType("LOG_TOKEN_VALUE_$column", LogLanguage, false)
+class LogTokenElementType(column: Int) : IElementType("LOG_TOKEN_VALUE_$column", LogLanguage, false)
 class LogFileEditorHighlighterProvider : EditorHighlighterProvider {
 
   override fun getEditorHighlighter(project: Project?, fileType: FileType, virtualFile: VirtualFile?, colors: EditorColorsScheme): EditorHighlighter {
