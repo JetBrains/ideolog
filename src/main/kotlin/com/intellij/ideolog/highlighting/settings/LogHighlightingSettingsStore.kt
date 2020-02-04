@@ -29,7 +29,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     ), CURRENT_SETTINGS_VERSION, "3", "heatmap", "16", true)
 
     val settingsUpgraders = mapOf<String, (State) -> State>(
-      "-1" to { _ -> cleanState.clone() },
+      "-1" to { cleanState.clone() },
       "0" to lambda@{ oldState ->
         val newState = oldState.clone()
         newState.version = "1"

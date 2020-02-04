@@ -137,7 +137,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
       val columnValue = columnValues[highlightColumn]
       lineBackground = getLineBackground(columnValue, myColors.defaultBackground) ?: lineBackground
     }
-    val highlightingSet = myEditor.getUserData(highlightingSetUserKey) ?: emptySet<String>()
+    val highlightingSet = myEditor.getUserData(highlightingSetUserKey) ?: emptySet()
 
     for ((pattern, info) in myPatterns) {
       if (info.action == LogHighlightingAction.HIGHLIGHT_LINE) {

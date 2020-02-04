@@ -136,7 +136,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
           var offs = 0
           val isRenderingTimeHighlighting = myIsRenderingTimeHighlighting
           val customPatterns = LogHighlightingSettingsStore.getInstance().myState.patterns.filter { it.enabled && it.showOnStripe }.map { Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it }.toTypedArray()
-          val customHighlightings = myLogFileEditor.editor.getUserData(highlightingSetUserKey) ?: emptySet<String>()
+          val customHighlightings = myLogFileEditor.editor.getUserData(highlightingSetUserKey) ?: emptySet()
           println(customHighlightings.joinToString { ", " })
           val colorDefaultBackground = myLogFileEditor.editor.colorsScheme.defaultBackground
 
