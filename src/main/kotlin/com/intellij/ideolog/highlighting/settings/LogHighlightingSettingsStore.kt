@@ -119,14 +119,14 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   }
 
   data class State(
-    @XCollection
-    @Tag("Patterns")
+    @XCollection(style = XCollection.Style.v2)
+    @Tag("highlightingPatterns")
     val patterns: ArrayList<LogHighlightingPattern>,
-    @XCollection
-    @Tag("hidden")
+    @XCollection(style = XCollection.Style.v2)
+    @Tag("hiddenSubstrings")
     val hidden: ArrayList<String>,
-    @XCollection
-    @Tag("parsing")
+    @XCollection(style = XCollection.Style.v2)
+    @Tag("parsingPatterns")
     val parsingPatterns: ArrayList<LogParsingPattern>,
     @Tag("settingsVersion", textIfEmpty = "0")
     var version: String,
@@ -144,26 +144,6 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
 
     @Suppress("unused")
     constructor(patterns: ArrayList<LogHighlightingPattern>, hidden: ArrayList<String>, parsingPatterns: ArrayList<LogParsingPattern>) : this(patterns, hidden, parsingPatterns, "-1", "-1", "heatmap", "16", true)
-
-    // settings migration to XCollection: store settings in new format, then drop the old one when most users migrate
-    // to migrate: remove old annotations from original properties, add annotations from these, drop these
-    var patternsV2: ArrayList<LogHighlightingPattern>
-      @XCollection(style = XCollection.Style.v2)
-      @Tag("highlightingPatterns")
-      get() = patterns
-      set(_) {}
-
-    var hiddenV2: ArrayList<String>
-      @XCollection(style = XCollection.Style.v2)
-      @Tag("hiddenSubstrings")
-      get() = hidden
-      set(_) {}
-
-    var parsingV2: ArrayList<LogParsingPattern>
-      @XCollection(style = XCollection.Style.v2)
-      @Tag("parsingPatterns")
-      get() = parsingPatterns
-      set(_) {}
 
     public override fun clone(): State {
       val result = State(ArrayList(), ArrayList(), ArrayList(), version, lastAddedDefaultFormat, errorStripeMode, readonlySizeThreshold, highlightLinks)
