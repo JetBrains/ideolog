@@ -52,7 +52,7 @@ class LogPatternTableModel(private var store: LogHighlightingSettingsStore.State
   }
 
   fun addNewPattern(pattern: String) {
-    store.patterns.add(LogHighlightingPattern(true, pattern, LogHighlightingAction.HIGHLIGHT_FIELD, null, null, false, false, true))
+    store.patterns.add(LogHighlightingPattern(true, pattern, LogHighlightingAction.HIGHLIGHT_FIELD, null, null, bold = false, italic = false, showOnStripe = true))
     val index = store.patterns.size - 1
     fireTableRowsInserted(index, index)
   }

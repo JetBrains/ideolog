@@ -10,7 +10,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 
 class LogWhitelistThisIntention : IntentionAction {
-  var lastText: String = ""
+  private var lastText: String = ""
 
   override fun getText(): String {
     return "Show only lines with '$lastText' in this field"

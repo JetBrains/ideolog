@@ -13,10 +13,10 @@ class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFil
   val endOffset = startOffset + rawText.length
 
   val date: String
-  val rawLevel: String
+  private val rawLevel: String
   val category: String
   val message: String
-  val fullMessage: String
+  private val fullMessage: String
 
   val level: String
 

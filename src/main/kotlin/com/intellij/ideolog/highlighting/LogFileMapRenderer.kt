@@ -18,6 +18,10 @@ import java.awt.Point
 import java.util.*
 import java.util.regex.Pattern
 import kotlin.concurrent.scheduleAtFixedRate
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.max
+import kotlin.math.min
 
 class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
   private val numBuckets = 1024
@@ -30,7 +34,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
 
   private val settingsStore = LogHighlightingSettingsStore.getInstance()
 
-  var detachedFromEditor = false
+  private var detachedFromEditor = false
 
   private val myMarkupModel: MarkupModelEx = (myLogFileEditor.editor as EditorEx).markupModel
 
@@ -49,60 +53,57 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
     val minSize = 4
 
     var timer: TimerTask? = null
-    timer = Timer().scheduleAtFixedRate(1000.toLong(), (interval * 1000).toLong(),
-      {
-        if (myLogFileEditor.editor.isDisposed || detachedFromEditor)
-          timer!!.cancel()
-        else {
-          ApplicationManager.getApplication().invokeLater({
-            // Compiler bug
-            @Suppress("RemoveEmptyParenthesesFromLambdaCall")
-            ApplicationManager.getApplication().runReadAction()
-            {
-              if ((myIsEnabledBreadcrumbs) && (!myLogFileEditor.editor.isDisposed && !detachedFromEditor) && (myLogFileEditor.editor.component.isVisible) && (myLogFileEditor.editor.caretModel.isUpToDate)) {
-                // Get buckets hit by visible range
-                val area = myLogFileEditor.editor.scrollingModel.visibleAreaOnScrollingFinished
-                val offsStart = myLogFileEditor.editor.logicalPositionToOffset(myLogFileEditor.editor.xyToLogicalPosition(area.location))
-                val offsEnd = myLogFileEditor.editor.logicalPositionToOffset(myLogFileEditor.editor.xyToLogicalPosition(Point(area.location.x + area.width, area.location.y + area.height)))
+    timer = Timer().scheduleAtFixedRate(1000.toLong(), (interval * 1000).toLong()
+    ) {
+      if (myLogFileEditor.editor.isDisposed || detachedFromEditor)
+        timer!!.cancel()
+      else {
+        ApplicationManager.getApplication().invokeLater {
+          ApplicationManager.getApplication().runReadAction {
+            if ((myIsEnabledBreadcrumbs) && (!myLogFileEditor.editor.isDisposed && !detachedFromEditor) && (myLogFileEditor.editor.component.isVisible) && (myLogFileEditor.editor.caretModel.isUpToDate)) {
+              // Get buckets hit by visible range
+              val area = myLogFileEditor.editor.scrollingModel.visibleAreaOnScrollingFinished
+              val offsStart = myLogFileEditor.editor.logicalPositionToOffset(myLogFileEditor.editor.xyToLogicalPosition(area.location))
+              val offsEnd = myLogFileEditor.editor.logicalPositionToOffset(myLogFileEditor.editor.xyToLogicalPosition(Point(area.location.x + area.width, area.location.y + area.height)))
 
-                var nBucketStart = getBucketForOffset(offsStart)
-                var nBucketEnd = getBucketForOffset(offsEnd)
+              var nBucketStart = getBucketForOffset(offsStart)
+              var nBucketEnd = getBucketForOffset(offsEnd)
 
-                // Ensure minSize
-                if (nBucketEnd - nBucketStart < minSize) {
-                  val deficit = minSize - (nBucketEnd - nBucketStart)
-                  nBucketStart = Math.max(nBucketStart - Math.floor(deficit / 2.0).toInt(), 0)
-                  nBucketEnd = Math.min(nBucketEnd + Math.ceil(deficit / 2.0).toInt(), numBuckets - 1)
-                }
-
-                // Paint fully hit buckets
-                for (nBucket in nBucketStart until nBucketEnd) {
-                  val bc = breadcrumbBuckets[nBucket]
-                  if (bc < 1)
-                    breadcrumbBuckets[nBucket] = bc + (1 - bc) * growRate
-                }
-
-                // Paint buckets partly hit by glow, before
-                for (nBucket in Math.max(nBucketStart - glowSize, 0) until nBucketStart) {
-                  val opacity = (1 - (nBucketStart - nBucket + 1).toDouble() / (glowSize + 1))
-                  val bc = breadcrumbBuckets[nBucket]
-                  if (bc < opacity)
-                    breadcrumbBuckets[nBucket] = bc + (opacity - bc) * growRate
-                }
-                // Paint buckets partly hit by glow, after
-                for (nBucket in nBucketEnd until Math.min(nBucketEnd + glowSize, numBuckets - 1)) {
-                  val opacity = (1 - (nBucket - nBucketEnd + 1).toDouble() / (glowSize + 1))
-                  val bc = breadcrumbBuckets[nBucket]
-                  if (bc < opacity)
-                    breadcrumbBuckets[nBucket] = bc + (opacity - bc) * growRate
-                }
-
-                composeBuckets()
+              // Ensure minSize
+              if (nBucketEnd - nBucketStart < minSize) {
+                val deficit = minSize - (nBucketEnd - nBucketStart)
+                nBucketStart = max(nBucketStart - floor(deficit / 2.0).toInt(), 0)
+                nBucketEnd = min(nBucketEnd + ceil(deficit / 2.0).toInt(), numBuckets - 1)
               }
+
+              // Paint fully hit buckets
+              for (nBucket in nBucketStart until nBucketEnd) {
+                val bc = breadcrumbBuckets[nBucket]
+                if (bc < 1)
+                  breadcrumbBuckets[nBucket] = bc + (1 - bc) * growRate
+              }
+
+              // Paint buckets partly hit by glow, before
+              for (nBucket in max(nBucketStart - glowSize, 0) until nBucketStart) {
+                val opacity = (1 - (nBucketStart - nBucket + 1).toDouble() / (glowSize + 1))
+                val bc = breadcrumbBuckets[nBucket]
+                if (bc < opacity)
+                  breadcrumbBuckets[nBucket] = bc + (opacity - bc) * growRate
+              }
+              // Paint buckets partly hit by glow, after
+              for (nBucket in nBucketEnd until min(nBucketEnd + glowSize, numBuckets - 1)) {
+                val opacity = (1 - (nBucket - nBucketEnd + 1).toDouble() / (glowSize + 1))
+                val bc = breadcrumbBuckets[nBucket]
+                if (bc < opacity)
+                  breadcrumbBuckets[nBucket] = bc + (opacity - bc) * growRate
+              }
+
+              composeBuckets()
             }
-          })
+          }
         }
-      })
+      }
+    }
   }
 
   private fun getBucketForOffset(offsStart: Int) = (offsStart.toDouble() / (myLogFileEditor.editor.document.textLength + 1) * numBuckets).toInt()
@@ -114,130 +115,134 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
   private fun initEventMaps() {
     val interval = 1.0
     var timer: TimerTask? = null
-    timer = Timer().scheduleAtFixedRate(1000.toLong(), (interval * 1000).toLong(),
-      {
-        if (myLogFileEditor.editor.isDisposed || detachedFromEditor)
-          timer!!.cancel()
-        else {
-          try {
-            synchronized(mySync)
-            {
-              if (!myIsPendingEventMap)
-                return@scheduleAtFixedRate
-              if (myIsRunningEventMap)
-                return@scheduleAtFixedRate
-              myIsRunningEventMap = true
-              myIsPendingEventMap = false
+    timer = Timer().scheduleAtFixedRate(1000.toLong(), (interval * 1000).toLong()
+    ) {
+      if (myLogFileEditor.editor.isDisposed || detachedFromEditor)
+        timer!!.cancel()
+      else {
+        try {
+          synchronized(mySync)
+          {
+            if (!myIsPendingEventMap)
+              return@scheduleAtFixedRate
+            if (myIsRunningEventMap)
+              return@scheduleAtFixedRate
+            myIsRunningEventMap = true
+            myIsPendingEventMap = false
+          }
+
+          val offsetLimit = myLogFileEditor.editor.document.textLength
+          val fileFormat = detectLogFileFormat(myLogFileEditor.editor)
+          var offs = 0
+          val isRenderingTimeHighlighting = myIsRenderingTimeHighlighting
+          val customPatterns = LogHighlightingSettingsStore.getInstance().myState.patterns.filter { it.enabled && it.showOnStripe }.map { Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it }.toTypedArray()
+          val customHighlightings = myLogFileEditor.editor.getUserData(highlightingSetUserKey) ?: emptySet<String>()
+          println(customHighlightings.joinToString { ", " })
+          val colorDefaultBackground = myLogFileEditor.editor.colorsScheme.defaultBackground
+
+          var nBucketCur = 0
+          var nCurBucketMaxTimeDelta = 0L
+          var isCurBucketError = false
+          var colorCurCustomHighlighter: Color? = null
+          var timestampPrev: Long? = null
+
+          fun commitBucket() {
+            if (nBucketCur >= numBuckets)
+              return
+            if (isCurBucketError) {
+              isCurBucketError = false
+              highlighterBuckets[nBucketCur] = Color.red
+              if (highlighterBuckets[max(nBucketCur - 1, 0)] != Color.red) // Min size of two buckets
+                highlighterBuckets[max(nBucketCur - 1, 0)] = Color.red
+            } else {
+              highlighterBuckets[nBucketCur] = colorCurCustomHighlighter
+              if (highlighterBuckets[max(nBucketCur - 1, 0)] != colorCurCustomHighlighter) // Min size of two buckets
+                highlighterBuckets[max(nBucketCur - 1, 0)] = colorCurCustomHighlighter
             }
+            colorCurCustomHighlighter = null
 
-            val offsetLimit = myLogFileEditor.editor.document.textLength
-            val fileFormat = detectLogFileFormat(myLogFileEditor.editor)
-            var offs = 0
-            val isRenderingTimeHighlighting = myIsRenderingTimeHighlighting
-            val customPatterns = LogHighlightingSettingsStore.getInstance().myState.patterns.filter { it.enabled && it.showOnStripe }.map { Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it }.toTypedArray()
-            val customHighlightings = myLogFileEditor.editor.getUserData(highlightingSetUserKey) ?: emptySet<String>()
-            println(customHighlightings.joinToString { ", " })
-            val colorDefaultBackground = myLogFileEditor.editor.colorsScheme.defaultBackground
+            val maxSec = timeDifferenceToRed.toDouble()
+            val heatValue = max(0.0, min(nCurBucketMaxTimeDelta, 10) / maxSec) // Scale up to maxSec
+            nCurBucketMaxTimeDelta = 0
+            heatMapBuckets[nBucketCur] = heatValue
+            if (heatMapBuckets[max(nBucketCur - 1, 0)] < heatValue)
+              heatMapBuckets[max(nBucketCur - 1, 0)] = heatValue
 
-            var nBucketCur = 0
-            var nCurBucketMaxTimeDelta = 0L
-            var isCurBucketError = false
-            var colorCurCustomHighlighter: Color? = null
-            var timestampPrev: Long? = null
+            nBucketCur++
+          }
 
-            fun commitBucket() {
-              if (nBucketCur >= numBuckets)
-                return
-              if (isCurBucketError) {
-                isCurBucketError = false
-                highlighterBuckets[nBucketCur] = Color.red
-                if (highlighterBuckets[Math.max(nBucketCur - 1, 0)] != Color.red) // Min size of two buckets
-                  highlighterBuckets[Math.max(nBucketCur - 1, 0)] = Color.red
-              } else {
-                highlighterBuckets[nBucketCur] = colorCurCustomHighlighter
-                if (highlighterBuckets[Math.max(nBucketCur - 1, 0)] != colorCurCustomHighlighter) // Min size of two buckets
-                  highlighterBuckets[Math.max(nBucketCur - 1, 0)] = colorCurCustomHighlighter
+          while (offs < offsetLimit) {
+            val logEvent = LogEvent.fromEditor(myLogFileEditor.editor, offs)
+            if (logEvent.rawText.isEmpty()) // At EOF
+              break
+            offs += logEvent.rawText.length
+
+            // Attrs of this entry
+            val timestamp = if (isRenderingTimeHighlighting) (logEvent.date.let { fileFormat.parseLogEventTimeSeconds(it) }
+              ?: timestampPrev) else 0
+            val timeDelta = if ((timestamp != null) && (timestampPrev != null)) timestamp - timestampPrev else 0
+            timestampPrev = timestamp
+            val isError = logEvent.level == "ERROR"
+            var colorCustomHighlighter: Color? = null
+            if (!isError) {
+              colorCustomHighlighter = customPatterns.firstOrNull { it.first.matcher(logEvent.rawText).find() }?.second?.let {
+                it.foregroundColor ?: it.backgroundColor
               }
-              colorCurCustomHighlighter = null
-
-              val maxSec = timeDifferenceToRed.toDouble()
-              val heatValue = Math.max(0.0, Math.min(nCurBucketMaxTimeDelta, 10) / maxSec) // Scale up to maxSec
-              nCurBucketMaxTimeDelta = 0
-              heatMapBuckets[nBucketCur] = heatValue
-              if (heatMapBuckets[Math.max(nBucketCur - 1, 0)] < heatValue)
-                heatMapBuckets[Math.max(nBucketCur - 1, 0)] = heatValue
-
-              nBucketCur++
-            }
-
-            while (offs < offsetLimit) {
-              val logEvent = LogEvent.fromEditor(myLogFileEditor.editor, offs)
-              if (logEvent.rawText.isEmpty()) // At EOF
-                break
-              offs += logEvent.rawText.length
-
-              // Attrs of this entry
-              val timestamp = if (isRenderingTimeHighlighting) (logEvent.date.let { fileFormat.parseLogEventTimeSeconds(it) } ?: timestampPrev) else 0
-              val timeDelta = if ((timestamp != null) && (timestampPrev != null)) timestamp - timestampPrev else 0
-              timestampPrev = timestamp
-              val isError = logEvent.level == "ERROR"
-              var colorCustomHighlighter: Color? = null
-              if (!isError) {
-                colorCustomHighlighter = customPatterns.filter { it.first.matcher(logEvent.rawText).find() }.firstOrNull()?.second?.let { it.foregroundColor ?: it.backgroundColor }
-                @Suppress("LoopToCallChain")
-                if (colorCustomHighlighter == null)
-                  for (word in customHighlightings) {
-                    if (logEvent.rawText.contains(word)) {
-                      colorCustomHighlighter = LogHighlightingIterator.getLineBackground(word, colorDefaultBackground)
-                    }
+              @Suppress("LoopToCallChain")
+              if (colorCustomHighlighter == null)
+                for (word in customHighlightings) {
+                  if (logEvent.rawText.contains(word)) {
+                    colorCustomHighlighter = LogHighlightingIterator.getLineBackground(word, colorDefaultBackground)
                   }
-              }
-
-              // Roll to affected buckets
-              val nBucketEnd = getBucketForOffset(logEvent.startOffset + logEvent.rawText.length - 1)
-              for (nBucket in nBucketCur..nBucketEnd) {
-                // Apply attrs to bucket
-                nCurBucketMaxTimeDelta = Math.max(nCurBucketMaxTimeDelta, timeDelta)
-                isCurBucketError = isCurBucketError || isError
-                colorCurCustomHighlighter = colorCurCustomHighlighter ?: colorCustomHighlighter
-
-                // Commit unless the last one (or the only one)
-                if (nBucketCur < nBucketEnd)
-                  commitBucket()
-              }
-              assert(nBucketCur == nBucketEnd, { "miscounted" })
-
+                }
             }
-            commitBucket() // Last one
-            beginInvokeComposeBuckets()
-          } finally {
-            synchronized(mySync)
-            {
-              myIsRunningEventMap = false
+
+            // Roll to affected buckets
+            val nBucketEnd = getBucketForOffset(logEvent.startOffset + logEvent.rawText.length - 1)
+            for (nBucket in nBucketCur..nBucketEnd) {
+              // Apply attrs to bucket
+              nCurBucketMaxTimeDelta = max(nCurBucketMaxTimeDelta, timeDelta)
+              isCurBucketError = isCurBucketError || isError
+              colorCurCustomHighlighter = colorCurCustomHighlighter ?: colorCustomHighlighter
+
+              // Commit unless the last one (or the only one)
+              if (nBucketCur < nBucketEnd)
+                commitBucket()
             }
+            assert(nBucketCur == nBucketEnd) { "miscounted" }
+
+          }
+          commitBucket() // Last one
+          beginInvokeComposeBuckets()
+        } finally {
+          synchronized(mySync)
+          {
+            myIsRunningEventMap = false
           }
         }
       }
-    )
+    }
   }
 
   companion object {
     val LogFileMapRendererKey = Key.create<LogFileMapRenderer>("LogFileMapRenderer")
-    fun getOrCreateLogFileMapRenderer(editor: LogFileEditor) = getLogFileMapRenderer(editor.editor) ?: LogFileMapRenderer(editor).let { editor.editor.putUserData(LogFileMapRendererKey, it) }
+    fun getOrCreateLogFileMapRenderer(editor: LogFileEditor) = getLogFileMapRenderer(editor.editor)
+      ?: LogFileMapRenderer(editor).let { editor.editor.putUserData(LogFileMapRendererKey, it) }
+
     fun getLogFileMapRenderer(editor: Editor) = editor.getUserData(LogFileMapRendererKey)
   }
 
-  fun composeBuckets() {
+  private fun composeBuckets() {
     val highlighters = myHighlighters ?: recreateHighlighters()
 
     for (nBucket in 0 until numBuckets) {
       val newColor: Color?
-      
+
       newColor = if (highlighterBuckets[nBucket] != null) {
         // User highlighter immediately wins
         highlighterBuckets[nBucket]!!
       } else {
-        if(settingsStore.myState.errorStripeMode == "heatmap") {
+        if (settingsStore.myState.errorStripeMode == "heatmap") {
           val hue = heatMapBuckets[nBucket] * -1.0 / 3.0 + 1.0 / 3.0 // Should go between green and red
           val bri = breadcrumbBuckets[nBucket] * .35 + .60 // Not too dark, up to almost full
           val sat = .5
@@ -263,20 +268,18 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
     detachedFromEditor = true
   }
 
-  fun beginInvokeComposeBuckets() {
-    // Compiler bug
-    @Suppress("RemoveEmptyParenthesesFromLambdaCall")
-    ApplicationManager.getApplication().invokeLater()
-    {
-      ApplicationManager.getApplication().runReadAction()
-      {
-        if ((!myLogFileEditor.editor.isDisposed && !detachedFromEditor) && (myLogFileEditor.editor.component.isVisible) && (myLogFileEditor.editor.caretModel.isUpToDate))
+  private fun beginInvokeComposeBuckets() {
+    ApplicationManager.getApplication().invokeLater {
+      ApplicationManager.getApplication().runReadAction {
+        if ((!myLogFileEditor.editor.isDisposed && !detachedFromEditor)
+          && (myLogFileEditor.editor.component.isVisible)
+          && (myLogFileEditor.editor.caretModel.isUpToDate))
           composeBuckets()
       }
     }
   }
 
-  fun recreateHighlighters(): Array<RangeHighlighter> {
+  private fun recreateHighlighters(): Array<RangeHighlighter> {
     if (detachedFromEditor || myLogFileEditor.editor.isDisposed)
       return arrayOf()
 
@@ -285,7 +288,15 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
         myMarkupModel.removeHighlighter(h)
 
     val docLen = myLogFileEditor.editor.document.textLength.toDouble()
-    myHighlighters = Array(numBuckets, { nBucket -> myMarkupModel.addRangeHighlighter((docLen / numBuckets * nBucket).toInt(), (docLen / numBuckets * (nBucket + 1)).toInt(), 7, TextAttributes().apply { setAttributes(null, null, null, composedBuckets[nBucket], EffectType.BOXED, Font.PLAIN) }, HighlighterTargetArea.EXACT_RANGE) })
+    myHighlighters = Array(numBuckets) { nBucket ->
+      myMarkupModel.addRangeHighlighter(
+        (docLen / numBuckets * nBucket).toInt(),
+        (docLen / numBuckets * (nBucket + 1)).toInt(), 7,
+        TextAttributes().apply {
+          setAttributes(null, null, null, composedBuckets[nBucket], EffectType.BOXED, Font.PLAIN)
+        },
+        HighlighterTargetArea.EXACT_RANGE)
+    }
 
     return myHighlighters!!
   }

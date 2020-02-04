@@ -16,7 +16,7 @@ import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-class LogParsingPatternSettingsDialog(val item: LogParsingPattern) : DialogWrapper(null, true, IdeModalityType.PROJECT) {
+class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : DialogWrapper(null, true, IdeModalityType.PROJECT) {
   private var myNameText: EditorTextField? = null
   private var myParsingPatternText: EditorTextField? = null
   private var myLineStartPatternText: EditorTextField? = null

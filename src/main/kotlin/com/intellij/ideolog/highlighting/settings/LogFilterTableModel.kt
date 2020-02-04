@@ -2,7 +2,7 @@ package com.intellij.ideolog.highlighting.settings
 
 import javax.swing.table.AbstractTableModel
 
-class LogFilterTableModel(var state: LogHighlightingSettingsStore.State) : AbstractTableModel() {
+class LogFilterTableModel(private var state: LogHighlightingSettingsStore.State) : AbstractTableModel() {
   override fun getRowCount(): Int {
     return state.hidden.size
   }
@@ -14,7 +14,7 @@ class LogFilterTableModel(var state: LogHighlightingSettingsStore.State) : Abstr
   }
 
   fun removeItem(index: Int) {
-    if (index in 0..(state.hidden.size - 1)) {
+    if (index in 0 until state.hidden.size) {
       state.hidden.removeAt(index)
       fireTableRowsDeleted(index, index)
     }

@@ -12,7 +12,7 @@ import com.intellij.psi.PsiFile
 import java.util.*
 
 class LogHighlightValueIntention : IntentionAction {
-  var lastSelection = ""
+  private var lastSelection = ""
   override fun getText(): String {
     return "Highlight '${if (lastSelection.length > 25) lastSelection.substring(0, 25) + "..." else lastSelection}'"
   }

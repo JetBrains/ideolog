@@ -10,18 +10,18 @@ import com.intellij.util.xmlb.annotations.*
 import org.intellij.lang.annotations.Language
 import java.awt.Color
 
-@State(name = "LogHighlightingSettings", storages = arrayOf(Storage(value = "log_highlighting.xml", roamingType = RoamingType.DEFAULT)))
+@State(name = "LogHighlightingSettings", storages = [Storage(value = "log_highlighting.xml", roamingType = RoamingType.DEFAULT)])
 class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSettingsStore.State>, Cloneable {
   companion object {
     fun getInstance() = ServiceManager.getService(LogHighlightingSettingsStore::class.java)!!
 
-    val CURRENT_SETTINGS_VERSION = "4"
+    const val CURRENT_SETTINGS_VERSION = "4"
 
     @Language("RegExp")
     val cleanState = State(arrayListOf(
-      LogHighlightingPattern(true, "^\\s*e(rror)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color.RED.rgb, null, true, false, true),
-      LogHighlightingPattern(true, "^\\s*w(arn(ing)?)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0xff, 0xaa, 0).rgb, null, true, false, false),
-      LogHighlightingPattern(true, "^\\s*i(nfo)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0x3f, 0xbf, 0x3f).rgb, null, false, false, false)
+      LogHighlightingPattern(true, "^\\s*e(rror)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color.RED.rgb, null, bold = true, italic = false, showOnStripe = true),
+      LogHighlightingPattern(true, "^\\s*w(arn(ing)?)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0xff, 0xaa, 0).rgb, null, bold = true, italic = false, showOnStripe = false),
+      LogHighlightingPattern(true, "^\\s*i(nfo)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0x3f, 0xbf, 0x3f).rgb, null, bold = false, italic = false, showOnStripe = false)
     ), arrayListOf(), arrayListOf(
       LogParsingPattern(true, "Pipe-separated", "^(?s)([^|]*)\\|([^|]*)\\|([^|]*)\\|(.*)$", "HH:mm:ss.SSS", "^\\d", 0, 1, 2, false),
       LogParsingPattern(true, "IntelliJ IDEA", "^([^\\[]+)(\\[[\\s\\d]+])\\s*(\\w*)\\s*-\\s*(\\S*)\\s*-(.+)$", "yyyy-MM-dd HH:mm:ss,SSS", "^\\d", 0, 2, 3, false),

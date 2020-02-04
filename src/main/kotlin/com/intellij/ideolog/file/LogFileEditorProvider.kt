@@ -1,8 +1,10 @@
 package com.intellij.ideolog.file
 
 import com.intellij.ideolog.fileType.LogFileType
-import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.fileEditor.*
+import com.intellij.openapi.fileEditor.FileEditor
+import com.intellij.openapi.fileEditor.FileEditorPolicy
+import com.intellij.openapi.fileEditor.FileEditorProvider
+import com.intellij.openapi.fileEditor.FileEditorState
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
@@ -23,7 +25,7 @@ class TotallyNotTextEditorProvider: TextEditorProvider(), DumbAware {
   }
 }
 
-class LogFileEditorProvider(val base: TotallyNotTextEditorProvider = TotallyNotTextEditorProvider()) : FileEditorProvider by base, DumbAware {
+class LogFileEditorProvider(private val base: TotallyNotTextEditorProvider = TotallyNotTextEditorProvider()) : FileEditorProvider by base, DumbAware {
   override fun writeState(state: FileEditorState, project: Project, targetElement: Element) = base.writeState(state,  project, targetElement)
   override fun disposeEditor(editor: FileEditor) = base.disposeEditor(editor)
   override fun readState(sourceElement: Element, project: Project, file: VirtualFile) = base.readState(sourceElement, project, file)

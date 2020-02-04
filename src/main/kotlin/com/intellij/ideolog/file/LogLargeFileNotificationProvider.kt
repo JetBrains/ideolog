@@ -33,8 +33,6 @@ class LogLargeFileNotificationProvider : EditorNotifications.Provider<EditorNoti
     companion object {
         private val KEY = Key.create<EditorNotificationPanel>("log.large.file.editor.notification")
         private val HIDDEN_KEY = Key.create<String>("log.large.file.editor.notification.hidden")
-        private val DISABLE_KEY = "log.large.file.editor.notification.disabled"
-        private val APPLY_KEY = "log.large.file.editor.notification.apply"
 
         private fun update(file: VirtualFile, project: Project) = EditorNotifications.getInstance(project).updateNotifications(file)
 
@@ -90,7 +88,7 @@ class LogLargeFileNotificationProvider : EditorNotifications.Provider<EditorNoti
         ))
     }
 
-    fun open(project: Project, file: File) : Boolean {
+    private fun open(project: Project, file: File) : Boolean {
         if (!file.exists()) {
             val confirmation = "File \n''${FileUtil.getLocationRelativeToUserHome(file.path)}''\n does not exist. Create?"
             val result = Messages.showYesNoDialog(project, confirmation, "Custom VM options", Messages.getQuestionIcon())
