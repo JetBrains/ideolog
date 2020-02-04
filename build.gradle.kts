@@ -1,10 +1,13 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-  val kotlinVersion = "1.3.61"
+  // TODO: Switch to after 1.3.70 released
+  val kotlinVersion = "1.3.70-eap-184"
 
   repositories {
     mavenCentral()
+    // TODO: Remove after 1.3.70 released
+    maven("https://dl.bintray.com/kotlin/kotlin-eap")
   }
   dependencies {
     classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
@@ -34,12 +37,11 @@ intellij {
 
 repositories {
   mavenCentral()
+  // TODO: Remove after 1.3.70 released
+  maven("https://dl.bintray.com/kotlin/kotlin-eap")
 }
 
 tasks.withType<KotlinCompile> {
   kotlinOptions.allWarningsAsErrors = true
-}
-
-dependencies {
-  compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+  kotlinOptions.freeCompilerArgs += "-Xnew-inference"
 }
