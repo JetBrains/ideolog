@@ -4,7 +4,6 @@ import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.foldings.FoldingCalculatorTask
 import com.intellij.ideolog.highlighting.LogParsingUtils
-import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
@@ -34,8 +33,10 @@ abstract class LogThisIntentionBase : IntentionAction {
       return visible
     }
 
+    abstract fun getIntentionItems(editor: Editor): HashSet<Pair<Int, String>>
+
     override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
-      val set = editor.document.ideologContext.whitelistedItems
+      val set = getIntentionItems(editor)
       val currentColumn = LogParsingUtils.getColumnByOffset(editor)
       val columnValue = LogParsingUtils.getColumnValueByOffset(editor) ?: "?"
 
