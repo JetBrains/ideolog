@@ -24,7 +24,5 @@ class LogFileParserDefinition : com.intellij.lang.ParserDefinition {
   override fun createElement(node: com.intellij.lang.ASTNode?) = com.intellij.psi.util.PsiUtilCore.NULL_PSI_ELEMENT!!
 
   override fun createFile(fileViewProvider: com.intellij.psi.FileViewProvider) = LogPsiFile(fileViewProvider) // LogPsiFileStub(fileViewProvider)
-
-  override fun spaceExistanceTypeBetweenTokens(left: com.intellij.lang.ASTNode?, right: com.intellij.lang.ASTNode?) = com.intellij.lang.ParserDefinition.SpaceRequirements.MAY
 }
 
