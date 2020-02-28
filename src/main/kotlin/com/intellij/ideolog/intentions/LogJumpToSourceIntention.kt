@@ -10,16 +10,17 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.VirtualFileWithId
 import com.intellij.openapi.vfs.newvfs.ManagingFS
 import com.intellij.openapi.vfs.newvfs.persistent.PersistentFS
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.impl.cache.impl.id.IdIndex
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.util.Processor
 import com.intellij.util.indexing.FileBasedIndex
 import com.intellij.util.indexing.FileBasedIndexImpl
 import com.intellij.util.indexing.IndexInfrastructure
-import com.intellij.util.indexing.UpdatableIndex
 import gnu.trove.TIntObjectHashMap
 import java.util.*
 
@@ -27,7 +28,7 @@ import java.util.*
 class FileMatch(private val evt: LogEvent) {
   var levelPresent = 0
   var categoryPresent = 0
-  var messageTrigramCount = 0
+  private var messageTrigramCount = 0
 
   private var filenameMatch = 0 // 1 - prefix match to category, 2- full match to category
 
@@ -138,13 +139,18 @@ class LogJumpToSourceIntention : IntentionAction {
 
       ApplicationManager.getApplication().runReadAction {
         val indexManager = FileBasedIndex.getInstance() as FileBasedIndexImpl
-        val trigramIndex = indexManager.getIndex(TrigramIndex.INDEX_ID)
-
 
         val fileIdMap = TIntObjectHashMap<FileMatch>()
-
-        trigramIndex.populateFileIdMap(fileIdMap, evt, evt.messageTrigrams) { it.messageTrigramCount++ }
-
+        indexManager.processFilesContainingAllKeys(TrigramIndex.INDEX_ID, evt.messageTrigrams, GlobalSearchScope.projectScope(project), null, Processor {
+          val fileId = (it as VirtualFileWithId).id
+          var structure = fileIdMap.get(fileId)
+          if (structure == null) {
+            structure = FileMatch(evt)
+            fileIdMap.put(fileId, structure)
+          }
+          evt.messageTrigrams += 1
+          return@Processor true
+        })
 
         val filesWithCategory = indexManager.getContainingFiles(IdIndex.NAME, evt.categoryIdEntry, GlobalSearchScope.projectScope(project))
         val filesWithLevel = indexManager.getContainingFiles(IdIndex.NAME, evt.levelIdEntry, GlobalSearchScope.projectScope(project))
@@ -208,31 +214,6 @@ class LogJumpToSourceIntention : IntentionAction {
 
       return filtered
     }
-
-    private inline fun <K, V, I> UpdatableIndex<K, V, I>.populateFileIdMap(
-      fileIdMap: TIntObjectHashMap<FileMatch>,
-      evt: LogEvent, dataKeys: Collection<K>,
-      inc: (FileMatch) -> Unit
-    ) {
-      @Suppress("LoopToCallChain")
-      for (dataKey in dataKeys) {
-        val valueIterator = this.getData(dataKey).valueIterator
-        if (!valueIterator.hasNext())
-          continue
-        val it = valueIterator.inputIdsIterator
-        while (it.hasNext()) {
-          val fileId = it.next()
-          var structure = fileIdMap.get(fileId)
-          if (structure == null) {
-            structure = FileMatch(evt)
-            fileIdMap.put(fileId, structure)
-          }
-
-          inc(structure)
-        }
-      }
-    }
-
 
     fun doIt(project: Project, editor: Editor) {
       println("\n<JumpToSource>")
