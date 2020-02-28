@@ -65,20 +65,20 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
           foldings.add(lastVisibleLine + 1 to i - 1)
           if (foldings.size >= 100) {
             ApplicationManager.getApplication().invokeAndWait {
-              editor.foldingModel.runBatchFoldingOperation({
+              editor.foldingModel.runBatchFoldingOperation {
                 val lastNewFoldingOffset = editor.document.getLineEndOffset(foldings.last().second)
                 val allFoldings = editor.foldingModel.allFoldRegions
                 allFoldings.forEach {
                   if (it.startOffset > lastAddedFoldingEndOffset) {
-                    if (it.startOffset > lastNewFoldingOffset)
-                      return@forEach
-                    editor.foldingModel.removeFoldRegion(it)
+                          if (it.startOffset > lastNewFoldingOffset)
+                            return@forEach
+                          editor.foldingModel.removeFoldRegion(it)
                   }
                 }
 
                 collapseFoldings()
                 lastAddedFoldingEndOffset = lastNewFoldingOffset
-              }, true)
+              }
               foldings.clear()
             }
           }
@@ -94,9 +94,9 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
   }
 
   override fun onSuccess() {
-    editor.foldingModel.runBatchFoldingOperation({
+    editor.foldingModel.runBatchFoldingOperation {
       val lastNewFoldingOffset = editor.document.charsSequence.length
-        editor.foldingModel.allFoldRegions.forEach {
+      editor.foldingModel.allFoldRegions.forEach {
         if (it.startOffset > lastAddedFoldingEndOffset) {
           if (it.startOffset > lastNewFoldingOffset)
             return@forEach
@@ -105,7 +105,7 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
       }
 
       collapseFoldings()
-    }, true)
+    }
   }
 
   private fun collapseFoldings() {
