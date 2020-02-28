@@ -35,10 +35,6 @@
     ]]>
   </change-notes>
 
-  <application-components>
-    <component><implementation-class>com.intellij.ideolog.intentions.LogIntentionLoaderComponent</implementation-class></component>
-  </application-components>
-
   <extensions defaultExtensionNs="com.intellij">
     <applicationService serviceImplementation="com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore"/>
     <projectService serviceImplementation="com.intellij.ideolog.highlighting.LogHeavyFilterService" />
