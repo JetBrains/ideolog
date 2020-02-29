@@ -28,7 +28,7 @@ import java.util.*
 class FileMatch(private val evt: LogEvent) {
   var levelPresent = 0
   var categoryPresent = 0
-  private var messageTrigramCount = 0
+  var messageTrigramCount = 0
 
   private var filenameMatch = 0 // 1 - prefix match to category, 2- full match to category
 
@@ -148,7 +148,7 @@ class LogJumpToSourceIntention : IntentionAction {
             structure = FileMatch(evt)
             fileIdMap.put(fileId, structure)
           }
-          evt.messageTrigrams += 1
+          structure.messageTrigramCount++
           return@Processor true
         })
 
