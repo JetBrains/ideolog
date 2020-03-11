@@ -217,12 +217,6 @@ class LogJumpToSourceIntention : IntentionAction {
 
     fun doIt(project: Project, editor: Editor) {
       println("\n<JumpToSource>")
-      if (!TrigramIndex.ENABLED) {
-        System.err.println("Trigram index is disabled")
-        return
-      }
-
-
       val event = LogEvent.fromEditor(editor)
       event.prepareTrigrams()
       println(event)
