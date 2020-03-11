@@ -25,15 +25,6 @@
       Issue tracker: <a href="https://github.com/JetBrains/ideolog/issues">https://github.com/JetBrains/ideolog/issues</a>
     </p>
   ]]></description>
-  <change-notes>
-    <![CDATA[
-      <p>
-        <ul>
-          <li>Fix plugin icon</li>
-        </ul>
-      </p>
-    ]]>
-  </change-notes>
 
   <extensions defaultExtensionNs="com.intellij">
     <applicationService serviceImplementation="com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore"/>
