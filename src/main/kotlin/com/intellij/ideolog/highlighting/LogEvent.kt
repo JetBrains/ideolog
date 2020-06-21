@@ -59,7 +59,12 @@ class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFil
 
   private fun parseTrigrams(text: String, res: THashSet<Int>) {
     TrigramBuilder.processTrigrams(text, object : TrigramBuilder.TrigramProcessor() {
-      override fun execute(value: Int): Boolean {
+      override fun consumeTrigramsCount(count: Int): Boolean {
+        res.ensureCapacity(count)
+        return true
+      }
+
+      override fun test(value: Int): Boolean {
         res.add(value)
         return true
       }

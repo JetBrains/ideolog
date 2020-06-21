@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-  val kotlinVersion = "1.3.70"
+  val kotlinVersion = "1.3.72"
 
   repositories {
     mavenCentral()
@@ -21,6 +21,7 @@ apply(plugin = "kotlin")
 
 repositories {
   mavenCentral()
+  maven("https://www.jetbrains.com/intellij-repository/snapshots")
 }
 
 group = "ideolog"
@@ -28,7 +29,7 @@ val buildNumber: String by rootProject.extra
 version = buildNumber
 
 intellij {
-  version = "2019.3"
+  version = "202-EAP-SNAPSHOT"
   pluginName = "ideolog"
   tasks {
     withType<org.jetbrains.intellij.tasks.PatchPluginXmlTask> {
