@@ -3,7 +3,7 @@
   <name>Ideolog</name>
   <vendor>JetBrains</vendor>
   <depends>com.intellij.modules.lang</depends>
-  <idea-version since-build="193.0" />
+  <idea-version since-build="202.5455" />
   <description><![CDATA[
     <h1>Interactive viewer for '.log' files.</h1>
     <p>
@@ -25,6 +25,14 @@
       Issue tracker: <a href="https://github.com/JetBrains/ideolog/issues">https://github.com/JetBrains/ideolog/issues</a>
     </p>
   ]]></description>
+
+  <change-notes><![CDATA[
+    <p>
+    <ul>
+      <li>Compatibility with IntelliJ platform 2020.2+</li>
+    </ul>
+    </p>
+  ]]></change-notes>
 
   <extensions defaultExtensionNs="com.intellij">
     <applicationService serviceImplementation="com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore"/>
