@@ -20,9 +20,6 @@ class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFil
 
   val level: String
 
-  val levelIdEntry: IdIndexEntry
-  val categoryIdEntry: IdIndexEntry
-
   val messageTrigrams: THashSet<Int> = THashSet()
 
   init {
@@ -46,10 +43,6 @@ class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFil
     }
 
     message = fullMessage.split('\n').first().trim()
-
-    levelIdEntry = IdIndexEntry(level, false)
-    categoryIdEntry = IdIndexEntry(category, false)
-
   }
 
   fun prepareTrigrams() {

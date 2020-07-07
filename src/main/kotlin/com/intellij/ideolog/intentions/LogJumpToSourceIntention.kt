@@ -15,11 +15,11 @@ import com.intellij.openapi.vfs.newvfs.ManagingFS
 import com.intellij.openapi.vfs.newvfs.persistent.PersistentFS
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
-import com.intellij.psi.impl.cache.impl.id.IdIndex
+import com.intellij.psi.impl.cache.CacheManager
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.UsageSearchContext
 import com.intellij.util.Processor
 import com.intellij.util.indexing.FileBasedIndex
-import com.intellij.util.indexing.FileBasedIndexImpl
 import com.intellij.util.indexing.IndexInfrastructure
 import gnu.trove.TIntObjectHashMap
 import java.util.*
@@ -138,9 +138,9 @@ class LogJumpToSourceIntention : IntentionAction {
       val filtered = ArrayList<FileMatch>()
 
       ApplicationManager.getApplication().runReadAction {
-        val indexManager = FileBasedIndex.getInstance() as FileBasedIndexImpl
-
+        val cacheManager = CacheManager.getInstance(project)
         val fileIdMap = TIntObjectHashMap<FileMatch>()
+        val indexManager = FileBasedIndex.getInstance() as FileBasedIndex
         indexManager.processFilesContainingAllKeys(TrigramIndex.INDEX_ID, evt.messageTrigrams, GlobalSearchScope.projectScope(project), null, Processor {
           val fileId = (it as VirtualFileWithId).id
           var structure = fileIdMap.get(fileId)
@@ -152,8 +152,8 @@ class LogJumpToSourceIntention : IntentionAction {
           return@Processor true
         })
 
-        val filesWithCategory = indexManager.getContainingFiles(IdIndex.NAME, evt.categoryIdEntry, GlobalSearchScope.projectScope(project))
-        val filesWithLevel = indexManager.getContainingFiles(IdIndex.NAME, evt.levelIdEntry, GlobalSearchScope.projectScope(project))
+        val filesWithCategory = cacheManager.getVirtualFilesWithWord(evt.category, UsageSearchContext.ANY, GlobalSearchScope.projectScope(project), false).toMutableSet()
+        val filesWithLevel = cacheManager.getVirtualFilesWithWord(evt.level, UsageSearchContext.ANY, GlobalSearchScope.projectScope(project), false).toMutableSet()
 
         val fs = ManagingFS.getInstance() as PersistentFS
         val pfi = ProjectFileIndex.SERVICE.getInstance(project)
