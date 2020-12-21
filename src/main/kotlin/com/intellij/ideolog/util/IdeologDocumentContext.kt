@@ -68,7 +68,7 @@ class IdeologDocumentContext(val document: Document) {
       val firstLines = doc.lineSequence().take(25)
       val sumByMatcher = regexMatchers.map { it to firstLines.count { line -> it.regex.matcher(line).find() } }
 
-      LogFileFormat(sumByMatcher.filter { it.second > 5 }.maxBy { it.second }?.first)
+      LogFileFormat(sumByMatcher.filter { it.second > 5 }.maxByOrNull { it.second }?.first)
     }.also { format = it }
   }
 

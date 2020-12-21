@@ -16,7 +16,7 @@ class ExtendsSelection : ExtendWordSelectionHandlerBase() {
     return e is LogPsiFile || e.parent is LogPsiFile
   }
 
-  override fun select(e: PsiElement, editorText: CharSequence, cursorOffset: Int, editor: Editor): List<TextRange>? {
+  override fun select(e: PsiElement, editorText: CharSequence, cursorOffset: Int, editor: Editor): List<TextRange> {
     val (evt, evtOffset) = LogParsingUtils.getEvent(editor, editor.selectionModel.selectionStart)
 
     val fileType = detectLogFileFormat(editor)

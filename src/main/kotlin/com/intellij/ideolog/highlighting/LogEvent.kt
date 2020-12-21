@@ -5,7 +5,6 @@ import com.intellij.ideolog.lex.LogToken
 import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.text.TrigramBuilder
-import com.intellij.psi.impl.cache.impl.id.IdIndexEntry
 import gnu.trove.THashSet
 import java.util.*
 

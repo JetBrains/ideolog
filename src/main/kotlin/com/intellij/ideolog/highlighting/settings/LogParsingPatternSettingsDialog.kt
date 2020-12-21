@@ -32,7 +32,7 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
     initValidation()
   }
 
-  override fun createCenterPanel(): JComponent? {
+  override fun createCenterPanel(): JComponent {
     val panel = JPanel(MigLayout("fill, wrap 2", "[right][fill]"))
 
     panel.add(JLabel("Name: "))

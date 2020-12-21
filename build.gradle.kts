@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-  val kotlinVersion = "1.3.72"
+  val kotlinVersion = "1.4.21"
 
   repositories {
     mavenCentral()
@@ -14,7 +14,7 @@ buildscript {
 
 plugins {
   id("me.filippov.gradle.jvm.wrapper") version "0.9.3"
-  id("org.jetbrains.intellij") version "0.4.16"
+  id("org.jetbrains.intellij") version "0.6.5"
 }
 
 apply(plugin = "kotlin")
@@ -29,7 +29,7 @@ val buildNumber: String by rootProject.extra
 version = buildNumber
 
 intellij {
-  version = "202-EAP-SNAPSHOT"
+  version = "2020.3"
   pluginName = "ideolog"
   tasks {
     withType<org.jetbrains.intellij.tasks.PatchPluginXmlTask> {
@@ -42,5 +42,5 @@ intellij {
 tasks.withType<KotlinCompile> {
   kotlinOptions.allWarningsAsErrors = true
   kotlinOptions.freeCompilerArgs += "-Xnew-inference"
-  kotlinOptions.jvmTarget = "1.8"
+  kotlinOptions.jvmTarget = "11"
 }

@@ -246,7 +246,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
     return eventPieces[eventPiecePointer].offsetEnd
   }
 
-  override fun getTokenType(): IElementType? {
+  override fun getTokenType(): IElementType {
     return LOG_TOKEN_SEPARATOR
   }
 

@@ -31,7 +31,7 @@ class LogHighlightingPatternSettingsDialog(private val item: LogHighlightingPatt
     BrowserUtil.browse("https://github.com/JetBrains/ideolog/wiki/Highlighting-Patterns")
   }
 
-  override fun createCenterPanel(): JComponent? {
+  override fun createCenterPanel(): JComponent {
     val panel = JPanel(GridBagLayout())
     val constraints = GridBagConstraints().apply {
       gridx = 0

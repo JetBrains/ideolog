@@ -236,9 +236,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
     val highlighters = myHighlighters ?: recreateHighlighters()
 
     for (nBucket in 0 until numBuckets) {
-      val newColor: Color?
-
-      newColor = if (highlighterBuckets[nBucket] != null) {
+      val newColor: Color? = if (highlighterBuckets[nBucket] != null) {
         // User highlighter immediately wins
         highlighterBuckets[nBucket]!!
       } else {

@@ -11,7 +11,7 @@ import com.intellij.psi.impl.source.PsiFileImpl
 
 class LogPsiFile(fileViewProvider: FileViewProvider) :
   PsiFileImpl(LOG_CONTENT_FILE, LOG_CONTENT_FILE, fileViewProvider), PsiLargeFile, NavigatableWithText {
-  override fun getNavigateActionText(focusEditor: Boolean): String? {
+  override fun getNavigateActionText(focusEditor: Boolean): String {
     return "Navigate To Source"
   }
 

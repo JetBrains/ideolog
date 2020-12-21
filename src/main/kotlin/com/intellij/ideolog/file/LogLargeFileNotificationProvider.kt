@@ -58,7 +58,7 @@ class LogLargeFileNotificationProvider : EditorNotifications.Provider<EditorNoti
                 ActionUtil.performActionDumbAware(vmEditAction, e)
 
                 val vmFile = VMOptions.getWriteFile()
-                if (vmFile != null && open(project, vmFile)) {
+                if (vmFile != null && open(project, vmFile.toFile())) {
                     VMOptions.writeOption("idea.max.content.load.filesize", "=", "1000000")
                     VMOptions.writeOption("idea.max.content.load.large.preview.size", "=", "1000000")
                     VMOptions.writeOption("idea.max.intellisense.filesize", "=", "1000000")
@@ -66,7 +66,7 @@ class LogLargeFileNotificationProvider : EditorNotifications.Provider<EditorNoti
                     VirtualFileManager.getInstance().refreshWithoutFileWatcher(true)
                 } else {
                     Messages.showErrorDialog(project, "Can't find custom vm options: create it or specify size 1000000 for system properties\n" +
-                        "idea.max.content.load.filesize \nidea.max.content.load.large.preview.size \nidea.max.intellisense.filesize", "No custom vm options specified")
+                        "idea.max.content.load.filesize \nidea.max.content.load.large.preview.size \nidea.max.intellisense.filesize", "No Custom VM Options Specified")
                 }
 
                 update(file, project)
@@ -91,7 +91,7 @@ class LogLargeFileNotificationProvider : EditorNotifications.Provider<EditorNoti
     private fun open(project: Project, file: File) : Boolean {
         if (!file.exists()) {
             val confirmation = "File \n''${FileUtil.getLocationRelativeToUserHome(file.path)}''\n does not exist. Create?"
-            val result = Messages.showYesNoDialog(project, confirmation, "Custom VM options", Messages.getQuestionIcon())
+            val result = Messages.showYesNoDialog(project, confirmation, "Custom VM Options", Messages.getQuestionIcon())
             if (result == Messages.NO) return false
 
             try {

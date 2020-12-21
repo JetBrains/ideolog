@@ -5,7 +5,7 @@ import com.intellij.ui.SimpleTextAttributes
 import javax.swing.JTable
 
 class LogPatternActionRenderer : ColoredTableCellRenderer() {
-  override fun customizeCellRenderer(table: JTable?, value: Any?, selected: Boolean, hasFocus: Boolean, row: Int, column: Int) {
+  override fun customizeCellRenderer(table: JTable, value: Any?, selected: Boolean, hasFocus: Boolean, row: Int, column: Int) {
     value as LogHighlightingPattern
     val defaultStyle = if (selected) SimpleTextAttributes.SELECTED_SIMPLE_CELL_ATTRIBUTES else SimpleTextAttributes.SIMPLE_CELL_ATTRIBUTES
     var style = 0

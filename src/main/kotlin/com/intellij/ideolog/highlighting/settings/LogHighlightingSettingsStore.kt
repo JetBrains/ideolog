@@ -3,10 +3,13 @@ package com.intellij.ideolog.highlighting.settings
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.*
-import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.Disposer
 import com.intellij.util.xmlb.XmlSerializerUtil
-import com.intellij.util.xmlb.annotations.*
+import com.intellij.util.xmlb.annotations.Attribute
+import com.intellij.util.xmlb.annotations.Tag
+import com.intellij.util.xmlb.annotations.Transient
+import com.intellij.util.xmlb.annotations.XCollection
 import org.intellij.lang.annotations.Language
 import java.awt.Color
 
@@ -14,6 +17,7 @@ import java.awt.Color
 class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSettingsStore.State>, Cloneable {
   companion object {
     fun getInstance() = ServiceManager.getService(LogHighlightingSettingsStore::class.java)!!
+    val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
     const val CURRENT_SETTINGS_VERSION = "4"
 
@@ -67,7 +71,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     ApplicationManager.getApplication().assertIsDispatchThread()
 
     myListeners.add(listener)
-    Disposer.register(disposable, Disposable {
+    Disposer.register(disposable, {
       myListeners.remove(listener)
     })
   }
@@ -88,7 +92,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     while(myState.version < CURRENT_SETTINGS_VERSION) {
       val upgrader = settingsUpgraders[myState.version]
       myState = if(upgrader == null) {
-        logger("LogHighlightingSettingsStore").warn("Upgrader for version ${myState.version} not found, performing hard reset of settings")
+        logger.warn("Upgrader for version ${myState.version} not found, performing hard reset of settings")
         cleanState.clone()
       } else {
         upgrader(myState)

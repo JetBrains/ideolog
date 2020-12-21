@@ -20,7 +20,6 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.UsageSearchContext
 import com.intellij.util.Processor
 import com.intellij.util.indexing.FileBasedIndex
-import com.intellij.util.indexing.IndexInfrastructure
 import gnu.trove.TIntObjectHashMap
 import java.util.*
 
@@ -118,7 +117,7 @@ class FileMatch(private val evt: LogEvent) {
 class LogJumpToSourceIntention : IntentionAction {
 
   override fun getText(): String {
-    return "Jump To Source"
+    return "Jump to source"
   }
 
   override fun getFamilyName() = "Logs"
@@ -160,7 +159,7 @@ class LogJumpToSourceIntention : IntentionAction {
 
 
         fileIdMap.forEachEntry { fileId, match ->
-          val vf = IndexInfrastructure.findFileByIdIfCached(fs, fileId)
+          val vf = fs.findFileByIdIfCached(fileId)
           if (vf == null
             || !pfi.isInSourceContent(vf)
             || vf.extension !in listOf("kt", "java", "cs", "vb", "cpp")
