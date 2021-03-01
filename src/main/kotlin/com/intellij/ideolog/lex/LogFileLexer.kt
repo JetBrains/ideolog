@@ -84,6 +84,8 @@ class LogFileLexer(private val tokenCache: MutableList<IElementType>, private va
       var lastGroupEnd = 0
       for(i in 1 .. matcher.groupCount()) {
         val start = matcher.start(i)
+        if (start < lastGroupEnd) continue;
+
         val end = matcher.end(i)
 
         if(start < 0 || end < 0)
