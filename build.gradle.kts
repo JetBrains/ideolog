@@ -14,7 +14,7 @@ buildscript {
 
 plugins {
   id("me.filippov.gradle.jvm.wrapper") version "0.9.3"
-  id("org.jetbrains.intellij") version "0.7.2"
+  id("org.jetbrains.intellij") version "1.0"
 }
 
 apply(plugin = "kotlin")
@@ -29,18 +29,22 @@ val buildNumber: String by rootProject.extra
 version = buildNumber
 
 intellij {
-  version = "2020.3"
-  pluginName = "ideolog"
+  version.set("2020.3")
+  pluginName.set("ideolog")
   tasks {
     withType<org.jetbrains.intellij.tasks.PatchPluginXmlTask> {
-      updateSinceUntilBuild = true
-      setUntilBuild("")
+      updateSinceUntilBuild.set(true)
+      untilBuild.set("")
+    }
+    runIde {
+      systemProperty("idea.is.internal", "true")
     }
   }
+
 }
 
 tasks.withType<KotlinCompile> {
-  kotlinOptions.allWarningsAsErrors = true
+  //kotlinOptions.allWarningsAsErrors = true
   kotlinOptions.freeCompilerArgs += "-Xnew-inference"
   kotlinOptions.jvmTarget = "11"
 }
