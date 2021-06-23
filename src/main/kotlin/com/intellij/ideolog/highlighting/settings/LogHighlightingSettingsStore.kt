@@ -1,36 +1,111 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.ideolog.util.application
+import com.intellij.ideolog.util.getService
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.*
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.Disposer
+import com.intellij.util.xmlb.Converter
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.Tag
 import com.intellij.util.xmlb.annotations.Transient
 import com.intellij.util.xmlb.annotations.XCollection
-import org.intellij.lang.annotations.Language
 import java.awt.Color
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
+
+object DefaultSettingsStoreItems {
+  val PipeSeparated = LogParsingPattern(
+    true,
+    "Pipe-separated",
+    "^(?s)([^|]*)\\|([^|]*)\\|([^|]*)\\|(.*)$",
+    "HH:mm:ss.SSS",
+    "^\\d",
+    0,
+    1,
+    2,
+    false,
+    UUID.fromString("b5772998-bf1e-4d9d-ab41-da0b86451163")
+  )
+  val IntelliJIDEA = LogParsingPattern(
+    true,
+    "IntelliJ IDEA",
+    "^([^\\[]+)(\\[[\\s\\d]+])\\s*(\\w*)\\s*-\\s*(\\S*)\\s*-(.+)$",
+    "yyyy-MM-dd HH:mm:ss,SSS",
+    "^\\d",
+    0,
+    2,
+    3,
+    false,
+    UUID.fromString("8a0e8992-94cb-4f4c-8be2-42b03609626b")
+  )
+  val TeamCityBuildLog = LogParsingPattern(
+    true,
+    "TeamCity build log",
+    "^\\[([^]]+)](.):\\s*(\\[[^]]+])?(.*)$",
+    "HH:mm:ss",
+    "^\\[",
+    0,
+    1,
+    2,
+    false,
+    UUID.fromString("e9fa2755-8390-42f5-a41e-a909c58c8cf9")
+  )
+  val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog)
+  val ParsingPatternsUUIDs = ParsingPatterns.map { it.uuid }
+
+  val Error = LogHighlightingPattern(
+    true,
+    "^\\s*e(rror)?\\s*$",
+    LogHighlightingAction.HIGHLIGHT_LINE,
+    Color.RED.rgb,
+    null,
+    bold = true,
+    italic = false,
+    showOnStripe = true
+  )
+  val Warning = LogHighlightingPattern(
+    true,
+    "^\\s*w(arn(ing)?)?\\s*$",
+    LogHighlightingAction.HIGHLIGHT_LINE,
+    Color(0xff, 0xaa, 0).rgb,
+    null,
+    bold = true,
+    italic = false,
+    showOnStripe = false
+  )
+  val Info = LogHighlightingPattern(
+    true,
+    "^\\s*i(nfo)?\\s*$",
+    LogHighlightingAction.HIGHLIGHT_LINE,
+    Color(0x3f, 0xbf, 0x3f).rgb,
+    null,
+    bold = false,
+    italic = false,
+    showOnStripe = false
+  )
+}
 
 @State(name = "LogHighlightingSettings", storages = [Storage(value = "log_highlighting.xml", roamingType = RoamingType.DEFAULT)])
 class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSettingsStore.State>, Cloneable {
   companion object {
-    fun getInstance() = ServiceManager.getService(LogHighlightingSettingsStore::class.java)!!
+    fun getInstance() = getService<LogHighlightingSettingsStore>()
     val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
-    const val CURRENT_SETTINGS_VERSION = "4"
+    const val CURRENT_SETTINGS_VERSION = "5"
 
-    @Language("RegExp")
     val cleanState = State(arrayListOf(
-      LogHighlightingPattern(true, "^\\s*e(rror)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color.RED.rgb, null, bold = true, italic = false, showOnStripe = true),
-      LogHighlightingPattern(true, "^\\s*w(arn(ing)?)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0xff, 0xaa, 0).rgb, null, bold = true, italic = false, showOnStripe = false),
-      LogHighlightingPattern(true, "^\\s*i(nfo)?\\s*$", LogHighlightingAction.HIGHLIGHT_LINE, Color(0x3f, 0xbf, 0x3f).rgb, null, bold = false, italic = false, showOnStripe = false)
+      DefaultSettingsStoreItems.Error,
+      DefaultSettingsStoreItems.Warning,
+      DefaultSettingsStoreItems.Info
     ), arrayListOf(), arrayListOf(
-      LogParsingPattern(true, "Pipe-separated", "^(?s)([^|]*)\\|([^|]*)\\|([^|]*)\\|(.*)$", "HH:mm:ss.SSS", "^\\d", 0, 1, 2, false),
-      LogParsingPattern(true, "IntelliJ IDEA", "^([^\\[]+)(\\[[\\s\\d]+])\\s*(\\w*)\\s*-\\s*(\\S*)\\s*-(.+)$", "yyyy-MM-dd HH:mm:ss,SSS", "^\\d", 0, 2, 3, false),
-      LogParsingPattern(true, "TeamCity build log", "^\\[([^]]+)](.):\\s*(\\[[^]]+])?(.*)$", "HH:mm:ss", "^\\[", 0, 1, 2, false)
-    ), CURRENT_SETTINGS_VERSION, "3", "heatmap", "16", true)
+      DefaultSettingsStoreItems.PipeSeparated,
+      DefaultSettingsStoreItems.IntelliJIDEA,
+      DefaultSettingsStoreItems.TeamCityBuildLog
+    ), CURRENT_SETTINGS_VERSION, DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it }, "heatmap", "16", true)
 
     val settingsUpgraders = mapOf<String, (State) -> State>(
       "-1" to { cleanState.clone() },
@@ -50,6 +125,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       "2" to lambda@{ oldState ->
         val newState = oldState.clone()
         newState.version = "3"
+
         newState.readonlySizeThreshold = "16"
         return@lambda newState
       },
@@ -60,6 +136,27 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         }
         newState.version = "4"
         return@lambda newState
+      },
+      "4" to lambda@{ oldState ->
+        val newState = oldState.clone()
+
+        newState.parsingPatterns.forEach {
+          when (it.name) {
+            DefaultSettingsStoreItems.TeamCityBuildLog.name ->
+              it.uuid = DefaultSettingsStoreItems.TeamCityBuildLog.uuid
+            DefaultSettingsStoreItems.IntelliJIDEA.name ->
+              it.uuid = DefaultSettingsStoreItems.IntelliJIDEA.uuid
+            DefaultSettingsStoreItems.PipeSeparated.name ->
+              it.uuid = DefaultSettingsStoreItems.PipeSeparated.uuid
+          }
+        }
+
+        newState.lastAddedDefaultFormat =
+          DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it }
+
+        newState.version = "5"
+
+        return@lambda newState
       }
     )
   }
@@ -68,16 +165,16 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   private val myListeners = HashSet<LogHighlightingSettingsListener>()
 
   fun addSettingsListener(disposable: Disposable, listener: LogHighlightingSettingsListener) {
-    ApplicationManager.getApplication().assertIsDispatchThread()
+    application.assertIsDispatchThread()
 
     myListeners.add(listener)
-    Disposer.register(disposable, {
+    Disposer.register(disposable) {
       myListeners.remove(listener)
-    })
+    }
   }
 
   private fun fireListeners() {
-    ApplicationManager.getApplication().assertIsDispatchThread()
+    application.assertIsDispatchThread()
 
     myListeners.forEach { it() }
   }
@@ -86,25 +183,47 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     return myState
   }
 
-  override fun loadState(state: State) {
-    XmlSerializerUtil.copyBean(state, myState)
-
-    while(myState.version < CURRENT_SETTINGS_VERSION) {
-      val upgrader = settingsUpgraders[myState.version]
-      myState = if(upgrader == null) {
-        logger.warn("Upgrader for version ${myState.version} not found, performing hard reset of settings")
+  private fun upgradeState(state: State): State {
+    var newState: State = state
+    while(newState.version < CURRENT_SETTINGS_VERSION) {
+      val upgrader = settingsUpgraders[newState.version]
+      newState = if(upgrader == null) {
+        logger.warn("Upgrader for version ${newState.version} not found, performing hard reset of settings")
         cleanState.clone()
       } else {
-        upgrader(myState)
+        upgrader(newState)
       }
     }
 
+    return newState
+  }
+
+  override fun loadState(state: State) {
+    XmlSerializerUtil.copyBean(state, myState)
+
+    myState = upgradeState(myState)
+
     if(myState.lastAddedDefaultFormat.toInt() < cleanState.parsingPatterns.size) {
-      myState.parsingPatterns.addAll(cleanState.parsingPatterns.subList(myState.lastAddedDefaultFormat.toInt(), cleanState.parsingPatterns.size))
+      myState.parsingPatterns.addAll(
+        cleanState.parsingPatterns.subList(myState.lastAddedDefaultFormat.toInt(), cleanState.parsingPatterns.size)
+      )
       myState.lastAddedDefaultFormat = cleanState.parsingPatterns.size.toString()
     }
 
     fireListeners()
+  }
+
+  /**
+   * @return true if has items that were not added
+   */
+  fun mergeAnotherState(newState: State): Boolean {
+    val newParsingPatterns = newState.parsingPatterns.filter { it1 -> myState.parsingPatterns.find { it.uuid == it1.uuid } == null }
+    val hasUnimportedItems = newParsingPatterns.size < newState.parsingPatterns.size
+    myState.parsingPatterns.addAll(newParsingPatterns)
+
+    fireListeners()
+
+    return hasUnimportedItems
   }
 
   override fun equals(other: Any?): Boolean {
@@ -165,24 +284,39 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   }
 }
 
+class UUIDConverter : Converter<UUID>() {
+  override fun toString(value: UUID) = value.toString()
+  override fun fromString(value: String): UUID? = UUID.fromString(value)
+}
+
 @Tag("LogParsingPattern")
-data class LogParsingPattern(@Attribute("enabled") var enabled: Boolean, @Attribute("name") var name: String, @Attribute("pattern") var pattern: String,
-                             @Attribute("timePattern") var timePattern: String, @Attribute("linePattern") var lineStartPattern: String, @Attribute("timeId") var timeColumnId: Int,
-                             @Attribute("severityId") var severityColumnId: Int, @Attribute("categoryId") var categoryColumnId: Int,
-                             @Attribute("fullmatch") var regexMatchFullEvent: Boolean): Cloneable {
+data class LogParsingPattern(@Attribute("enabled") var enabled: Boolean,
+                             @Attribute("name") var name: String,
+                             @Attribute("pattern") var pattern: String,
+                             @Attribute("timePattern") var timePattern: String,
+                             @Attribute("linePattern") var lineStartPattern: String,
+                             @Attribute("timeId") var timeColumnId: Int,
+                             @Attribute("severityId") var severityColumnId: Int,
+                             @Attribute("categoryId") var categoryColumnId: Int,
+                             @Attribute("fullmatch") var regexMatchFullEvent: Boolean,
+                             @Attribute("uuid", converter = UUIDConverter::class) var uuid: UUID): Cloneable {
 
   @Suppress("unused")
-  constructor(): this(true, "", "", "", "", -1, -1, -1, false)
+  constructor(): this(true, "", "", "", "", -1, -1, -1, false, UUID.randomUUID())
 
   public override fun clone(): LogParsingPattern {
-    return LogParsingPattern(enabled, name, pattern, timePattern, lineStartPattern, timeColumnId, severityColumnId, categoryColumnId, regexMatchFullEvent)
+    return LogParsingPattern(enabled, name, pattern, timePattern, lineStartPattern, timeColumnId, severityColumnId, categoryColumnId, regexMatchFullEvent, uuid)
   }
 }
 
 @Tag("LogHighlightingPattern")
-data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean, @Attribute("pattern") var pattern: String, @Attribute("action") var action: LogHighlightingAction,
-                                  @Attribute("fg") var fgRgb: Int?, @Attribute("bg") var bgRgb: Int?,
-                                  @Attribute("bold") var bold: Boolean, @Attribute("italic") var italic: Boolean,
+data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean,
+                                  @Attribute("pattern") var pattern: String,
+                                  @Attribute("action") var action: LogHighlightingAction,
+                                  @Attribute("fg") var fgRgb: Int?,
+                                  @Attribute("bg") var bgRgb: Int?,
+                                  @Attribute("bold") var bold: Boolean,
+                                  @Attribute("italic") var italic: Boolean,
                                   @Attribute("stripe") var showOnStripe: Boolean) : Cloneable {
 
   @Suppress("unused")

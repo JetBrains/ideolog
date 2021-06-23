@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
+import java.util.*
 import javax.swing.table.AbstractTableModel
 
 class LogFormatTableModel(private var state: LogHighlightingSettingsStore.State) : AbstractTableModel() {
@@ -58,15 +59,17 @@ class LogFormatTableModel(private var state: LogHighlightingSettingsStore.State)
     fireTableDataChanged()
   }
 
-  fun addNewFormat(name: String) {
-    state.parsingPatterns.add(LogParsingPattern(false, name, "", "", "", -1, -1, -1, false))
+  fun addNewFormat(name: String): Pair<Int, LogParsingPattern> {
+    val pattern = LogParsingPattern(false, name, "", "", "", -1, -1, -1, false, UUID.randomUUID())
+    state.parsingPatterns.add(pattern)
     val index = state.parsingPatterns.size - 1
     fireTableRowsInserted(index, index)
+
+    return Pair(index, pattern)
   }
 
   fun removeFormat(index: Int) {
     state.parsingPatterns.removeAt(index)
     fireTableRowsDeleted(index, index)
   }
-
 }
