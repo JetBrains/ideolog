@@ -1,40 +1,65 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.ideolog.util.application
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
+import com.intellij.openapi.fileChooser.FileChooserFactory
+import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.options.BaseConfigurable
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.ui.IdeBorderFactory
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.OnePixelSplitter
 import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.table.JBTable
+import com.intellij.util.toByteArray
+import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil
+import com.intellij.util.ui.components.BorderLayoutPanel
+import com.intellij.util.xmlb.XmlSerializer
+import org.jdom.input.SAXBuilder
 import java.awt.BorderLayout
-import javax.swing.JCheckBox
-import javax.swing.JComponent
-import javax.swing.JPanel
+import java.awt.FlowLayout
+import java.awt.event.ComponentAdapter
+import java.awt.event.ComponentEvent
+import javax.swing.*
+
 
 class LogHighlightingConfigurable : BaseConfigurable() {
-  private var myLogHighlightingStore: LogHighlightingSettingsStore.State = LogHighlightingSettingsStore.getInstance().myState.clone()
-  private val patternTableModel = LogPatternTableModel(myLogHighlightingStore)
-  private val filterTableModel = LogFilterTableModel(myLogHighlightingStore)
-  private val formatsTableModel = LogFormatTableModel(myLogHighlightingStore)
+  private val store = LogHighlightingSettingsStore.getInstance()
+  private var myLogHighlightingState: LogHighlightingSettingsStore.State = store.myState.clone()
+  private val patternTableModel = LogPatternTableModel(myLogHighlightingState)
+  private val filterTableModel = LogFilterTableModel(myLogHighlightingState)
+  private val formatsTableModel = LogFormatTableModel(myLogHighlightingState)
+
+  private val disposable = Disposer.newDisposable()
 
   override fun getHelpTopic(): Nothing? = null
 
   override fun createComponent(): JComponent? {
-    val heatmapCheckbox = JCheckBox("Display heat map on error stripe/scrollbar", myLogHighlightingStore.errorStripeMode == "heatmap")
-    heatmapCheckbox.addChangeListener {
-      myLogHighlightingStore.errorStripeMode = if(heatmapCheckbox.isSelected) "heatmap" else "normal"
+    val heatmapCheckbox = JCheckBox(
+      "Display heat map on error stripe/scrollbar",
+      myLogHighlightingState.errorStripeMode == "heatmap").apply {
+      addChangeListener {
+        myLogHighlightingState.errorStripeMode = if (this.isSelected) "heatmap" else "normal"
+      }
     }
 
-    val linksCheckbox = JCheckBox("Highlight links and code references in logs", myLogHighlightingStore.highlightLinks)
-    linksCheckbox.addChangeListener {
-      myLogHighlightingStore.highlightLinks = linksCheckbox.isSelected
+    val linksCheckbox = JCheckBox(
+      "Highlight links and code references in logs",
+      myLogHighlightingState.highlightLinks).apply {
+      addChangeListener {
+        myLogHighlightingState.highlightLinks = this.isSelected
+      }
     }
 
-    val logSizeSpinner = JBIntSpinner(myLogHighlightingStore.readonlySizeThreshold.toInt(), 0, 1024*1024)
-    logSizeSpinner.addChangeListener {
-      myLogHighlightingStore.readonlySizeThreshold = logSizeSpinner.value.toString()
+    val logSizeSpinner = JBIntSpinner(
+      myLogHighlightingState.readonlySizeThreshold.toInt(), 0, 1024*1024).apply {
+      addChangeListener {
+        myLogHighlightingState.readonlySizeThreshold = this.value.toString()
+      }
     }
 
     val patternsTable = JBTable(patternTableModel).apply {
@@ -43,7 +68,9 @@ class LogHighlightingConfigurable : BaseConfigurable() {
       getColumn(getColumnName(1)).width = JBUI.scale(50)
       getColumn(getColumnName(2)).cellRenderer = LogPatternActionRenderer()
     }
-    val filtersTable = JBTable(filterTableModel).apply { preferredScrollableViewportSize = JBUI.size(10) }
+    val filtersTable = JBTable(filterTableModel).apply {
+      preferredScrollableViewportSize = JBUI.size(10)
+    }
     val formatsTable = JBTable(formatsTableModel).apply {
       preferredScrollableViewportSize = JBUI.size(10)
       getColumn(getColumnName(0)).maxWidth = JBUI.Fonts.label().size * 15
@@ -51,38 +78,64 @@ class LogHighlightingConfigurable : BaseConfigurable() {
 
     val patternsPanel = JPanel(BorderLayout()).apply {
       border = IdeBorderFactory.createTitledBorder("Patterns")
-      add(ToolbarDecorator.createDecorator(patternsTable).setAddAction {
-        val result = Messages.showInputDialog("Enter new pattern (regex supported):", "New highlighting pattern", null) ?: return@setAddAction
-        patternTableModel.addNewPattern(result)
-      }.setRemoveAction {
-        val selectedIndex = patternsTable.selectedRow
-        if (selectedIndex >= 0)
-          patternTableModel.removePattern(selectedIndex)
-      }.setEditAction {
-        val selectedIndex = patternsTable.selectedRow
-        if (selectedIndex >= 0)
-          LogHighlightingPatternSettingsDialog(patternTableModel.getValueAt(selectedIndex, 2) as LogHighlightingPattern).show()
-      }.createPanel(), BorderLayout.CENTER)
+
+      val panel = ToolbarDecorator.createDecorator(patternsTable).apply {
+        setAddAction {
+          val result = Messages.showInputDialog("Enter new pattern (regex supported):", "New Highlighting Pattern", null) ?: return@setAddAction
+          patternTableModel.addNewPattern(result)
+        }
+        setRemoveAction {
+          val selectedIndex = patternsTable.selectedRow
+          if (selectedIndex >= 0) patternTableModel.removePattern(selectedIndex)
+        }
+        setEditAction {
+          val selectedIndex = patternsTable.selectedRow
+          if (selectedIndex >= 0) {
+            LogHighlightingPatternSettingsDialog(
+              patternTableModel.getValueAt(selectedIndex, 2) as LogHighlightingPattern).show()
+          }
+        }
+      }.createPanel()
+
+      UIUtil.addBorder(panel, JBUI.Borders.emptyRight(IdeBorderFactory.TITLED_BORDER_INDENT))
+
+      add(panel, BorderLayout.CENTER)
     }
 
     val filtersPanel = JPanel(BorderLayout()).apply {
       border = IdeBorderFactory.createTitledBorder("Filters")
-      add(ToolbarDecorator.createDecorator(filtersTable).setAddAction {
-        val string = Messages.showInputDialog("Enter new pattern (exact match)", "New filter pattern", null) ?: return@setAddAction
-        filterTableModel.addItem(string)
-      }.setRemoveAction {
-        val selectedIndex = filtersTable.selectedRow
-        if (selectedIndex >= 0)
-          filterTableModel.removeItem(selectedIndex)
-      }.createPanel(), BorderLayout.CENTER)
+      val panel = ToolbarDecorator.createDecorator(filtersTable).apply {
+        setAddAction {
+          val string = Messages.showInputDialog(
+            "Enter new pattern (exact match)",
+            "New Filter Pattern", null) ?: return@setAddAction
+          filterTableModel.addItem(string)
+        }
+        setRemoveAction {
+          val selectedIndex = filtersTable.selectedRow
+          if (selectedIndex >= 0)
+            filterTableModel.removeItem(selectedIndex)
+        }
+      }.createPanel()
+
+      UIUtil.addBorder(panel, JBUI.Borders.emptyRight(IdeBorderFactory.TITLED_BORDER_INDENT))
+
+      add(panel, BorderLayout.CENTER)
     }
 
     val formatsPanel = JPanel(BorderLayout()).apply {
       border = IdeBorderFactory.createTitledBorder("Log Formats")
-      add(ToolbarDecorator.createDecorator(formatsTable).apply {
+      val panel = ToolbarDecorator.createDecorator(formatsTable).apply {
         setAddAction {
-          val result = Messages.showInputDialog("Enter new format name:", "New log format", null) ?: return@setAddAction
-          formatsTableModel.addNewFormat(result)
+          val result = Messages.showInputDialog(
+            "Enter new format name:",
+            "New Log Format", null) ?: return@setAddAction
+          val (newIndex, newFormat) = formatsTableModel.addNewFormat(result)
+          val isOk = LogParsingPatternSettingsDialog(newFormat).showAndGet()
+
+          if (!isOk) {
+            formatsTableModel.removeFormat(newIndex)
+          }
         }
         setRemoveAction {
           val selectedIndex = formatsTable.selectedRow
@@ -92,40 +145,186 @@ class LogHighlightingConfigurable : BaseConfigurable() {
         setEditAction {
           val selectedIndex = formatsTable.selectedRow
           if (selectedIndex >= 0)
-            LogParsingPatternSettingsDialog(formatsTableModel.getValueAt(selectedIndex, -1) as LogParsingPattern).show()
+            LogParsingPatternSettingsDialog(
+              formatsTableModel.getValueAt(selectedIndex, -1) as LogParsingPattern).show()
         }
-      }.createPanel(), BorderLayout.CENTER)
+      }.createPanel()
+
+      add(panel, BorderLayout.CENTER)
     }
 
     val topPanel = OnePixelSplitter(false, "Ideolog.Settings.TopProportion", 0.5f)
-    topPanel.firstComponent = patternsPanel
-    topPanel.secondComponent = filtersPanel
+    topPanel.setResizeEnabled(false)
 
-    return com.intellij.util.ui.FormBuilder.createFormBuilder()
-      .addComponent(heatmapCheckbox)
-      .addComponent(linksCheckbox)
-      .addLabeledComponent("Allow editing log files smaller than (KB, editing can cause performance issues):", logSizeSpinner)
-      .addComponentFillVertically(formatsPanel, 0)
-      .addComponentFillVertically(topPanel, 0)
-      .panel
+    topPanel.firstComponent = BorderLayoutPanel().apply {
+      addToCenter(patternsPanel)
+      border = JBUI.Borders.emptyRight(10)
+    }
+    topPanel.secondComponent = BorderLayoutPanel().apply {
+      addToCenter(filtersPanel)
+      border = JBUI.Borders.emptyLeft(10)
+    }
+
+    var formatsTableRange: IntRange? = null
+    var patternsTableRange: IntRange? = null
+    var filtersTableRange: IntRange? = null
+
+    val theLabel = JLabel("Select (shift+click for many) items to export them").apply {
+      foreground = UIUtil.getLabelDisabledForeground()
+      border = JBUI.Borders.emptyLeft(10)
+    }
+    val resetBtn = JButton("Reset selection").apply {
+      isVisible = false
+    }
+    val exportBtn = JButton("Export").apply {
+      isVisible = false
+
+      addPropertyChangeListener("enabled") {
+        theLabel.isVisible = it.newValue != true
+        resetBtn.isVisible = it.newValue == true
+      }
+
+      addComponentListener(object : ComponentAdapter() {
+        override fun componentHidden(e: ComponentEvent?) {
+          theLabel.isVisible = true
+          resetBtn.isVisible = false
+        }
+
+        override fun componentShown(e: ComponentEvent?) {
+          theLabel.isVisible = false
+          resetBtn.isVisible = true
+        }
+      })
+
+      addActionListener {
+        // Export button
+        val saver = FileChooserFactory.getInstance().createSaveFileDialog(
+          FileSaverDescriptor("Save XML", "", "xml"),
+          this
+        )
+
+        val patterns = patternsTableRange?.map { patternTableModel.getValueAt(it,2) as LogHighlightingPattern }
+          ?: emptyList()
+        val formats = formatsTableRange?.map { formatsTableModel.getValueAt(it,-1) as LogParsingPattern }
+          ?: emptyList()
+
+        val store = LogHighlightingSettingsStore.State().apply {
+          this.version = LogHighlightingSettingsStore.CURRENT_SETTINGS_VERSION
+          this.patterns.addAll(patterns)
+          this.parsingPatterns.addAll(formats)
+        }
+
+        val serialized = XmlSerializer.serialize(store)
+
+        val fileWrapper = saver.save(VfsUtil.getUserHomeDir(), "ideologExported.xml")
+
+        application.runWriteAction {
+          fileWrapper?.getVirtualFile(true)?.setBinaryContent(serialized.toByteArray())
+        }
+      }
+    }
+
+    val importBtn = JButton("Import").apply {
+      addActionListener {
+        val chooser = FileChooserFactory.getInstance().createFileChooser(
+          FileChooserDescriptorFactory.createSingleFileDescriptor("xml"), null, this
+        )
+
+        val vfArr = chooser.choose(null, VfsUtil.getUserHomeDir())
+
+        if (vfArr.size != 1) {
+          println("vf null")
+          return@addActionListener
+        }
+
+        val vf = SAXBuilder().build(vfArr[0].toNioPath().toFile())
+
+        val theState = XmlSerializer.deserialize(vf, LogHighlightingSettingsStore.State::class.java)
+
+        LogHighlightingSettingsStore.getInstance().mergeAnotherState(theState)
+      }
+    }
+
+    fun removeSelectionFromTable(table: JTable, range: IntRange) {
+      table.selectionModel.removeSelectionInterval(range.first, range.last)
+    }
+
+    resetBtn.addActionListener {
+      formatsTableRange?.let { it1 -> removeSelectionFromTable(formatsTable, it1) }
+      patternsTableRange?.let { it1 -> removeSelectionFromTable(patternsTable, it1) }
+      filtersTableRange?.let { it1 -> removeSelectionFromTable(filtersTable, it1) }
+
+      formatsTableRange = null
+      patternsTableRange = null
+      filtersTableRange = null
+
+      exportBtn.isVisible = false
+    }
+
+    fun tableRangeWatcher(table: JTable, setter: (IntRange?) -> Unit) {
+      table.selectionModel.addListSelectionListener { e ->
+        val lsm = e.source as ListSelectionModel
+        val minIndex = lsm.minSelectionIndex
+        val maxIndex = lsm.maxSelectionIndex
+
+        if (minIndex == -1) {
+          setter(null)
+          exportBtn.isVisible = false
+        }
+        else {
+          setter(minIndex..maxIndex)
+          exportBtn.isVisible = true
+        }
+      }
+    }
+
+    store.addSettingsListener(disposable) {
+      reset()
+    }
+
+    tableRangeWatcher(formatsTable) { formatsTableRange = it }
+    tableRangeWatcher(patternsTable) { patternsTableRange = it }
+    tableRangeWatcher(filtersTable) { filtersTableRange = it }
+
+    return FormBuilder().run {
+      addComponent(heatmapCheckbox)
+      addComponent(linksCheckbox)
+      addLabeledComponent("Allow editing log files smaller than (KB, editing can cause performance issues):", logSizeSpinner)
+      addComponent(JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
+        add(importBtn)
+        add(exportBtn)
+        add(theLabel)
+        add(resetBtn)
+      })
+      addComponentFillVertically(formatsPanel, 0)
+      addComponentFillVertically(topPanel, 0)
+
+      panel
+    }
+
+  }
+
+  override fun disposeUIResources() {
+    disposable.dispose()
+    super.disposeUIResources()
   }
 
   override fun apply() {
-    LogHighlightingSettingsStore.getInstance().loadState(myLogHighlightingStore)
+    LogHighlightingSettingsStore.getInstance().loadState(myLogHighlightingState)
   }
 
   override fun isModified(): Boolean {
     val originalState = LogHighlightingSettingsStore.getInstance()
-    return originalState.myState != myLogHighlightingStore
+    return originalState.myState != myLogHighlightingState
   }
 
   override fun reset() {
-    myLogHighlightingStore = LogHighlightingSettingsStore.getInstance().myState.clone()
-    patternTableModel.updateStore(myLogHighlightingStore)
-    filterTableModel.updateStore(myLogHighlightingStore)
-    formatsTableModel.updateStore(myLogHighlightingStore)
+    myLogHighlightingState = store.myState.clone()
+    patternTableModel.updateStore(myLogHighlightingState)
+    filterTableModel.updateStore(myLogHighlightingState)
+    formatsTableModel.updateStore(myLogHighlightingState)
   }
 
-  override fun getDisplayName(): String = "Log Highlighting (ideolog)"
+  override fun getDisplayName(): String = "Log Highlighting (Ideolog)"
 }
 
