@@ -44,7 +44,7 @@ intellij {
 }
 
 tasks.withType<KotlinCompile> {
-  //kotlinOptions.allWarningsAsErrors = true
+  kotlinOptions.allWarningsAsErrors = true
   kotlinOptions.freeCompilerArgs += "-Xnew-inference"
   kotlinOptions.jvmTarget = "11"
 }
