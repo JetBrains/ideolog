@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.ideolog.highlighting.settings.recommendations.RecommenderEngine
 import com.intellij.ideolog.util.application
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.fileChooser.FileChooserFactory
@@ -8,10 +9,7 @@ import com.intellij.openapi.options.BaseConfigurable
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VfsUtil
-import com.intellij.ui.IdeBorderFactory
-import com.intellij.ui.JBIntSpinner
-import com.intellij.ui.OnePixelSplitter
-import com.intellij.ui.ToolbarDecorator
+import com.intellij.ui.*
 import com.intellij.ui.table.JBTable
 import com.intellij.util.toByteArray
 import com.intellij.util.ui.FormBuilder
@@ -19,6 +17,7 @@ import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
 import com.intellij.util.xmlb.XmlSerializer
+import net.miginfocom.swing.MigLayout
 import org.jdom.input.SAXBuilder
 import java.awt.BorderLayout
 import java.awt.FlowLayout
@@ -150,19 +149,24 @@ class LogHighlightingConfigurable : BaseConfigurable() {
         }
       }.createPanel()
 
+      val recsPanel = JPanel(MigLayout("novisualpadding, insets 0")).apply {
+        border = JBUI.Borders.emptyTop(7)
+        add(RecommenderEngine().getComponent())
+      }
       add(panel, BorderLayout.CENTER)
+      add(recsPanel, BorderLayout.SOUTH)
     }
 
-    val topPanel = OnePixelSplitter(false, "Ideolog.Settings.TopProportion", 0.5f)
-    topPanel.setResizeEnabled(false)
-
-    topPanel.firstComponent = BorderLayoutPanel().apply {
-      addToCenter(patternsPanel)
-      border = JBUI.Borders.emptyRight(10)
-    }
-    topPanel.secondComponent = BorderLayoutPanel().apply {
-      addToCenter(filtersPanel)
-      border = JBUI.Borders.emptyLeft(10)
+    val topPanel = OnePixelSplitter(false, "Ideolog.Settings.TopProportion", 0.5f).apply {
+      setResizeEnabled(false)
+      firstComponent = BorderLayoutPanel().apply {
+        addToCenter(patternsPanel)
+        border = JBUI.Borders.emptyRight(10)
+      }
+      secondComponent = BorderLayoutPanel().apply {
+        addToCenter(filtersPanel)
+        border = JBUI.Borders.emptyLeft(10)
+      }
     }
 
     var formatsTableRange: IntRange? = null
