@@ -137,6 +137,10 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
 
     myOnlyFirstLineRegexCheckbox?.let { item.regexMatchFullEvent = it.isSelected }
 
+    if (DefaultSettingsStoreItems.ParsingPatternsUUIDs.contains(item.uuid)) {
+      item.uuid = UUID.randomUUID()
+    }
+
     super.doOKAction()
   }
 

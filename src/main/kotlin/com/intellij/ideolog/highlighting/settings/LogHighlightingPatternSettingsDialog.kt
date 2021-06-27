@@ -8,6 +8,7 @@ import com.intellij.ui.EditorTextField
 import java.awt.Component
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
+import java.util.*
 import javax.swing.*
 
 class LogHighlightingPatternSettingsDialog(private val item: LogHighlightingPattern) : DialogWrapper(null, true, IdeModalityType.PROJECT) {
@@ -114,6 +115,9 @@ class LogHighlightingPatternSettingsDialog(private val item: LogHighlightingPatt
   }
 
   override fun doOKAction() {
+    if (DefaultSettingsStoreItems.HighlightingPatternsUUIDs.contains(item.uuid)) {
+      item.uuid = UUID.randomUUID()
+    }
     myPatternText?.let { item.pattern = it.text }
     myActionCombo?.let { item.action = it.selectedItem as LogHighlightingAction }
     myForegroundCheck?.let {
