@@ -65,7 +65,8 @@ object DefaultSettingsStoreItems {
     null,
     bold = true,
     italic = false,
-    showOnStripe = true
+    showOnStripe = true,
+    uuid = UUID.fromString("de2d3bb2-78c9-4beb-835e-d483c35c07b6")
   )
   val Warning = LogHighlightingPattern(
     true,
@@ -75,7 +76,8 @@ object DefaultSettingsStoreItems {
     null,
     bold = true,
     italic = false,
-    showOnStripe = false
+    showOnStripe = false,
+    uuid = UUID.fromString("11ff1574-2118-4722-905a-61bec89b079e")
   )
   val Info = LogHighlightingPattern(
     true,
@@ -85,8 +87,11 @@ object DefaultSettingsStoreItems {
     null,
     bold = false,
     italic = false,
-    showOnStripe = false
+    showOnStripe = false,
+    uuid = UUID.fromString("5e882ebc-2179-488b-8e1a-2fe488636f36")
   )
+  val HighlightingPatterns = listOf(Error, Warning, Info)
+  val HighlightingPatternsUUIDs = HighlightingPatterns.map { it.uuid }
 }
 
 @State(name = "LogHighlightingSettings", storages = [Storage(value = "log_highlighting.xml", roamingType = RoamingType.DEFAULT)])
@@ -148,6 +153,21 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
               it.uuid = DefaultSettingsStoreItems.IntelliJIDEA.uuid
             DefaultSettingsStoreItems.PipeSeparated.name ->
               it.uuid = DefaultSettingsStoreItems.PipeSeparated.uuid
+            else ->
+              it.uuid = UUID.randomUUID()
+          }
+        }
+
+        newState.patterns.forEach {
+          when (it.pattern) {
+            DefaultSettingsStoreItems.Error.pattern ->
+              it.uuid = DefaultSettingsStoreItems.Error.uuid
+            DefaultSettingsStoreItems.Warning.pattern ->
+              it.uuid = DefaultSettingsStoreItems.Warning.uuid
+            DefaultSettingsStoreItems.Info.pattern ->
+              it.uuid = DefaultSettingsStoreItems.Info.uuid
+            else ->
+              it.uuid = UUID.randomUUID()
           }
         }
 
@@ -317,10 +337,11 @@ data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean,
                                   @Attribute("bg") var bgRgb: Int?,
                                   @Attribute("bold") var bold: Boolean,
                                   @Attribute("italic") var italic: Boolean,
-                                  @Attribute("stripe") var showOnStripe: Boolean) : Cloneable {
+                                  @Attribute("stripe") var showOnStripe: Boolean,
+                                  @Attribute("uuid", converter = UUIDConverter::class) var uuid: UUID) : Cloneable {
 
   @Suppress("unused")
-  constructor() : this(true, "", LogHighlightingAction.HIGHLIGHT_FIELD, null, null, false, false, false)
+  constructor() : this(true, "", LogHighlightingAction.HIGHLIGHT_FIELD, null, null, false, false, false, UUID.randomUUID())
 
   var foregroundColor: Color?
     @Transient get() = fgRgb?.let { Color(it) }
@@ -335,7 +356,7 @@ data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean,
     }
 
   public override fun clone(): LogHighlightingPattern {
-    return LogHighlightingPattern(enabled, pattern, action, fgRgb, bgRgb, bold, italic, showOnStripe)
+    return LogHighlightingPattern(enabled, pattern, action, fgRgb, bgRgb, bold, italic, showOnStripe, uuid)
   }
 }
 
