@@ -52,24 +52,26 @@ class IdeologDocumentContext(val document: Document) {
   }
 
   fun detectLogFileFormat(): LogFileFormat {
-    return format ?: run {
-      val regexMatchers = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.mapNotNull {
-        if (!it.enabled)
-          return@mapNotNull null
+    val format2 = format
+    if (format2 != null) return format2
 
-        try {
-          return@mapNotNull RegexLogParser(Pattern.compile(it.pattern, Pattern.DOTALL), Pattern.compile(it.lineStartPattern), it, SimpleDateFormat(it.timePattern))
-        } catch(e: PatternSyntaxException){
-          return@mapNotNull null
-        }
+    val regexMatchers = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.mapNotNull {
+      if (!it.enabled)
+        return@mapNotNull null
+
+      try {
+        return@mapNotNull RegexLogParser(Pattern.compile(it.pattern, Pattern.DOTALL), Pattern.compile(it.lineStartPattern), it, SimpleDateFormat(it.timePattern))
+      } catch(e: PatternSyntaxException){
+        println(e)
+        return@mapNotNull null
       }
+    }
 
-      val doc = document.charsSequence
-      val firstLines = doc.lineSequence().take(25)
-      val sumByMatcher = regexMatchers.map { it to firstLines.count { line -> it.regex.matcher(line).find() } }
+    val doc = document.charsSequence
+    val firstLines = doc.lineSequence().take(25)
+    val sumByMatcher = regexMatchers.map { it to firstLines.count { line -> it.regex.matcher(line).find() } }
 
-      LogFileFormat(sumByMatcher.filter { it.second > 5 }.maxByOrNull { it.second }?.first)
-    }.also { format = it }
+    return LogFileFormat(sumByMatcher.filter { it.second > 5 }.maxByOrNull { it.second }?.first).also { format = it }
   }
 
   /**
