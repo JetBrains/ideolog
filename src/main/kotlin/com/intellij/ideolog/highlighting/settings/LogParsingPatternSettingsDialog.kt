@@ -1,20 +1,30 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.icons.AllIcons
 import com.intellij.ide.BrowserUtil
+import com.intellij.openapi.editor.event.DocumentEvent
+import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBIntSpinner
+import com.intellij.ui.components.Link
+import com.intellij.ui.components.labels.LinkLabel
+import com.intellij.util.ui.UIUtil
+import com.intellij.util.ui.update.MergingUpdateQueue
+import com.intellij.util.ui.update.Update
 import net.miginfocom.swing.MigLayout
 import org.intellij.lang.regexp.RegExpFileType
 import java.text.SimpleDateFormat
+import java.util.*
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
+import kotlin.collections.ArrayList
 
 class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : DialogWrapper(null, true, IdeModalityType.PROJECT) {
   private var myNameText: EditorTextField? = null
@@ -54,6 +64,29 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
     val timeFormatText = EditorTextField(item.timePattern)
     myTimePatternText = timeFormatText
     panel.add(timeFormatText)
+    panel.add(
+      JLabel("Preview: ").apply {
+        foreground = UIUtil.getLabelDisabledForeground()
+      }
+    )
+    val timeFormatPreviewLabel = JLabel(getDatePreviewText(item.timePattern))
+    val queue = MergingUpdateQueue("TimePreview", 500, true, MergingUpdateQueue.ANY_COMPONENT, myDisposable)
+    timeFormatText.document.addDocumentListener(object : DocumentListener {
+      override fun documentChanged(event: DocumentEvent) {
+        queue.queue(object : Update("typingTime") {
+          override fun run() {
+            timeFormatPreviewLabel.text = getDatePreviewText(event.document.text)
+          }
+        })
+      }
+    }, myDisposable)
+    panel.add(timeFormatPreviewLabel)
+    panel.add(JLabel())
+    val linkLbl = (Link("Documentation") {
+      BrowserUtil.browse("https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html")
+    } as LinkLabel<*>).apply { icon = AllIcons.Ide.External_link_arrow }
+    panel.add(linkLbl)
+
 
     panel.add(JLabel("Time capture group: "))
     val timeSpinner = JBIntSpinner(item.timeColumnId + 1, 0, 100)
@@ -75,6 +108,15 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
     panel.add(firstLineRegexCheckbox, "span 2, left")
 
     return panel
+  }
+
+  private fun getDatePreviewText(format: String): String {
+    val parsedFormat = try {
+      SimpleDateFormat(format).format(Date(629518620000))
+    }
+    catch (t: Throwable) { "" }
+
+    return parsedFormat.ifBlank { "-" }
   }
 
   override fun getHelpId() = ""
