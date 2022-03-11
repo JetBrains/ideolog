@@ -54,7 +54,19 @@ object DefaultSettingsStoreItems {
     false,
     UUID.fromString("e9fa2755-8390-42f5-a41e-a909c58c8cf9")
   )
-  val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog)
+  val All = LogParsingPattern(
+    true,
+    "All",
+    "^(.*?)(\\s(.*?))?(\\s(.*?))?(\\s(.*?))?(\\s(.*?))?(\\s(.*?))?(\\s(.*?))?\$",
+    "",
+    "",
+    -1,
+    -1,
+    -1,
+    false,
+    UUID.fromString("db0779ce-9fd3-11ec-b909-0242ac120002")
+  )
+  val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog, All)
   val ParsingPatternsUUIDs = ParsingPatterns.map { it.uuid }
 
   val Error = LogHighlightingPattern(
@@ -95,7 +107,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     fun getInstance() = getService<LogHighlightingSettingsStore>()
     val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
-    const val CURRENT_SETTINGS_VERSION = "5"
+    const val CURRENT_SETTINGS_VERSION = "6"
 
     val cleanState = State(arrayListOf(
       DefaultSettingsStoreItems.Error,
@@ -104,7 +116,8 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     ), arrayListOf(), arrayListOf(
       DefaultSettingsStoreItems.PipeSeparated,
       DefaultSettingsStoreItems.IntelliJIDEA,
-      DefaultSettingsStoreItems.TeamCityBuildLog
+      DefaultSettingsStoreItems.TeamCityBuildLog,
+      DefaultSettingsStoreItems.All
     ), CURRENT_SETTINGS_VERSION, DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it }, "heatmap", "16", true)
 
     val settingsUpgraders = mapOf<String, (State) -> State>(
@@ -156,6 +169,16 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
 
         newState.version = "5"
 
+        return@lambda newState
+      },
+      "5" to lambda@{ oldState ->
+        val newState = oldState.clone()
+
+        newState.parsingPatterns.add(DefaultSettingsStoreItems.All)
+        newState.lastAddedDefaultFormat =
+          DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it }
+
+        newState.version = "6"
         return@lambda newState
       }
     )
