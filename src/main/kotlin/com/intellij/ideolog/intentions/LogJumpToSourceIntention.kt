@@ -29,20 +29,28 @@ class FileMatch(private val evt: LogEvent) {
   var categoryPresent = 0
   var messageTrigramCount = 0
 
-  private var filenameMatch = 0 // 1 - prefix match to category, 2- full match to category
+  private var filenameMatch = 0 /* 1 - prefix match to category, 2 - full match to category
+                                   in case of not specified category: 1 - raw text of event contains filename */
 
   private lateinit var _vf: VirtualFile
+
+  fun calculateFilenameMatch(name: String): Int {
+    if (evt.category.isNotBlank()) {
+      if (name == evt.category) return 2
+      else if (name.startsWith(evt.category) && /*To suppress short prefixes*/name.length <= evt.category.length * 1.5) {
+        return 1
+      }
+    } else if (evt.rawText.split(Regex("\\p{P}|\\s")).contains(name)) {
+      return 1
+    }
+    return 0
+  }
+
   var virtualFile: VirtualFile
     get() = _vf
     set(value) {
       _vf = value
-      val name = _vf.nameWithoutExtension
-      if (evt.category.isNotBlank()) {
-        if (name == evt.category) filenameMatch = 2
-        else if (name.startsWith(evt.category) && /*To suppress short prefixes*/name.length <= evt.category.length * 1.5) {
-          filenameMatch = 1
-        }
-      }
+      filenameMatch = calculateFilenameMatch(_vf.nameWithoutExtension)
     }
 
   val priority: Int get() = filenameMatch * 15 + categoryPresent * 3 + levelPresent * 2 + messageTrigramCount
@@ -186,28 +194,37 @@ class LogJumpToSourceIntention : IntentionAction {
           true
         }
 
+        fun processVirtualFiles(vfs: Iterable<VirtualFile>, haveCategory: Boolean) {
+          vfs.forEach { vf ->
+            if (vf.extension == LogFileType.defaultExtension || !pfi.isInSourceContent(vf)) {
+              return@forEach
+            }
 
-        filesWithCategory.forEach { vf ->
-          if (vf == null
-            || vf.extension == LogFileType.defaultExtension
-            || !pfi.isInSourceContent(vf)) {
-            return@forEach
+            val match = FileMatch(evt)
+            match.virtualFile = vf
+            if (haveCategory) {
+              match.categoryPresent = 1
+            }
+
+            if (filesWithLevel.contains(vf)) {
+              match.levelPresent = 1
+              filesWithLevel.remove(vf)
+            }
+
+            filtered.add(match)
           }
+        }
 
-          val match = FileMatch(evt)
-          match.virtualFile = vf
-          match.categoryPresent = 1
+        processVirtualFiles(filesWithCategory, true)
 
-          if (filesWithLevel.contains(vf)) {
-            match.levelPresent = 1
-            filesWithLevel.remove(vf)
-          }
+        if (evt.category.isBlank()) {
+          val filesWithMessagePart = evt.message.split(Regex("\\p{P}|\\s")).filter { it.length >= 5 }.map {
+            cacheManager.getVirtualFilesWithWord(it, UsageSearchContext.ANY, GlobalSearchScope.projectScope(project), false).toList()
+          }.flatten().distinct()
 
-          filtered.add(match)
+          processVirtualFiles(filesWithMessagePart, false)
         }
       }
-
-
 
       filtered.sortBy { -it.priority }
 
