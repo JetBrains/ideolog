@@ -28,7 +28,7 @@ class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFil
 
     date = fileType.extractDate(tokensFiltered)?.takeFrom(rawText)?.trim()?.toString() ?: ""
     rawLevel = fileType.extractSeverity(tokensFiltered)?.takeFrom(rawText)?.trim()?.toString() ?: ""
-    category = fileType.extractCategory(tokensFiltered)?.takeFrom(rawText)?.trim().toString()
+    category = fileType.extractCategory(tokensFiltered)?.takeFrom(rawText)?.trim()?.toString() ?: ""
     fullMessage = fileType.extractMessage(tokensFiltered).takeFrom(rawText).toString().trim()
 
     level = when (rawLevel.toUpperCase()) {
