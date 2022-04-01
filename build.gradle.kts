@@ -17,6 +17,11 @@ plugins {
   id("org.jetbrains.intellij") version "1.0"
 }
 
+dependencies {
+  implementation(kotlin("test"))
+  implementation("org.junit.jupiter:junit-jupiter:5.8.2")
+}
+
 apply(plugin = "kotlin")
 
 repositories {
@@ -38,6 +43,9 @@ intellij {
     }
     runIde {
       systemProperty("idea.is.internal", "true")
+    }
+    test {
+      useJUnitPlatform()
     }
   }
 
