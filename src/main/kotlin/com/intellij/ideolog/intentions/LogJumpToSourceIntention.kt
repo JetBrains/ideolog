@@ -23,6 +23,7 @@ import com.intellij.util.indexing.FileBasedIndex
 import gnu.trove.TIntObjectHashMap
 import java.util.*
 
+const val logDelimiters = "\\p{P}|\\s"
 
 class FileMatch(private val evt: LogEvent) {
   var levelPresent = 0
@@ -33,19 +34,6 @@ class FileMatch(private val evt: LogEvent) {
                                    in case of not specified category: 1 - raw text of event contains filename */
 
   private lateinit var _vf: VirtualFile
-
-  fun calculateFilenameMatch(name: String): Int {
-    if (evt.category.isNotBlank()) {
-      if (name == evt.category) return 2
-      else if (name.startsWith(evt.category) && /*To suppress short prefixes*/name.length <= evt.category.length * 1.5) {
-        return 1
-      }
-    } else if (evt.rawText.split(Regex("\\p{P}|\\s")).contains(name)) {
-      return 1
-    }
-    return 0
-  }
-
   var virtualFile: VirtualFile
     get() = _vf
     set(value) {
@@ -54,6 +42,18 @@ class FileMatch(private val evt: LogEvent) {
     }
 
   val priority: Int get() = filenameMatch * 15 + categoryPresent * 3 + levelPresent * 2 + messageTrigramCount
+
+  fun calculateFilenameMatch(name: String): Int {
+    if (evt.category.isNotBlank()) {
+      if (name == evt.category) return 2
+      else if (name.startsWith(evt.category) && /*To suppress short prefixes*/name.length <= evt.category.length * 1.5) {
+        return 1
+      }
+    } else if (evt.rawText.split(Regex(logDelimiters)).contains(name)) {
+      return 1
+    }
+    return 0
+  }
 
   override fun toString(): String {
     return "Match(${virtualFile.presentableName}): (level: $levelPresent, " +
@@ -141,6 +141,28 @@ class LogJumpToSourceIntention : IntentionAction {
 
 
   companion object {
+    private fun getMatchesFromFiles(pfi: ProjectFileIndex, filesWithLevel: MutableSet<VirtualFile>, evt: LogEvent, vfs: Iterable<VirtualFile>, haveCategory: Boolean): List<FileMatch> {
+      val matches = ArrayList<FileMatch>()
+      vfs.forEach { vf ->
+        if (vf.extension == LogFileType.defaultExtension || !pfi.isInSourceContent(vf)) {
+          return@forEach
+        }
+
+        val match = FileMatch(evt)
+        match.virtualFile = vf
+        if (haveCategory) {
+          match.categoryPresent = 1
+        }
+
+        if (filesWithLevel.contains(vf)) {
+          match.levelPresent = 1
+        }
+
+        matches.add(match)
+      }
+      return matches
+    }
+
     private fun getFilesToMatch(project: Project, evt: LogEvent): List<FileMatch> {
       val filtered = ArrayList<FileMatch>()
 
@@ -186,7 +208,6 @@ class LogJumpToSourceIntention : IntentionAction {
 
           if (filesWithLevel.contains(vf)) {
             match.levelPresent = 1
-            filesWithLevel.remove(vf)
           }
 
           filtered.add(match)
@@ -194,35 +215,16 @@ class LogJumpToSourceIntention : IntentionAction {
           true
         }
 
-        fun processVirtualFiles(vfs: Iterable<VirtualFile>, haveCategory: Boolean) {
-          vfs.forEach { vf ->
-            if (vf.extension == LogFileType.defaultExtension || !pfi.isInSourceContent(vf)) {
-              return@forEach
-            }
-
-            val match = FileMatch(evt)
-            match.virtualFile = vf
-            if (haveCategory) {
-              match.categoryPresent = 1
-            }
-
-            if (filesWithLevel.contains(vf)) {
-              match.levelPresent = 1
-              filesWithLevel.remove(vf)
-            }
-
-            filtered.add(match)
-          }
-        }
-
-        processVirtualFiles(filesWithCategory, true)
+        filtered.addAll(getMatchesFromFiles(pfi, filesWithLevel, evt, filesWithCategory, true))
 
         if (evt.category.isBlank()) {
-          val filesWithMessagePart = evt.message.split(Regex("\\p{P}|\\s")).filter { it.length >= 5 }.map {
+          /* for events without a category, files for matching can be found using words from the event message,
+             but short words are not informative and there may be too many words in the event message,
+             so only first 10 words of length at least 5 are considered */
+          val filesWithMessagePart = evt.message.split(Regex(logDelimiters)).filter { it.length >= 5 }.take(10).map {
             cacheManager.getVirtualFilesWithWord(it, UsageSearchContext.ANY, GlobalSearchScope.projectScope(project), false).toList()
           }.flatten().distinct()
-
-          processVirtualFiles(filesWithMessagePart, false)
+          filtered.addAll(getMatchesFromFiles(pfi, filesWithLevel, evt, filesWithMessagePart, false))
         }
       }
 
