@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
+import java.util.*
 import javax.swing.table.AbstractTableModel
 
 class LogPatternTableModel(private var store: LogHighlightingSettingsStore.State) : AbstractTableModel() {
@@ -52,7 +53,7 @@ class LogPatternTableModel(private var store: LogHighlightingSettingsStore.State
   }
 
   fun addNewPattern(pattern: String) {
-    store.patterns.add(LogHighlightingPattern(true, pattern, LogHighlightingAction.HIGHLIGHT_FIELD, null, null, bold = false, italic = false, showOnStripe = true))
+    store.patterns.add(LogHighlightingPattern(true, pattern, LogHighlightingAction.HIGHLIGHT_FIELD, null, null, bold = false, italic = false, showOnStripe = true, UUID.randomUUID()))
     val index = store.patterns.size - 1
     fireTableRowsInserted(index, index)
   }
