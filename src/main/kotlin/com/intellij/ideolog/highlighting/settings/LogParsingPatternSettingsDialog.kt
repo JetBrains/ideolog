@@ -8,14 +8,17 @@ import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.Link
 import com.intellij.ui.components.labels.LinkLabel
 import com.intellij.util.ui.UIUtil
+import com.intellij.util.ui.components.BorderLayoutPanel
 import com.intellij.util.ui.update.MergingUpdateQueue
 import com.intellij.util.ui.update.Update
 import net.miginfocom.swing.MigLayout
 import org.intellij.lang.regexp.RegExpFileType
+import java.awt.BorderLayout
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
@@ -82,9 +85,13 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
     }, myDisposable)
     panel.add(timeFormatPreviewLabel)
     panel.add(JLabel())
-    val linkLbl = (Link("Documentation") {
-      BrowserUtil.browse("https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html")
-    } as LinkLabel<*>).apply { icon = AllIcons.Ide.External_link_arrow }
+
+    val linkLbl = BorderLayoutPanel().apply {
+      addToLeft(HyperlinkLabel().apply {
+        setHyperlinkText("Documentation")
+        setHyperlinkTarget("https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html")
+      })
+    }
     panel.add(linkLbl)
 
 
