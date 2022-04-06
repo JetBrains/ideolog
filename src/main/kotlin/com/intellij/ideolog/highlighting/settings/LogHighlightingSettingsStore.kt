@@ -246,14 +246,19 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
 
     myState = upgradeState(myState)
 
-    if(myState.lastAddedDefaultFormat.toInt() < cleanState.parsingPatterns.size) {
+    val lastAddedDefaultFormatOld = try {
+      myState.lastAddedDefaultFormat.toInt()
+    }
+    catch (t: NumberFormatException) {
+      return
+    }
+    if (lastAddedDefaultFormatOld < cleanState.parsingPatterns.size) {
       myState.parsingPatterns.addAll(
         cleanState.parsingPatterns.subList(myState.lastAddedDefaultFormat.toInt(), cleanState.parsingPatterns.size)
       )
       myState.lastAddedDefaultFormat = cleanState.parsingPatterns.size.toString()
+      fireListeners()
     }
-
-    fireListeners()
   }
 
   /**
