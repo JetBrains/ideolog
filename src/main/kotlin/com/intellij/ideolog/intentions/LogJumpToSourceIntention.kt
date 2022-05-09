@@ -5,8 +5,12 @@ import com.intellij.find.ngrams.TrigramIndex
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.highlighting.LogEvent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
@@ -77,8 +81,9 @@ class FileMatch(private val evt: LogEvent) {
 
 
   fun processFileOffset(psiManager: PsiManager) {
-    val psiFile = psiManager.findFile(virtualFile) ?: return
-    val text = psiFile.text
+    val text = ReadAction.compute<String, Throwable> {
+      psiManager.findFile(virtualFile)?.text
+    } ?: return
     val strForSubstring = evt.message.take(LIMIT)
 
     text.lines().forEachIndexed { line, strInCode ->
@@ -234,36 +239,48 @@ class LogJumpToSourceIntention : IntentionAction {
     }
 
     fun doIt(project: Project, editor: Editor) {
-      println("\n<JumpToSource>")
-      val event = LogEvent.fromEditor(editor)
-      event.prepareTrigrams()
-      println(event)
+      ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Finding a source", false) {
+        override fun run(indicator: ProgressIndicator) {
+          println("\n<JumpToSource>")
+
+          indicator.text = "Finding a source"
+          indicator.isIndeterminate = true
+
+          val event = ReadAction.compute<LogEvent, Throwable> {
+            LogEvent.fromEditor(editor)
+          }
+          event.prepareTrigrams()
+          println(event)
 
 
-      if (event.message.isBlank()) return
+          if (event.message.isBlank()) return
 
-      val sorted = getFilesToMatch(project, event)
+          val sorted = getFilesToMatch(project, event)
 
-      val bestCandidates = sorted.take(3).toMutableList()
-
-
-      val psiManager = PsiManager.getInstance(project)
-
-      println("Best candidates:")
-      bestCandidates.forEach {
-        it.processFileOffset(psiManager)
-        println(it)
-      }
+          val bestCandidates = sorted.take(3).toMutableList()
 
 
+          val psiManager = PsiManager.getInstance(project)
 
-      bestCandidates.sortBy { -it.bestScore }
-      val best = bestCandidates.firstOrNull() ?: return
+          println("Best candidates:")
+          bestCandidates.forEach {
+            it.processFileOffset(psiManager)
+            println(it)
+          }
 
 
-      val descriptor = OpenFileDescriptor(project, best.virtualFile, best.bestLine, 0)
-      val navigable = descriptor.setUseCurrentWindow(true)
-      if (navigable.canNavigate()) navigable.navigate(true)
+
+          bestCandidates.sortBy { -it.bestScore }
+          val best = bestCandidates.firstOrNull() ?: return
+
+
+          ApplicationManager.getApplication().invokeLater {
+            val descriptor = OpenFileDescriptor(project, best.virtualFile, best.bestLine, 0)
+            val navigable = descriptor.setUseCurrentWindow(true)
+            if (navigable.canNavigate()) navigable.navigate(true)
+          }
+        }
+      })
     }
   }
 
