@@ -14,7 +14,7 @@ buildscript {
 
 plugins {
   id("me.filippov.gradle.jvm.wrapper") version "0.9.3"
-  id("org.jetbrains.intellij") version "1.0"
+  id("org.jetbrains.intellij") version "1.6.0"
 }
 
 dependencies {
