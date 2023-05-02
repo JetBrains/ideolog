@@ -5,6 +5,7 @@ import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.editor.Editor
 import java.text.DateFormat
 import java.text.ParseException
+import java.util.*
 import java.util.regex.Pattern
 
 data class LogToken(val startOffset: Int, var endOffset: Int, val isSeparator: Boolean) {
@@ -13,7 +14,7 @@ data class LogToken(val startOffset: Int, var endOffset: Int, val isSeparator: B
   }
 }
 
-class RegexLogParser(val regex: Pattern, val lineRegex: Pattern, val otherParsingSettings: LogParsingPattern, val timeFormat: DateFormat)
+class RegexLogParser(val uuid: UUID, val regex: Pattern, val lineRegex: Pattern, val otherParsingSettings: LogParsingPattern, val timeFormat: DateFormat)
 
 class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
   fun isLineEventStart(line: CharSequence): Boolean {
@@ -63,9 +64,9 @@ class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
         return@let it.timeFormat.parse(time.toString()).time
       } catch (e: ParseException) {
         // silently ignore it
-      } catch (e: NumberFormatException) {
+      } catch (_: NumberFormatException) {
 
-      } catch (e: ArrayIndexOutOfBoundsException) {
+      } catch (_: ArrayIndexOutOfBoundsException) {
         // apparently this one is also randomly thrown by parsing
       }
       return@let null

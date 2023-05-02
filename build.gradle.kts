@@ -19,7 +19,6 @@ plugins {
 
 dependencies {
   implementation(kotlin("test"))
-  implementation("org.junit.jupiter:junit-jupiter:5.8.2")
 }
 
 apply(plugin = "kotlin")
@@ -34,28 +33,25 @@ val buildNumber: String by rootProject.extra
 version = buildNumber
 
 intellij {
-  version.set("2020.3")
+  version.set("2022.2")
   pluginName.set("ideolog")
   tasks {
     withType<org.jetbrains.intellij.tasks.PatchPluginXmlTask> {
       updateSinceUntilBuild.set(true)
+      sinceBuild.set("222.3345")
       untilBuild.set("")
     }
     runIde {
       systemProperty("idea.is.internal", "true")
     }
-    test {
-      useJUnitPlatform()
-    }
   }
-
 }
 
 tasks {
   withType<KotlinCompile> {
     kotlinOptions.allWarningsAsErrors = true
     kotlinOptions.freeCompilerArgs += "-Xnew-inference"
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "17"
   }
 
   wrapper {
