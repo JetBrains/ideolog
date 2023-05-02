@@ -29,18 +29,27 @@ if "%DIRNAME%" == "" set DIRNAME=.
 set APP_BASE_NAME=%~n0
 set APP_HOME=%DIRNAME%
 
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
 @rem GRADLE JVM WRAPPER START MARKER
 
 setlocal
+set BUILD_DIR=%LOCALAPPDATA%\gradle-jvm
+set JVM_TARGET_DIR=%BUILD_DIR%\jdk-17.0.3.1_windows-x64_bin-d6ede5\
 
-set BUILD_DIR=%APP_HOME%build\
-set JVM_TARGET_DIR=%BUILD_DIR%gradle-jvm\amazon-corretto-11.0.4.11.1-windows-x64-9b61dd\
+set JVM_URL=https://download.oracle.com/java/17/archive/jdk-17.0.3.1_windows-x64_bin.zip
 
-set JVM_TEMP_FILE=jvm-windows-x64.zip
-set JVM_URL=https://d3pxv6yz143wms.cloudfront.net/11.0.4.11.1/amazon-corretto-11.0.4.11.1-windows-x64.zip
+set IS_TAR_GZ=0
+set JVM_TEMP_FILE=gradle-jvm.zip
+
+if /I "%JVM_URL:~-7%"==".tar.gz" (
+    set IS_TAR_GZ=1
+    set JVM_TEMP_FILE=gradle-jvm.tar.gz
+)
 
 set POWERSHELL=%SystemRoot%\system32\WindowsPowerShell\v1.0\powershell.exe
 
@@ -53,13 +62,15 @@ if "%CURRENT_FLAG%" == "%JVM_URL%" goto continueWithJvm
 
 :downloadAndExtractJvm
 
-CD "%BUILD_DIR%"
+PUSHD "%BUILD_DIR%"
 if errorlevel 1 goto fail
 
-echo Downloading %JVM_URL% to %BUILD_DIR%%JVM_TEMP_FILE%
+echo Downloading %JVM_URL% to %BUILD_DIR%\%JVM_TEMP_FILE%
 if exist "%JVM_TEMP_FILE%" DEL /F "%JVM_TEMP_FILE%"
 "%POWERSHELL%" -nologo -noprofile -Command "Set-StrictMode -Version 3.0; $ErrorActionPreference = \"Stop\"; (New-Object Net.WebClient).DownloadFile('%JVM_URL%', '%JVM_TEMP_FILE%')"
 if errorlevel 1 goto fail
+
+POPD
 
 RMDIR /S /Q "%JVM_TARGET_DIR%"
 if errorlevel 1 goto fail
@@ -67,15 +78,22 @@ if errorlevel 1 goto fail
 MKDIR "%JVM_TARGET_DIR%"
 if errorlevel 1 goto fail
 
-CD "%JVM_TARGET_DIR%"
+PUSHD "%JVM_TARGET_DIR%"
 if errorlevel 1 goto fail
 
-echo Extracting %BUILD_DIR%%JVM_TEMP_FILE% to %JVM_TARGET_DIR%
-"%POWERSHELL%" -nologo -noprofile -command "Set-StrictMode -Version 3.0; $ErrorActionPreference = \"Stop\"; Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('..\\..\\%JVM_TEMP_FILE%', '.');"
+echo Extracting %BUILD_DIR%\%JVM_TEMP_FILE% to %JVM_TARGET_DIR%
+
+if "%IS_TAR_GZ%"=="1" (
+    tar xf "..\\%JVM_TEMP_FILE%"
+) else (
+    "%POWERSHELL%" -nologo -noprofile -command "Set-StrictMode -Version 3.0; $ErrorActionPreference = \"Stop\"; Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('..\\%JVM_TEMP_FILE%', '.');"
+)
 if errorlevel 1 goto fail
 
-DEL /F "..\..\%JVM_TEMP_FILE%"
+DEL /F "..\%JVM_TEMP_FILE%"
 if errorlevel 1 goto fail
+
+POPD
 
 echo %JVM_URL%>"%JVM_TARGET_DIR%.flag"
 if errorlevel 1 goto fail
@@ -98,7 +116,7 @@ if defined JAVA_HOME goto findJavaFromJavaHome
 
 set JAVA_EXE=java.exe
 %JAVA_EXE% -version >NUL 2>&1
-if "%ERRORLEVEL%" == "0" goto init
+if "%ERRORLEVEL%" == "0" goto execute
 
 echo.
 echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
@@ -112,7 +130,7 @@ goto fail
 set JAVA_HOME=%JAVA_HOME:"=%
 set JAVA_EXE=%JAVA_HOME%/bin/java.exe
 
-if exist "%JAVA_EXE%" goto init
+if exist "%JAVA_EXE%" goto execute
 
 echo.
 echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
@@ -122,28 +140,14 @@ echo location of your Java installation.
 
 goto fail
 
-:init
-@rem Get command-line arguments, handling Windows variants
-
-if not "%OS%" == "Windows_NT" goto win9xME_args
-
-:win9xME_args
-@rem Slurp the command line arguments.
-set CMD_LINE_ARGS=
-set _SKIP=2
-
-:win9xME_args_slurp
-if "x%~1" == "x" goto execute
-
-set CMD_LINE_ARGS=%*
-
 :execute
 @rem Setup the command line
 
 set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
 
+
 @rem Execute Gradle
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %CMD_LINE_ARGS%
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
 
 :end
 @rem End local scope for the variables with windows NT shell

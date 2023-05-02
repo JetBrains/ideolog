@@ -44,7 +44,7 @@ class LogLargeFileNotificationProvider : EditorNotifications.Provider<EditorNoti
     override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor, project: Project): EditorNotificationPanel? {
         if (fileEditor !is LogFileEditor) return null
         val editor = (fileEditor as TextEditor).editor
-        val productName = ApplicationNamesInfo.getInstance().productName.toLowerCase(Locale.US)
+        val productName = ApplicationNamesInfo.getInstance().productName.lowercase(Locale.getDefault())
         val versionName = ApplicationInfo.getInstance().majorVersion
         val isSupported = productName == "rider" && versionName >= "2018"
         if (editor.getUserData(HIDDEN_KEY) != null || dontShowAgain || !FileUtilRt.isTooLarge(file.length) || !isSupported) {

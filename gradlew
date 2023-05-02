@@ -82,21 +82,43 @@ esac
 
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
-# GRADLE JVM WRAPPER START MARKER
-BUILD_DIR=$APP_HOME/build
 
+# GRADLE JVM WRAPPER START MARKER
+BUILD_DIR="${HOME}/.local/share/gradle-jvm"
+JVM_ARCH=$(uname -m)
+JVM_TEMP_FILE=$BUILD_DIR/gradle-jvm-temp.tar.gz
 if [ "$darwin" = "true" ]; then
-    JVM_TEMP_FILE=$BUILD_DIR/jvm-macosx-x64.tar.gz
-    JVM_URL=https://d3pxv6yz143wms.cloudfront.net/11.0.4.11.1/amazon-corretto-11.0.4.11.1-macosx-x64.tar.gz
-    JVM_TARGET_DIR=$BUILD_DIR/gradle-jvm/amazon-corretto-11.0.4.11.1-macosx-x64-cc08dc
+    case $JVM_ARCH in
+    x86_64)
+        JVM_URL=https://download.oracle.com/java/17/archive/jdk-17.0.3.1_macos-x64_bin.tar.gz
+        JVM_TARGET_DIR=$BUILD_DIR/jdk-17.0.3.1_macos-x64_bin-1bcf03
+        ;;
+    arm64)
+        JVM_URL=https://download.oracle.com/java/17/archive/jdk-17.0.3.1_macos-aarch64_bin.tar.gz
+        JVM_TARGET_DIR=$BUILD_DIR/jdk-17.0.3.1_macos-aarch64_bin-297fa2
+        ;;
+    *) 
+        die "Unknown architecture $JVM_ARCH"
+        ;;
+    esac
 elif [ "$cygwin" = "true" ] || [ "$msys" = "true" ]; then
-    JVM_TEMP_FILE=$BUILD_DIR/jvm-windows-x64.zip
-    JVM_URL=https://d3pxv6yz143wms.cloudfront.net/11.0.4.11.1/amazon-corretto-11.0.4.11.1-windows-x64.zip
-    JVM_TARGET_DIR=$BUILD_DIR/amazon-corretto-11.0.4.11.1-windows-x64-9b61dd
+    JVM_URL=https://download.oracle.com/java/17/archive/jdk-17.0.3.1_windows-x64_bin.zip
+    JVM_TARGET_DIR=$BUILD_DIR/jdk-17.0.3.1_windows-x64_bin-d6ede5
 else
-    JVM_TEMP_FILE=$BUILD_DIR/jvm-linux-x64.tar.gz
-    JVM_URL=https://d3pxv6yz143wms.cloudfront.net/11.0.4.11.1/amazon-corretto-11.0.4.11.1-linux-x64.tar.gz
-    JVM_TARGET_DIR=$BUILD_DIR/gradle-jvm/amazon-corretto-11.0.4.11.1-linux-x64-a8fc5f
+    JVM_ARCH=$(linux$(getconf LONG_BIT) uname -m)
+     case $JVM_ARCH in
+        x86_64)
+            JVM_URL=https://download.oracle.com/java/17/archive/jdk-17.0.3.1_linux-x64_bin.tar.gz
+            JVM_TARGET_DIR=$BUILD_DIR/jdk-17.0.3.1_linux-x64_bin-9324ae
+            ;;
+        aarch64)
+            JVM_URL=https://download.oracle.com/java/17/archive/jdk-17.0.3.1_linux-aarch64_bin.tar.gz
+            JVM_TARGET_DIR=$BUILD_DIR/jdk-17.0.3.1_linux-aarch64_bin-319da6
+            ;;
+        *) 
+            die "Unknown architecture $JVM_ARCH"
+            ;;
+        esac
 fi
 
 set -e
@@ -105,30 +127,30 @@ if [ -e "$JVM_TARGET_DIR/.flag" ] && [ -n "$(ls "$JVM_TARGET_DIR")" ] && [ "x$(c
     # Everything is up-to-date in $JVM_TARGET_DIR, do nothing
     true
 else
-  warn "Downloading $JVM_URL to $JVM_TEMP_FILE"
+  echo "Downloading $JVM_URL to $JVM_TEMP_FILE"
 
   rm -f "$JVM_TEMP_FILE"
   mkdir -p "$BUILD_DIR"
   if command -v curl >/dev/null 2>&1; then
       if [ -t 1 ]; then CURL_PROGRESS="--progress-bar"; else CURL_PROGRESS="--silent --show-error"; fi
       # shellcheck disable=SC2086
-      curl $CURL_PROGRESS --output "${JVM_TEMP_FILE}" "$JVM_URL"
+      curl $CURL_PROGRESS -L --output "${JVM_TEMP_FILE}" "$JVM_URL" 2>&1
   elif command -v wget >/dev/null 2>&1; then
       if [ -t 1 ]; then WGET_PROGRESS=""; else WGET_PROGRESS="-nv"; fi
-      wget $WGET_PROGRESS -O "${JVM_TEMP_FILE}" "$JVM_URL"
+      wget $WGET_PROGRESS -O "${JVM_TEMP_FILE}" "$JVM_URL" 2>&1
   else
       die "ERROR: Please install wget or curl"
   fi
 
-  warn "Extracting $JVM_TEMP_FILE to $JVM_TARGET_DIR"
+  echo "Extracting $JVM_TEMP_FILE to $JVM_TARGET_DIR"
   rm -rf "$JVM_TARGET_DIR"
   mkdir -p "$JVM_TARGET_DIR"
 
-  if [ "$cygwin" = "true" ] || [ "$msys" = "true" ]; then
-      unzip "$JVM_TEMP_FILE" -d "$JVM_TARGET_DIR"
-  else
-      tar -x -f "$JVM_TEMP_FILE" -C "$JVM_TARGET_DIR"
-  fi
+  case "$JVM_URL" in
+    *".zip") unzip "$JVM_TEMP_FILE" -d "$JVM_TARGET_DIR" ;;
+    *) tar -x -f "$JVM_TEMP_FILE" -C "$JVM_TARGET_DIR" ;;
+  esac
+  
   rm -f "$JVM_TEMP_FILE"
 
   echo "$JVM_URL" >"$JVM_TARGET_DIR/.flag"
@@ -199,6 +221,7 @@ fi
 if [ "$cygwin" = "true" -o "$msys" = "true" ] ; then
     APP_HOME=`cygpath --path --mixed "$APP_HOME"`
     CLASSPATH=`cygpath --path --mixed "$CLASSPATH"`
+
     JAVACMD=`cygpath --unix "$JAVACMD"`
 
     # We build the pattern for arguments to be converted via cygpath
