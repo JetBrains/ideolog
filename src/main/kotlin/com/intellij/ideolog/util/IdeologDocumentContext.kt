@@ -7,6 +7,7 @@ import com.intellij.ideolog.lex.LogFileFormat
 import com.intellij.ideolog.lex.RegexLogParser
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.FoldingModel
@@ -24,7 +25,7 @@ private val documentContextKey = Key.create<IdeologDocumentContext>("IdeologDocu
 val Document.ideologContext : IdeologDocumentContext
   get() = getUserData(documentContextKey) ?: run {
     putUserData(documentContextKey, IdeologDocumentContext(this))
-    getUserData(documentContextKey)!! // get again in case of multi-threaded writes (UDH is thread-safe)
+    getUserData(documentContextKey)!! // get again in case of multithreading writes (UDH is thread-safe)
   }
 
 class IdeologDocumentContext(val document: Document) {
@@ -52,17 +53,17 @@ class IdeologDocumentContext(val document: Document) {
   }
 
   fun detectLogFileFormat(): LogFileFormat {
-    val format2 = format
-    if (format2 != null) return format2
+    val currentFormat = format
+    if (currentFormat != null) return currentFormat
 
     val regexMatchers = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.mapNotNull {
       if (!it.enabled)
         return@mapNotNull null
 
       try {
-        return@mapNotNull RegexLogParser(Pattern.compile(it.pattern, Pattern.DOTALL), Pattern.compile(it.lineStartPattern), it, SimpleDateFormat(it.timePattern))
+        return@mapNotNull RegexLogParser(it.uuid, Pattern.compile(it.pattern, Pattern.DOTALL), Pattern.compile(it.lineStartPattern), it, SimpleDateFormat(it.timePattern))
       } catch(e: PatternSyntaxException){
-        println(e)
+        thisLogger().info(e)
         return@mapNotNull null
       }
     }

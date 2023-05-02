@@ -12,45 +12,47 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotificationPanel
+import com.intellij.ui.EditorNotificationProvider
 import com.intellij.ui.EditorNotifications
+import java.util.function.Function
+import javax.swing.JComponent
 
-class LogFileFormatNotificationProvider : EditorNotifications.Provider<EditorNotificationPanel>(), DumbAware {
+class LogFileFormatNotificationProvider : EditorNotificationProvider, DumbAware {
   companion object {
-    private val KEY = Key.create<EditorNotificationPanel>("log.file.format.editor.notification")
     private val HIDDEN_KEY = Key.create<Any>("log.file.format.editor.notification.hidden")
     private const val DONT_SHOW_AGAIN_KEY = "log.file.format.editor.notification.disabled"
 
     fun update(file: VirtualFile, project: Project) = EditorNotifications.getInstance(project).updateNotifications(file)
   }
 
-  override fun getKey(): Key<EditorNotificationPanel> = KEY
+  override fun collectNotificationData(project: Project, file: VirtualFile): Function<in FileEditor, out JComponent?> {
+    return Function {
+      if (it !is LogFileEditor) return@Function null
+      val editor = (it as TextEditor).editor
 
-  override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor, project: Project): EditorNotificationPanel? {
-    if (fileEditor !is LogFileEditor) return null
-    val editor = (fileEditor as TextEditor).editor
+      val propertiesComponent = PropertiesComponent.getInstance()
+      if (editor.document.ideologContext.detectLogFileFormat().myRegexLogParser != null || propertiesComponent.getBoolean(DONT_SHOW_AGAIN_KEY) || editor.getUserData(HIDDEN_KEY) != null)
+        return@Function null
 
-    val propertiesComponent = PropertiesComponent.getInstance()
-    if (editor.document.ideologContext.detectLogFileFormat().myRegexLogParser != null || propertiesComponent.getBoolean(DONT_SHOW_AGAIN_KEY) || editor.getUserData(HIDDEN_KEY) != null)
-      return null
+      val panel = EditorNotificationPanel().apply {
+        createActionLabel("Configure log formats") {
+          ShowSettingsUtil.getInstance().editConfigurable(project, LogHighlightingConfigurable())
 
-    val panel = EditorNotificationPanel().apply {
-      createActionLabel("Configure log formats") {
-        ShowSettingsUtil.getInstance().editConfigurable(project, LogHighlightingConfigurable())
+          update(file, project)
+        }
+        createActionLabel("Hide this notification") {
+          editor.putUserData(HIDDEN_KEY, HIDDEN_KEY)
 
-        update(file, project)
+          update(file, project)
+        }
+        createActionLabel("Don't show again") {
+          propertiesComponent.setValue(DONT_SHOW_AGAIN_KEY, true)
+
+          update(file, project)
+        }
       }
-      createActionLabel("Hide this notification") {
-        editor.putUserData(HIDDEN_KEY, HIDDEN_KEY)
 
-        update(file, project)
-      }
-      createActionLabel("Don't show again") {
-        propertiesComponent.setValue(DONT_SHOW_AGAIN_KEY, true)
-
-        update(file, project)
-      }
+      return@Function panel.text("Log format not recognized")
     }
-
-    return panel.text("Log format not recognized")
   }
 }

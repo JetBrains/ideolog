@@ -7,7 +7,6 @@ import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
-import com.intellij.util.containers.isNullOrEmpty
 
 class ResetHiddenItemsIntention : IntentionAction {
   override fun getText() = "Restore all hidden lines"
@@ -19,10 +18,10 @@ class ResetHiddenItemsIntention : IntentionAction {
       return false
 
     val context = editor.document.ideologContext
-    val hasHiddenItems = !context.hiddenItems.isNullOrEmpty()
-    val hasHiddenSubstrings = !context.hiddenSubstrings.isNullOrEmpty()
-    val hasWhitelistedSubstrings = !context.whitelistedSubstrings.isNullOrEmpty()
-    val hasWhitelistedItems = !context.whitelistedItems.isNullOrEmpty()
+    val hasHiddenItems = context.hiddenItems.isNotEmpty()
+    val hasHiddenSubstrings = context.hiddenSubstrings.isNotEmpty()
+    val hasWhitelistedSubstrings = context.whitelistedSubstrings.isNotEmpty()
+    val hasWhitelistedItems = context.whitelistedItems.isNotEmpty()
 
     return hasHiddenItems || hasHiddenSubstrings || hasWhitelistedSubstrings || hasWhitelistedItems || context.hideLinesAbove >= 0 || context.hideLinesBelow < Int.MAX_VALUE
   }

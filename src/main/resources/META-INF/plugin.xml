@@ -3,7 +3,6 @@
   <name>Ideolog</name>
   <vendor>JetBrains</vendor>
   <depends>com.intellij.modules.lang</depends>
-  <idea-version since-build="202.5455" />
   <description><![CDATA[
     <h1>Interactive viewer for '.log' files.</h1>
     <p>

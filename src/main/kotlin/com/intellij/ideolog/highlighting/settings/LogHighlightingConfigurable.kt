@@ -8,6 +8,7 @@ import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.options.BaseConfigurable
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.util.JDOMUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.ui.*
 import com.intellij.ui.table.JBTable
@@ -18,7 +19,6 @@ import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
 import com.intellij.util.xmlb.XmlSerializer
 import net.miginfocom.swing.MigLayout
-import org.jdom.input.SAXBuilder
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import java.awt.event.ComponentAdapter
@@ -241,7 +241,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
           return@addActionListener
         }
 
-        val vf = SAXBuilder().build(vfArr[0].toNioPath().toFile())
+        val vf = JDOMUtil.load(vfArr[0].toNioPath().toFile())
 
         val theState = XmlSerializer.deserialize(vf, LogHighlightingSettingsStore.State::class.java)
 

@@ -190,11 +190,11 @@ class LogJumpToSourceIntention : IntentionAction {
         val filesWithLevel = cacheManager.getVirtualFilesWithWord(evt.level, UsageSearchContext.ANY, GlobalSearchScope.projectScope(project), false).toMutableSet()
 
         val fs = ManagingFS.getInstance() as PersistentFS
-        val pfi = ProjectFileIndex.SERVICE.getInstance(project)
+        val pfi = ProjectFileIndex.getInstance(project)
 
 
         fileIdMap.forEachEntry { fileId, match ->
-          val vf = fs.findFileByIdIfCached(fileId)
+          val vf = fs.findFileById(fileId)
           if (vf == null
             || !pfi.isInSourceContent(vf)
             || vf.extension !in listOf("kt", "java", "cs", "vb", "cpp")

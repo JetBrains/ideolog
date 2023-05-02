@@ -38,6 +38,7 @@ class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFil
       "V" -> "VERBOSE"
       "D" -> "DEBUG"
       "T" -> "TRACE"
+      "SEVERE" -> "ERROR"
       else -> rawLevel.uppercase(Locale.getDefault())
     }
 

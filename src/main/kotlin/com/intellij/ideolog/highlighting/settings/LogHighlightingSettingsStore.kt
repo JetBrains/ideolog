@@ -6,12 +6,14 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.*
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.Disposer
+import com.intellij.ui.JBColor
 import com.intellij.util.xmlb.Converter
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.Tag
 import com.intellij.util.xmlb.annotations.Transient
 import com.intellij.util.xmlb.annotations.XCollection
+import org.intellij.lang.annotations.Language
 import java.awt.Color
 import java.util.*
 import kotlin.collections.ArrayList
@@ -54,26 +56,14 @@ object DefaultSettingsStoreItems {
     false,
     UUID.fromString("e9fa2755-8390-42f5-a41e-a909c58c8cf9")
   )
-  val All = LogParsingPattern(
-    true,
-    "All",
-    "^(.*?)(\\s(.*?))?(\\s(.*?))?(\\s(.*?))?(\\s(.*?))?(\\s(.*?))?(\\s(.*?))?\$",
-    "",
-    "",
-    -1,
-    -1,
-    -1,
-    false,
-    UUID.fromString("db0779ce-9fd3-11ec-b909-0242ac120002")
-  )
-  val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog, All)
+  private val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog)
   val ParsingPatternsUUIDs = ParsingPatterns.map { it.uuid }
 
   val Error = LogHighlightingPattern(
     true,
-    "^\\s*e(rror)?\\s*$",
+    "^\\s*(e(rror)?|severe)\\s*$",
     LogHighlightingAction.HIGHLIGHT_LINE,
-    Color.RED.rgb,
+    JBColor.RED.rgb,
     null,
     bold = true,
     italic = false,
@@ -84,7 +74,7 @@ object DefaultSettingsStoreItems {
     true,
     "^\\s*w(arn(ing)?)?\\s*$",
     LogHighlightingAction.HIGHLIGHT_LINE,
-    Color(0xff, 0xaa, 0).rgb,
+    JBColor.ORANGE.rgb,
     null,
     bold = true,
     italic = false,
@@ -95,14 +85,14 @@ object DefaultSettingsStoreItems {
     true,
     "^\\s*i(nfo)?\\s*$",
     LogHighlightingAction.HIGHLIGHT_LINE,
-    Color(0x3f, 0xbf, 0x3f).rgb,
+    JBColor.GREEN.rgb,
     null,
     bold = false,
     italic = false,
     showOnStripe = false,
     uuid = UUID.fromString("5e882ebc-2179-488b-8e1a-2fe488636f36")
   )
-  val HighlightingPatterns = listOf(Error, Warning, Info)
+  private val HighlightingPatterns = listOf(Error, Warning, Info)
   val HighlightingPatternsUUIDs = HighlightingPatterns.map { it.uuid }
 }
 
@@ -112,7 +102,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     fun getInstance() = getService<LogHighlightingSettingsStore>()
     val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
-    const val CURRENT_SETTINGS_VERSION = "6"
+    const val CURRENT_SETTINGS_VERSION = "7"
 
     val cleanState = State(arrayListOf(
       DefaultSettingsStoreItems.Error,
@@ -121,8 +111,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     ), arrayListOf(), arrayListOf(
       DefaultSettingsStoreItems.PipeSeparated,
       DefaultSettingsStoreItems.IntelliJIDEA,
-      DefaultSettingsStoreItems.TeamCityBuildLog,
-      DefaultSettingsStoreItems.All
+      DefaultSettingsStoreItems.TeamCityBuildLog
     ), CURRENT_SETTINGS_VERSION, DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it }, "heatmap", "16", true)
 
     val settingsUpgraders = mapOf<String, (State) -> State>(
@@ -194,11 +183,22 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       "5" to lambda@{ oldState ->
         val newState = oldState.clone()
 
-        newState.parsingPatterns.add(DefaultSettingsStoreItems.All)
         newState.lastAddedDefaultFormat =
           DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it }
 
         newState.version = "6"
+        return@lambda newState
+      },
+      "6" to lambda@{ oldState ->
+        val newState = oldState.clone()
+
+        newState.parsingPatterns.removeIf { it.uuid == UUID.fromString("db0779ce-9fd3-11ec-b909-0242ac120002") }
+        newState.lastAddedDefaultFormat =
+          DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it }
+
+        newState.patterns.find { it.uuid == DefaultSettingsStoreItems.Error.uuid }?.pattern = DefaultSettingsStoreItems.Error.pattern
+
+        newState.version = "7"
         return@lambda newState
       }
     )
@@ -282,9 +282,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
 
     other as LogHighlightingSettingsStore
 
-    if (myState != other.myState) return false
-
-    return true
+    return myState == other.myState
   }
 
   override fun hashCode(): Int {
@@ -342,9 +340,9 @@ class UUIDConverter : Converter<UUID>() {
 @Tag("LogParsingPattern")
 data class LogParsingPattern(@Attribute("enabled") var enabled: Boolean,
                              @Attribute("name") var name: String,
-                             @Attribute("pattern") var pattern: String,
-                             @Attribute("timePattern") var timePattern: String,
-                             @Attribute("linePattern") var lineStartPattern: String,
+                             @Attribute("pattern") @Language("RegExp") var pattern: String,
+                             @Attribute("timePattern") @Language("RegExp") var timePattern: String,
+                             @Attribute("linePattern") @Language("RegExp") var lineStartPattern: String,
                              @Attribute("timeId") var timeColumnId: Int,
                              @Attribute("severityId") var severityColumnId: Int,
                              @Attribute("categoryId") var categoryColumnId: Int,
@@ -361,7 +359,7 @@ data class LogParsingPattern(@Attribute("enabled") var enabled: Boolean,
 
 @Tag("LogHighlightingPattern")
 data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean,
-                                  @Attribute("pattern") var pattern: String,
+                                  @Attribute("pattern") @Language("RegExp") var pattern: String,
                                   @Attribute("action") var action: LogHighlightingAction,
                                   @Attribute("fg") var fgRgb: Int?,
                                   @Attribute("bg") var bgRgb: Int?,
