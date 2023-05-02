@@ -31,14 +31,14 @@ class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFil
     category = fileType.extractCategory(tokensFiltered)?.takeFrom(rawText)?.trim()?.toString() ?: ""
     fullMessage = fileType.extractMessage(tokensFiltered).takeFrom(rawText).toString().trim()
 
-    level = when (rawLevel.toUpperCase()) {
+    level = when (rawLevel.uppercase(Locale.getDefault())) {
       "E" -> "ERROR"
       "W" -> "WARN"
       "I" -> "INFO"
       "V" -> "VERBOSE"
       "D" -> "DEBUG"
       "T" -> "TRACE"
-      else -> rawLevel.toUpperCase()
+      else -> rawLevel.uppercase(Locale.getDefault())
     }
 
     message = fullMessage.split('\n').first().trim()
