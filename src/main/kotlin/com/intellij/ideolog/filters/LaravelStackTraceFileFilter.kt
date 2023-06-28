@@ -49,12 +49,18 @@ class LaravelStackTraceFileFilter(
     val filePathEndIndex = fileUri.lastIndexOf('(')
 
     val filePath = fileUri.substring(0, filePathEndIndex)
-    localFileSystem.findFileByPathIfCached(filePath) ?: return null
+    localFileSystem.findFileByPath(filePath) ?: return null
 
     val possibleDocumentLine = StringUtil.parseInt(fileUri.substring(filePathEndIndex + 1, fileUri.lastIndex), Int.MIN_VALUE)
     if (possibleDocumentLine != Int.MIN_VALUE) {
       documentLine = possibleDocumentLine - 1
     }
-    return LazyFileHyperlinkInfo(project, filePath, documentLine, 0, false)
+    return LinedFileHyperlinkInfo(project, filePath, documentLine)
   }
+
+  class LinedFileHyperlinkInfo(
+    project: Project,
+    val filePath: String,
+    val documentLine: Int,
+  ) : LazyFileHyperlinkInfo(project, filePath, documentLine, 0, false)
 }
