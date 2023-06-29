@@ -14,25 +14,33 @@ class LaravelStackTraceFileFilter(
   private val localFileSystem: LocalFileSystem
 ) : Filter {
   companion object {
+    private const val FILE_LINE_REGEX = "\\(\\d+\\)"
     private val LINUX_MACOS_FILE_PATTERN =
-      Pattern.compile("\\B/[-A-Za-z0-9+$&@#/%?=~_|!:,.;]*[-A-Za-z0-9+$&@#/%=~_|]\\(\\d+\\)")
+      Pattern.compile("""\B/(?:[\w.-]+/)*[\w.-]+$FILE_LINE_REGEX""")
     private val WINDOWS_FILE_PATTERN =
-      Pattern.compile("\\b[A-Z]:\\\\[-A-Za-z0-9+$&@#\\\\%=~_!:,.;]*[-A-Za-z0-9+$&@#/%=~_|]\\(\\d+\\)")
-  }
+      Pattern.compile("""\b[a-zA-Z]:\\(?:[^\\/:*?"<>|\r\n]+\\)*[^\\/:*?"<>|\r\n]*$FILE_LINE_REGEX""")
 
-  override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
-    val textStartOffset = entireLength - line.length
-    val items = collectItems(textStartOffset, LINUX_MACOS_FILE_PATTERN.matcher(line)) +
-      collectItems(textStartOffset, WINDOWS_FILE_PATTERN.matcher(line))
-
-    return when (items.size) {
-      0 -> null
-      1 -> Filter.Result(items[0].highlightStartOffset, items[0].highlightEndOffset, items[0].hyperlinkInfo)
-      else -> Filter.Result(items)
+    private fun canContainFilePathFromLaravelLogs(line: String): Boolean {
+      return line.contains('(') && line.contains(')') && (line.contains(":\\") || line.contains('/'))
     }
   }
 
-  private fun collectItems(textStartOffset: Int, matcher: Matcher): List<Filter.ResultItem> {
+  override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
+    if (!canContainFilePathFromLaravelLogs(line))
+      return null
+
+    val textStartOffset = entireLength - line.length
+    val filterResultItems = collectFilterResultItems(textStartOffset, LINUX_MACOS_FILE_PATTERN.matcher(line)) +
+      collectFilterResultItems(textStartOffset, WINDOWS_FILE_PATTERN.matcher(line))
+
+    return when (filterResultItems.size) {
+      0 -> null
+      1 -> Filter.Result(filterResultItems[0].highlightStartOffset, filterResultItems[0].highlightEndOffset, filterResultItems[0].hyperlinkInfo)
+      else -> Filter.Result(filterResultItems)
+    }
+  }
+
+  private fun collectFilterResultItems(textStartOffset: Int, matcher: Matcher): List<Filter.ResultItem> {
     val resultItems = mutableListOf<Filter.ResultItem>()
     while (matcher.find()) {
       resultItems.add(Filter.ResultItem(
@@ -45,16 +53,12 @@ class LaravelStackTraceFileFilter(
   }
 
   private fun buildFileHyperlinkInfo(fileUri: String): HyperlinkInfo? {
-    var documentLine = 0
     val filePathEndIndex = fileUri.lastIndexOf('(')
-
     val filePath = fileUri.substring(0, filePathEndIndex)
     localFileSystem.findFileByPath(filePath) ?: return null
 
     val possibleDocumentLine = StringUtil.parseInt(fileUri.substring(filePathEndIndex + 1, fileUri.lastIndex), Int.MIN_VALUE)
-    if (possibleDocumentLine != Int.MIN_VALUE) {
-      documentLine = possibleDocumentLine - 1
-    }
+    val documentLine = if (possibleDocumentLine != Int.MIN_VALUE) possibleDocumentLine - 1 else 0
     return LinedFileHyperlinkInfo(project, filePath, documentLine)
   }
 
