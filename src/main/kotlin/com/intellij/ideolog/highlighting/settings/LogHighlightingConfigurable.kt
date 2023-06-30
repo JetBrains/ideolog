@@ -309,7 +309,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
   }
 
   override fun disposeUIResources() {
-    disposable.dispose()
+    Disposer.dispose(disposable)
     super.disposeUIResources()
   }
 
