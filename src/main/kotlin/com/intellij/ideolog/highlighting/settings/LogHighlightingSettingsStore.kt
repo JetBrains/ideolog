@@ -104,15 +104,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
 
     const val CURRENT_SETTINGS_VERSION = "7"
 
-    val cleanState = State(arrayListOf(
-      DefaultSettingsStoreItems.Error,
-      DefaultSettingsStoreItems.Warning,
-      DefaultSettingsStoreItems.Info
-    ), arrayListOf(), arrayListOf(
-      DefaultSettingsStoreItems.PipeSeparated,
-      DefaultSettingsStoreItems.IntelliJIDEA,
-      DefaultSettingsStoreItems.TeamCityBuildLog
-    ), CURRENT_SETTINGS_VERSION, DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it }, "heatmap", "16", true)
+    val cleanState = State()
 
     val settingsUpgraders = mapOf<String, (State) -> State>(
       "-1" to { cleanState.clone() },
@@ -299,19 +291,35 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     @XCollection(style = XCollection.Style.v2)
     @Tag("parsingPatterns")
     val parsingPatterns: ArrayList<LogParsingPattern>,
-    @Tag("settingsVersion", textIfEmpty = "0")
+    @Tag("settingsVersion")
     var version: String,
-    @Tag("lastAddedDefaultFormat", textIfEmpty = "2")
+    @Tag("lastAddedDefaultFormat")
     var lastAddedDefaultFormat: String,
-    @Tag("errorStripeModel", textIfEmpty = "heatmap")
+    @Tag("errorStripeModel")
     var errorStripeMode: String,
-    @Tag("readonlySizeThreshold", textIfEmpty = "1024")
+    @Tag("readonlySizeThreshold")
     var readonlySizeThreshold: String,
-    @Tag("highlight_links", textIfEmpty = "true")
+    @Tag("highlight_links")
     var highlightLinks: Boolean
   ) : Cloneable {
     @Suppress("unused")
-    constructor() : this(ArrayList(), ArrayList(), ArrayList(), "-1", "-1", "heatmap", "16", true)
+    constructor() : this(
+      arrayListOf(
+        DefaultSettingsStoreItems.Error,
+        DefaultSettingsStoreItems.Warning,
+        DefaultSettingsStoreItems.Info
+      ),
+      arrayListOf(),
+      arrayListOf(
+        DefaultSettingsStoreItems.PipeSeparated,
+        DefaultSettingsStoreItems.IntelliJIDEA,
+        DefaultSettingsStoreItems.TeamCityBuildLog
+      ),
+      CURRENT_SETTINGS_VERSION,
+      DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it },
+      "heatmap",
+      "16",
+      true)
 
     @Suppress("unused")
     constructor(patterns: ArrayList<LogHighlightingPattern>, hidden: ArrayList<String>, parsingPatterns: ArrayList<LogParsingPattern>) : this(patterns, hidden, parsingPatterns, "-1", "-1", "heatmap", "16", true)
@@ -372,13 +380,13 @@ data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean,
   constructor() : this(true, "", LogHighlightingAction.HIGHLIGHT_FIELD, null, null, false, false, false, UUID.randomUUID())
 
   var foregroundColor: Color?
-    @Transient get() = fgRgb?.let { Color(it) }
+    @Transient get() = fgRgb?.let { JBColor(it, it) }
     @Transient set(value) {
       fgRgb = value?.rgb
     }
 
   var backgroundColor: Color?
-    @Transient get() = bgRgb?.let { Color(it) }
+    @Transient get() = bgRgb?.let { JBColor(it, it) }
     @Transient set(value) {
       bgRgb = value?.rgb
     }
