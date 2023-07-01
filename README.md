@@ -2,7 +2,7 @@ Interactive viewer for '.log' files.
 
 Features:
 
-* Code highlighting based of log level: error, warn, info, etc.
+* Code highlighting based on log level: error, warn, info, etc.
 * Intention to highlight columns (time, category, threads, stack frames) in log file editor.
 * Folding of uninteresting events
 * Hyperlinks of stack traces in log
