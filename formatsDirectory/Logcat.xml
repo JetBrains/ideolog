@@ -1,0 +1,8 @@
+<State>
+  <highlightingPatterns />
+  <hiddenSubstrings />
+  <parsingPatterns>
+    <LogParsingPattern enabled="true" name="Logcat" pattern="^(.+)(?:\s{2}\d*\s{1})(?:\s\d*){2}(V|D|I|W|E)\s([^:]+):(.*)$" timePattern="MM:dd HH:mm:ss.mmm" linePattern="^\d" timeId="0" severityId="1" categoryId="2" fullmatch="false" uuid="b8fcb4d4-b1b8-4681-90f1-42f7c02aaf67" />
+  </parsingPatterns>
+  <settingsVersion>5</settingsVersion>
+</State>
