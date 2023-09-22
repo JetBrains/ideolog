@@ -9,6 +9,7 @@ import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.serviceContainer.NonInjectable
 import org.jdom.Element
 
 class TotallyNotTextEditorProvider: TextEditorProvider(), DumbAware {
@@ -25,7 +26,10 @@ class TotallyNotTextEditorProvider: TextEditorProvider(), DumbAware {
   }
 }
 
-class LogFileEditorProvider(private val base: TotallyNotTextEditorProvider = TotallyNotTextEditorProvider()) : FileEditorProvider by base, DumbAware {
+class LogFileEditorProvider @NonInjectable internal constructor(private val base: TotallyNotTextEditorProvider) : FileEditorProvider by base, DumbAware {
+  // used by extension
+  @Suppress("unused")
+  constructor() : this(TotallyNotTextEditorProvider())
   override fun writeState(state: FileEditorState, project: Project, targetElement: Element) = base.writeState(state,  project, targetElement)
   override fun disposeEditor(editor: FileEditor) = base.disposeEditor(editor)
   override fun readState(sourceElement: Element, project: Project, file: VirtualFile) = base.readState(sourceElement, project, file)
