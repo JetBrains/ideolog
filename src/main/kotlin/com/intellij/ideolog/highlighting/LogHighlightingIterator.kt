@@ -14,7 +14,6 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.psi.tree.IElementType
 import java.awt.Color
 import java.awt.Font
-import java.util.ArrayList
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 import kotlin.math.abs
@@ -227,7 +226,14 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
     if (!settingsStore.myState.highlightLinks || !ApplicationManager.getApplication().isDispatchThread || event.indexOf('\n').let { it < 0 || it >= event.length - 1 })
       return
 
-    LogHeavyFilterService.getInstance(project).enqueueHeavyFiltering(myEditor, eventOffset, event)
+    ApplicationManager.getApplication().executeOnPooledThread {
+      // Service init could be slow due to filters loading
+      val service = LogHeavyFilterService.getInstance(project)
+      ApplicationManager.getApplication().runReadAction {
+        // could be slow and requires read action
+        service.enqueueHeavyFiltering(myEditor, eventOffset, event)
+      }
+    }
   }
 
   private fun getFont(bold: Boolean, italic: Boolean): Int {
