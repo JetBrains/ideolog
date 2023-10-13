@@ -30,22 +30,28 @@ class LogHeavyFilterService(project: Project): Disposable {
   private val myAlarm = Alarm(Alarm.ThreadToUse.POOLED_THREAD, this)
 
   fun enqueueHeavyFiltering(editor: Editor, eventOffset: Int, event: CharSequence) {
+    if (editor.isDisposed) return
+
     val markupModel = editor.markupModel
 
     val set = markupModel.getUserData(markupHighlightedExceptionsKey)
       ?: TIntHashSet().also { markupModel.putUserData(markupHighlightedExceptionsKey, it) }
 
-    if (set.contains(eventOffset))
-      return
+    synchronized(set) {
+      if (set.contains(eventOffset))
+        return
 
-    set.add(eventOffset)
+      set.add(eventOffset)
+    }
 
     val hyperlinkSupport = markupModel.getUserData(markupHyperlinkSupportKey)
       ?: EditorHyperlinkSupport(editor, editor.project!!).also { markupModel.putUserData(markupHyperlinkSupportKey, it) }
 
     fun consumeResult(result: Filter.Result?, addOffset: Boolean) {
       result ?: return
+      if (editor.isDisposed) return
       ApplicationManager.getApplication().invokeLater { // todo: consider MergingQueue if this generates too many events
+        if (editor.isDisposed) return@invokeLater
         val extraOffset = if (addOffset) eventOffset else 0
         result.resultItems.forEach {
           val hyperlinkInfo = it.hyperlinkInfo

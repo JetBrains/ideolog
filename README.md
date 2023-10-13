@@ -1,4 +1,4 @@
-Interactive viewer for '.log' files.
+# Interactive viewer for '.log' files. [![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
 Features:
 
