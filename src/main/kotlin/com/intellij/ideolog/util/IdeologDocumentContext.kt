@@ -22,13 +22,18 @@ import java.util.regex.PatternSyntaxException
 
 private val documentContextKey = Key.create<IdeologDocumentContext>("IdeologDocumentContext")
 
-val Document.ideologContext : IdeologDocumentContext
+val Document.ideologContext: IdeologDocumentContext
   get() = getUserData(documentContextKey) ?: run {
     putUserData(documentContextKey, IdeologDocumentContext(this))
     getUserData(documentContextKey)!! // get again in case of multithreading writes (UDH is thread-safe)
   }
 
 class IdeologDocumentContext(val document: Document) {
+  companion object {
+    const val NUMBER_FIRST_LINES = 10000
+    const val MIN_FORMAT_MATCHES = 1
+  }
+
   private val eventStartLines = TIntIntHashMap()
   private val eventEndLines = TIntIntHashMap()
 
@@ -61,18 +66,25 @@ class IdeologDocumentContext(val document: Document) {
         return@mapNotNull null
 
       try {
-        return@mapNotNull RegexLogParser(it.uuid, Pattern.compile(it.pattern, Pattern.DOTALL), Pattern.compile(it.lineStartPattern), it, SimpleDateFormat(it.timePattern))
-      } catch(e: PatternSyntaxException){
+        return@mapNotNull RegexLogParser(
+          it.uuid,
+          Pattern.compile(it.pattern, Pattern.DOTALL),
+          Pattern.compile(it.lineStartPattern),
+          it,
+          SimpleDateFormat(it.timePattern)
+        )
+      } catch (e: PatternSyntaxException) {
         thisLogger().info(e)
         return@mapNotNull null
       }
     }
 
     val doc = document.charsSequence
-    val firstLines = doc.lineSequence().take(25)
+    val firstLines = doc.lineSequence().take(NUMBER_FIRST_LINES)
     val sumByMatcher = regexMatchers.map { it to firstLines.count { line -> it.regex.matcher(line).find() } }
 
-    return LogFileFormat(sumByMatcher.filter { it.second > 5 }.maxByOrNull { it.second }?.first).also { format = it }
+    return LogFileFormat(sumByMatcher.filter { it.second >= MIN_FORMAT_MATCHES }
+      .maxByOrNull { it.second }?.first).also { format = it }
   }
 
   /**
@@ -104,7 +116,7 @@ class IdeologDocumentContext(val document: Document) {
     var currentLine = atLine
 
     fun updateCache(highLine: Int, value: Int) {
-      for (i in atLine .. highLine) {
+      for (i in atLine..highLine) {
         eventEndLines.put(i, value)
       }
     }
@@ -171,11 +183,13 @@ fun Editor.getSelectedText(): CharSequence? {
   return this.document.getText(TextRange(selectionStart, selectionEnd))
 }
 
-data class GoToActionContext(val event: LogEvent,
-                             val editor: Editor,
-                             val foldingModel: FoldingModel,
-                             val project: Project,
-                             val psiFile: PsiFile)
+data class GoToActionContext(
+  val event: LogEvent,
+  val editor: Editor,
+  val foldingModel: FoldingModel,
+  val project: Project,
+  val psiFile: PsiFile
+)
 
 fun AnActionEvent.getGoToActionContext(): GoToActionContext? {
   val editor = this.dataContext.getData(CommonDataKeys.EDITOR) ?: return null
