@@ -2,7 +2,7 @@
   <highlightingPatterns />
   <hiddenSubstrings />
   <parsingPatterns>
-    <LogParsingPattern enabled="true" name="Laravel" pattern="^\[([\d\-: ]*)] [\s\S]*?\.(.*?(?=:)): ([\s\S]*?(?=(^\[[\d\-: ]*])|\Z))" timePattern="yyyy-MM-dd HH:mm:ss" linePattern="^\[\d" timeId="0" severityId="1" categoryId="-1" fullmatch="true" uuid="9a75fe1c-24f0-4e5d-8359-ce4dbb9c4c33" />
+    <LogParsingPattern enabled="true" name="Laravel" pattern="^\[([\d\-: ]*)] [\s\S]*?\.(.*?(?=:)): ([\s\S]*?(?=(^\[[\d\-: ]*])|\Z))$" timePattern="yyyy-MM-dd HH:mm:ss" linePattern="^\[\d" timeId="0" severityId="1" categoryId="-1" fullmatch="true" uuid="9a75fe1c-24f0-4e5d-8359-ce4dbb9c4c33" />
   </parsingPatterns>
   <settingsVersion>5</settingsVersion>
 </State>
