@@ -68,6 +68,18 @@ object DefaultSettingsStoreItems {
     true,
     UUID.fromString("9a75fe1c-24f0-4e5d-8359-ce4dbb9c4c33")
   )
+  val Logcat = LogParsingPattern(
+    true,
+    "Logcat",
+    "^(.+)(?:\\s+\\d*\\s+\\d*\\s+)(V|D|I|W|E)\\s([^:]+):(.*)\$",
+    "MM:dd HH:mm:ss.mmm",
+    "^\\d",
+    0,
+    1,
+    2,
+    false,
+    UUID.fromString("b8fcb4d4-b1b8-4681-90f1-42f7c02aaf67")
+  )
   private val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog)
   val ParsingPatternsUUIDs = ParsingPatterns.map { it.uuid }
 
@@ -161,6 +173,8 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
               it.uuid = DefaultSettingsStoreItems.PipeSeparated.uuid
             DefaultSettingsStoreItems.LaravelLog.name ->
               it.uuid = DefaultSettingsStoreItems.LaravelLog.uuid
+            DefaultSettingsStoreItems.Logcat.name ->
+              it.uuid = DefaultSettingsStoreItems.Logcat.uuid
             else ->
               it.uuid = UUID.randomUUID()
           }
@@ -328,7 +342,8 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         DefaultSettingsStoreItems.PipeSeparated,
         DefaultSettingsStoreItems.IntelliJIDEA,
         DefaultSettingsStoreItems.TeamCityBuildLog,
-        DefaultSettingsStoreItems.LaravelLog
+        DefaultSettingsStoreItems.LaravelLog,
+        DefaultSettingsStoreItems.Logcat
       ),
       CURRENT_SETTINGS_VERSION,
       DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it },
