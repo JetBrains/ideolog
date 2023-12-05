@@ -161,4 +161,18 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.Loguru.uuid, format.myRegexLogParser?.uuid)
   }
+
+  fun `test should detect Symfony format`() {
+    val document = MockDocument()
+    document.replaceText(
+      "[2023-06-05T09:57:38.056800+00:00] php.DEBUG: Warning: filemtime(): stat failed for /app/config/routes/framework.yaml {\"exception\":\"[object] (Symfony\\\\Component\\\\ErrorHandler\\\\Error\\\\SilencedErrorContext {...})\"} []\n" +
+        "[2023-06-05T09:57:38.057300+00:00] request.ERROR: Uncaught PHP Exception Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException: \"No route found for \"GET https://example.com/nonexistent\" [] []\n" +
+        "[2023-06-05T09:57:38.101820+00:00] request.ERROR: Uncaught PHP Exception Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException: \"No route found for \"GET https://example.com/failedroute\" [] []\n" +
+        "[2023-06-05T09:57:38.130130+00:00] request.CRITICAL: Uncaught PHP Exception Twig\\\\Error\\\\RuntimeError: \"An exception has been thrown during the rendering of a template (\\\"Failed to fetch user profile data\\\").\" at /path/to/template/file.twig line 15 [] []\n" +
+        "[2023-06-05T09:57:39.355650+00:00] deprecation.INFO: User Deprecated: The \"url\" connection parameter is deprecated. Please use Doctrine\\\\DBAL\\\\Tools\\\\DsnParser to parse a DSN string instead. {\"exception\":\"[object] (ErrorException(code: 0): User Deprecated: The \\\"url\\\" connection parameter is deprecated at /path/to/deprecated/code:123)\"} []\n",
+      0
+    )
+    val format = document.ideologContext.detectLogFileFormat()
+    assertEquals(DefaultSettingsStoreItems.Symfony.uuid, format.myRegexLogParser?.uuid)
+  }
 }
