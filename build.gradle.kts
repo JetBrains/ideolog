@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-  val kotlinVersion = "1.8.20"
+  val kotlinVersion = "1.9.21"
 
   repositories {
     mavenCentral()
@@ -14,11 +14,7 @@ buildscript {
 
 plugins {
   id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
-  id("org.jetbrains.intellij") version "1.13.3"
-}
-
-dependencies {
-  implementation(kotlin("test"))
+  id("org.jetbrains.intellij") version "1.16.1"
 }
 
 apply(plugin = "kotlin")
@@ -50,7 +46,6 @@ intellij {
 tasks {
   withType<KotlinCompile> {
     kotlinOptions.allWarningsAsErrors = true
-    kotlinOptions.freeCompilerArgs += "-Xnew-inference"
     kotlinOptions.jvmTarget = "17"
   }
 
