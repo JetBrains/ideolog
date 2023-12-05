@@ -168,4 +168,33 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.Logcat.uuid, format.myRegexLogParser?.uuid)
   }
+
+  fun `test should detect Loguru format`() {
+    val document = MockDocument()
+    document.replaceText(
+      "2023-07-08 16:30:13.780 | SUCCESS | __main__:login:64 - \n" +
+        "    User authentication successful\n" +
+        "    Session token generated\n" +
+        "2023-07-08 16:30:14.137 | INFO    | __main__:change_steps:103 - \n" +
+        "    Steps updated to new value\n" +
+        "    Previous: 1000, New: 1200\n" +
+        "2023-07-08 16:30:15.488 | INFO    | __main__:update_user_data:80 - \n" +
+        "    User data synchronization started\n" +
+        "    Fetching data from remote server\n" +
+        "2023-07-08 16:52:43.963 | INFO    | __main__:login:62 - \n" +
+        "    Login process initiated by user\n" +
+        "2023-07-08 16:52:43.964 | ERROR   | __main__:login:63 - \n" +
+        "    Error encountered during login:\n" +
+        "    List index out of range - index 5 of a 4-item list\n" +
+        "2023-07-08 16:52:43.967 | WARNING | __main__:module:142 - \n" +
+        "    Unexpected data format received\n" +
+        "    Expected JSON, received XML\n" +
+        "2023-07-08 16:52:44.439 | INFO    | __main__:sbs_api_info:121 - \n" +
+        "    API information retrieved successfully\n" +
+        "    Endpoint: /api/v1/info\n",
+      0
+    )
+    val format = document.ideologContext.detectLogFileFormat()
+    assertEquals(DefaultSettingsStoreItems.Loguru.uuid, format.myRegexLogParser?.uuid)
+  }
 }
