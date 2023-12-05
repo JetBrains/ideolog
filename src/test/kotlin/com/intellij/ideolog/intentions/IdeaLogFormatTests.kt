@@ -86,4 +86,36 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(UUID.fromString("8a0e8992-94cb-4f4c-8be2-42b03609626b"), format.myRegexLogParser?.uuid)
   }
+
+  fun `test should detect Laravel format`() {
+    val document = MockDocument()
+    document.replaceText(
+      "[2023-12-05 09:15:23] local.ERROR: Uncaught Exception: Division by zero {\"exception\":\"[object] (ErrorException(code: 0): Division by zero at /path/to/laravel/project/app/Http/Controllers/SomeController.php:55)\n" +
+        "[stacktrace]\n" +
+        "#0 /path/to/laravel/project/app/Http/Controllers/SomeController.php(55): divisionByZeroFunction()\n" +
+        "#1 [internal function]: App\\\\Http\\\\Controllers\\\\SomeController->index()\n" +
+        "#2 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): call_user_func_array()\n" +
+        "#3 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(45): Illuminate\\\\Routing\\\\Controller->callAction()\n" +
+        "#4 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Route.php(239): Illuminate\\\\Routing\\\\ControllerDispatcher->dispatch()\n" +
+        "#5 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Route.php(196): Illuminate\\\\Routing\\\\Route->runController()\n" +
+        "#6 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Router.php(685): Illuminate\\\\Routing\\\\Route->run()\n" +
+        "\n" +
+        "[2023-12-05 09:16:47] local.WARNING: User 123 attempted to access restricted area.\n" +
+        "[stacktrace]\n" +
+        "#0 /path/to/laravel/project/app/Http/Middleware/CheckRole.php(27): checkUserRole()\n" +
+        "#1 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(167): App\\\\Http\\\\Middleware\\\\CheckRole->handle()\n" +
+        "#2 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(41): Illuminate\\\\Pipeline\\\\Pipeline->Illuminate\\\\Pipeline\\\\{closure}()\n" +
+        "\n" +
+        "[2023-12-05 09:17:05] local.INFO: User 456 logged in successfully.\n" +
+        "[stacktrace]\n" +
+        "#0 /path/to/laravel/project/app/Http/Controllers/Auth/LoginController.php(72): attemptLogin()\n" +
+        "#1 [internal function]: App\\\\Http\\\\Controllers\\\\Auth\\\\LoginController->login()\n" +
+        "#2 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): call_user_func_array()\n" +
+        "#3 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/R\n" +
+        "\n",
+      0
+    )
+    val format = document.ideologContext.detectLogFileFormat()
+    assertEquals(DefaultSettingsStoreItems.LaravelLog.uuid, format.myRegexLogParser?.uuid)
+  }
 }
