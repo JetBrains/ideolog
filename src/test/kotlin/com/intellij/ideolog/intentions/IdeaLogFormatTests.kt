@@ -118,4 +118,18 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.LaravelLog.uuid, format.myRegexLogParser?.uuid)
   }
+
+  fun `test should detect Logcat format`() {
+    val document = MockDocument()
+    document.replaceText(
+      "01-01 10:00:01.123  1234  5678 D MyAppTag: Starting app\n" +
+        "01-01 10:00:02.456  1234  5678 I MyAppTag: Initializing user interface\n" +
+        "01-01 10:00:03.789  1234  5678 W MyAppTag: Network connection is slow\n" +
+        "01-01 10:00:04.012  1234  5678 E MyAppTag: Failed to load user data\n" +
+        "01-01 10:00:05.345  1234  5678 I MyAppTag: App ready",
+      0
+    )
+    val format = document.ideologContext.detectLogFileFormat()
+    assertEquals(DefaultSettingsStoreItems.Logcat.uuid, format.myRegexLogParser?.uuid)
+  }
 }
