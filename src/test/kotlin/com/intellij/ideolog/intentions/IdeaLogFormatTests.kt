@@ -84,6 +84,42 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
       0
     )
     val format = document.ideologContext.detectLogFileFormat()
-    assertEquals(UUID.fromString("8a0e8992-94cb-4f4c-8be2-42b03609626b"), format.myRegexLogParser?.uuid)
+    assertEquals(DefaultSettingsStoreItems.IntelliJIDEA.uuid, format.myRegexLogParser?.uuid)
+  }
+
+  fun `test should detect Pipe-separated pattern`() {
+    val document = MockDocument()
+    document.replaceText(
+      "03:17:00.000|INFO|Log started|This is info message\n" +
+        "03:17:00.000|INFO|Log started|This is multiline\n" +
+        "info\n" +
+        "message\n" +
+        "03:17:00.000|ERROR|Some error type|This is error message\n",
+      0
+    )
+    val format = document.ideologContext.detectLogFileFormat()
+    assertEquals(DefaultSettingsStoreItems.PipeSeparated.uuid, format.myRegexLogParser?.uuid)
+  }
+
+  fun `test should detect TeamCity pattern`() {
+    val document = MockDocument()
+    document.replaceText(
+      "[23:54:03]i: TeamCity server version is 9.1.5 (build 37377)\n" +
+        "[23:54:03]W: bt4 (2m:17s)\n" +
+        "[23:54:03] : projectId:project55 projectExternalId:StackExchangeNetwork_NewYork buildTypeId:bt4 buildTypeExternalId:StackExchangeNetwork_NewYork_SENetworkDev\n" +
+        "[23:54:03] : Collecting changes in 2 VCS roots (1s)\n" +
+        "[23:54:03] :\t [Collecting changes in 2 VCS roots] VCS Root details\n" +
+        "[23:54:03] :\t\t [VCS Root details] \"Gitlab - TeamCity Build Configs\" {instance id=968, parent internal id=158, parent id=GitlabTeamCityBuildConfigs, description: \"git@git:shared/teamcity-build-configs.git#refs/heads/master\"}\n" +
+        "[23:54:03] :\t\t [VCS Root details] \"Gitlab - Stack Exchange Network\" {instance id=939, parent internal id=99, parent id=GitlabStackExchangeNetwork, description: \"git@git:core/stackoverflow.git#refs/heads/master\"}\n" +
+        "[23:54:04]i:\t [Collecting changes in 2 VCS roots] Waiting for completion of current operations for the VCS root 'Gitlab - TeamCity Build Configs'\n" +
+        "[23:54:04]i:\t [Collecting changes in 2 VCS roots] Waiting for completion of current operations for the VCS root 'Gitlab - Stack Exchange Network'\n" +
+        "[23:54:04]i:\t [Collecting changes in 2 VCS roots] Detecting changes in VCS root 'Gitlab - Stack Exchange Network' (used in 'Release', 'SENetwork - Dev' and 36 other configurations)\n" +
+        "[23:54:04]i:\t [Collecting changes in 2 VCS roots] Will collect changes for 'Gitlab - Stack Exchange Network' starting from revision 52173e6ad55dd55da435aaf7dd3343894afb3f1a\n" +
+        "[23:54:04]i:\t [Collecting changes in 2 VCS roots] Detecting changes in VCS root 'Gitlab - TeamCity Build Configs' (used in 'ADTools - Dev', 'ADTools - Dev' and 257 other configurations)\n" +
+        "[23:54:04]i:\t [Collecting changes in 2 VCS roots] Will collect changes for 'Gitlab - TeamCity Build Configs' starting from revision 35ddc3e78bcae9b7bbb71638dad519abd7d12249",
+      0
+    )
+    val format = document.ideologContext.detectLogFileFormat()
+    assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
   }
 }
