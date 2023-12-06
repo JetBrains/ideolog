@@ -16,6 +16,8 @@ import java.awt.Color
 import java.awt.Font
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
+import kotlin.collections.ArrayDeque
+import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -194,22 +196,76 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
 
       val newlineOffset = value.indexOf('\n')
       currentPieces.clear()
-      if (newlineOffset > 0 && newlineOffset < value.length - 1) {
-        currentPieces.add(EventPiece(token.startOffset + offset, token.startOffset + newlineOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)), token.isSeparator))
-        currentPieces.add(EventPiece(token.startOffset + newlineOffset + offset, token.endOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, 0), token.isSeparator))
-      } else
-        currentPieces.add(EventPiece(token.startOffset + offset, token.endOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)), token.isSeparator)) // todo: lexeme type?
 
+      val matchedPieces = ArrayList<EventPiece>()
       if (!token.isSeparator) {
-        for ((pattern, _) in partHighlighters) {
-          currentPieces.forEachIndexed { _, (offsetStart, offsetEnd) ->
-            val matcher = pattern.matcher(myText.subSequence(offsetStart, offsetEnd))
-            while (matcher.find()) {
-              // todo: match highlighting
+        for ((pattern, info) in partHighlighters) {
+          val expr = pattern.toRegex()
+          val matches = expr.findAll(value)
+          matches.forEach {
+            it.groups.drop(1).filterNotNull().forEach { matchGroup ->
+              val fg = info.foregroundColor ?: valueForeground
+              val bg = info.backgroundColor ?: valueBackground
+              val startOffset = token.startOffset + offset + matchGroup.range.first
+              val endOffset = token.startOffset + offset + matchGroup.range.last + 1
+
+              matchedPieces.add(
+                EventPiece(
+                  startOffset,
+                  endOffset,
+                  TextAttributes(fg, bg, null, null, getFont(valueBold, valueItalic)),
+                  token.isSeparator
+                )
+              )
             }
           }
         }
       }
+
+      if (matchedPieces.isNotEmpty()) {
+        val order = solveNestedLines(matchedPieces.mapIndexed { index, it ->
+          LineSegment(
+            it.offsetStart,
+            it.offsetEnd,
+            index
+          )
+        })
+        for (lineSegment in order) {
+          currentPieces.add(
+            EventPiece(
+              lineSegment.start,
+              lineSegment.end,
+              matchedPieces[lineSegment.id].textAttributes,
+              matchedPieces[lineSegment.id].isSeparator,
+            )
+          )
+        }
+      }
+
+      var prevEnd = token.startOffset + offset
+      val unusedPieces = currentPieces.mapNotNull {
+        val piece = if (it.offsetStart > prevEnd) {
+          EventPiece(prevEnd,
+            it.offsetStart,
+            TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)),
+            token.isSeparator
+          )
+        } else null
+        prevEnd = it.offsetEnd
+        piece
+      }
+
+      currentPieces.addAll(unusedPieces)
+      currentPieces.sortBy { it.offsetStart }
+
+      if (newlineOffset > 0 && newlineOffset < value.length - 1) {
+        currentPieces.add(EventPiece(token.startOffset + offset, token.startOffset + newlineOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)), token.isSeparator))
+        currentPieces.add(EventPiece(token.startOffset + newlineOffset + offset, token.endOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, 0), token.isSeparator))
+      } else{
+        currentPieces.add(EventPiece(token.startOffset + offset, token.endOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)), token.isSeparator)) // todo: lexeme type?
+      }
+
+
 
       if (!token.isSeparator)
         valueIndex++
@@ -219,7 +275,6 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
 
     tryHighlightStacktrace(event, offset)
   }
-
 
   private fun tryHighlightStacktrace(event: CharSequence, eventOffset: Int) {
     val project = myEditor.project ?: return
@@ -296,4 +351,51 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
       return Color(Color.HSBtoRGB(bgHsl[0], bgHsl[1], bgHsl[2]))
     }
   }
+}
+
+
+data class LineSegment(val start: Int, val end: Int, val id: Int): Comparable<LineSegment> {
+  override fun compareTo(other: LineSegment) = compareValuesBy(this, other, { it.start }, { it.end })
+}
+
+data class LineEvent(val x: Int, val l: Int, val id: Int,  val isOpening: Boolean)
+
+fun solveNestedLines(lines: List<LineSegment>): List<LineSegment> {
+  val result : MutableList<LineSegment> = mutableListOf()
+  val events : MutableList<LineEvent> = mutableListOf()
+  lines.forEach {
+    events.add(LineEvent(it.start, it.end - it.start, it.id, true))
+    events.add(LineEvent(it.end, it.end - it.start, it.id, false))
+  }
+
+  events.sortWith(compareBy({ it.x }, { -it.l }))
+
+  val stack = ArrayDeque(listOf<LineEvent>())
+  var x = 0
+  val closed = hashSetOf<Int>()
+  events.forEach {
+    when{
+      it.isOpening -> {
+        if (it.x > x) {
+          if (stack.isNotEmpty()) {
+            result.add(LineSegment(x, it.x, stack.last().id))
+          }
+          x = it.x
+        }
+        stack.addLast(it)
+      }
+      else -> {
+        if (it.id == stack.last().id){
+          result.add(LineSegment(x, it.x,  stack.last().id))
+          x = it.x
+        }
+        closed.add(it.id)
+        while (stack.isNotEmpty() && closed.contains(stack.last().id)){
+          stack.removeLast()
+        }
+      }
+    }
+  }
+
+  return result
 }
