@@ -150,7 +150,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     fun getInstance() = getService<LogHighlightingSettingsStore>()
     val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
-    const val CURRENT_SETTINGS_VERSION = "7"
+    const val CURRENT_SETTINGS_VERSION = "8"
 
     val cleanState = State()
 
@@ -247,6 +247,12 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         newState.patterns.find { it.uuid == DefaultSettingsStoreItems.Error.uuid }?.pattern = DefaultSettingsStoreItems.Error.pattern
 
         newState.version = "7"
+        return@lambda newState
+      },
+      "7" to lambda@{ oldState ->
+        val newState = oldState.clone()
+
+        newState.version = "8"
         return@lambda newState
       }
     )
