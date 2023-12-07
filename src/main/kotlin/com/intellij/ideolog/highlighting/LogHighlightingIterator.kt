@@ -208,7 +208,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
               val bg = info.backgroundColor ?: valueBackground
               val startOffset = token.startOffset + offset + matchGroup.range.first
               val endOffset = token.startOffset + offset + matchGroup.range.last + 1
-
+              // TODO: handle newlines
               matchedPieces.add(
                 EventPiece(
                   startOffset,
@@ -220,6 +220,14 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
             }
           }
         }
+      }
+
+
+      if (newlineOffset > 0 && newlineOffset < value.length - 1) {
+        matchedPieces.add(EventPiece(token.startOffset + offset, token.startOffset + newlineOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)), token.isSeparator))
+        matchedPieces.add(EventPiece(token.startOffset + newlineOffset + offset, token.endOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, 0), token.isSeparator))
+      } else{
+        matchedPieces.add(EventPiece(token.startOffset + offset, token.endOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)), token.isSeparator)) // todo: lexeme type?
       }
 
       if (matchedPieces.isNotEmpty()) {
@@ -241,31 +249,6 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
           )
         }
       }
-
-      var prevEnd = token.startOffset + offset
-      val unusedPieces = currentPieces.mapNotNull {
-        val piece = if (it.offsetStart > prevEnd) {
-          EventPiece(prevEnd,
-            it.offsetStart,
-            TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)),
-            token.isSeparator
-          )
-        } else null
-        prevEnd = it.offsetEnd
-        piece
-      }
-
-      currentPieces.addAll(unusedPieces)
-      currentPieces.sortBy { it.offsetStart }
-
-      if (newlineOffset > 0 && newlineOffset < value.length - 1) {
-        currentPieces.add(EventPiece(token.startOffset + offset, token.startOffset + newlineOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)), token.isSeparator))
-        currentPieces.add(EventPiece(token.startOffset + newlineOffset + offset, token.endOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, 0), token.isSeparator))
-      } else{
-        currentPieces.add(EventPiece(token.startOffset + offset, token.endOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)), token.isSeparator)) // todo: lexeme type?
-      }
-
-
 
       if (!token.isSeparator)
         valueIndex++
