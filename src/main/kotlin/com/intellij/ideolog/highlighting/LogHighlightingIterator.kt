@@ -164,8 +164,6 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
     val partHighlighters = myPatterns.filter { it.second.action == LogHighlightingAction.HIGHLIGHT_MATCH }
     val valueHighlighters = myPatterns.filter { it.second.action == LogHighlightingAction.HIGHLIGHT_FIELD }
 
-    val currentPieces = ArrayList<EventPiece>()
-
     var valueIndex = 0
     val timeIndex = fileFormat.getTimeFieldIndex()
     parsedTokens.forEach { token ->
@@ -195,32 +193,31 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
       }
 
       val newlineOffset = value.indexOf('\n')
-      currentPieces.clear()
 
-      val matchedPieces = ArrayList<EventPiece>()
-      if (!token.isSeparator) {
-        for ((pattern, info) in partHighlighters) {
-          val expr = pattern.toRegex()
-          val matches = expr.findAll(value)
-          matches.forEach {
-            it.groups.drop(1).filterNotNull().forEach { matchGroup ->
-              val fg = info.foregroundColor ?: valueForeground
-              val bg = info.backgroundColor ?: valueBackground
-              val startOffset = token.startOffset + offset + matchGroup.range.first
-              val endOffset = token.startOffset + offset + matchGroup.range.last + 1
-              // TODO: handle newlines
-              matchedPieces.add(
+      val matchedPieces = when {
+        token.isSeparator -> emptyList()
+        else -> partHighlighters.flatMap { (pattern, info) ->
+          pattern.toRegex().findAll(value).flatMap {
+            it.groups.drop(1).mapNotNull { matchGroup ->
+              matchGroup?.let {
+                // TODO handle new lines
                 EventPiece(
-                  startOffset,
-                  endOffset,
-                  TextAttributes(fg, bg, null, null, getFont(valueBold, valueItalic)),
-                  token.isSeparator
+                  token.startOffset + offset + matchGroup.range.first,
+                  token.startOffset + offset + matchGroup.range.last + 1,
+                  TextAttributes(
+                    info.foregroundColor ?: valueForeground,
+                    info.backgroundColor ?: valueBackground,
+                    null,
+                    null,
+                    getFont(valueBold, valueItalic)
+                  ),
+                  false
                 )
-              )
+              }
             }
           }
         }
-      }
+      }.toMutableList()
 
 
       if (newlineOffset > 0 && newlineOffset < value.length - 1) {
@@ -230,30 +227,26 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
         matchedPieces.add(EventPiece(token.startOffset + offset, token.endOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)), token.isSeparator)) // todo: lexeme type?
       }
 
-      if (matchedPieces.isNotEmpty()) {
-        val order = solveNestedLines(matchedPieces.mapIndexed { index, it ->
+      eventPieces.addAll(
+        solveNestedLines(matchedPieces.mapIndexed { index, it ->
           LineSegment(
             it.offsetStart,
             it.offsetEnd,
             index
           )
-        })
-        for (lineSegment in order) {
-          currentPieces.add(
-            EventPiece(
-              lineSegment.start,
-              lineSegment.end,
-              matchedPieces[lineSegment.id].textAttributes,
-              matchedPieces[lineSegment.id].isSeparator,
-            )
+        }).map { lineSegment ->
+          EventPiece(
+            lineSegment.start,
+            lineSegment.end,
+            matchedPieces[lineSegment.id].textAttributes,
+            matchedPieces[lineSegment.id].isSeparator,
           )
         }
-      }
+      )
 
       if (!token.isSeparator)
         valueIndex++
 
-      eventPieces.addAll(currentPieces)
     }
 
     tryHighlightStacktrace(event, offset)
