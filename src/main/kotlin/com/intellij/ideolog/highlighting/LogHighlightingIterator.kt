@@ -175,6 +175,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
     parsedTokens.forEach { token ->
       if(token.isSeparator)
         return@forEach
+
       val value = token.takeFrom(event)
       var valueForeground = lineForeground
       var valueBackground = lineBackground
@@ -198,8 +199,9 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
         }
       }
 
+      // find all matches for every patttern
       val matchedPieces = partHighlighters.flatMap { (pattern, info) ->
-        Regex(pattern.toString(), RegexOption.DOT_MATCHES_ALL).findAll(value).flatMap {
+        pattern.toRegex().findAll(value).flatMap {
           it.groups.drop(1).mapNotNull { matchGroup ->
             matchGroup?.let {
               EventPiece(
@@ -220,6 +222,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
         }
       }.toMutableList()
 
+      // add default background
       matchedPieces.add(
         EventPiece(
           token.startOffset + offset,
@@ -230,6 +233,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
       ) // todo: lexeme type?
 
       eventPieces.addAll(
+        // cut lines to remove overlapping regions
         solveNestedLines(matchedPieces.mapIndexed { index, piece ->
           LineSegment(
             piece.offsetStart,
@@ -247,7 +251,6 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
       )
 
       valueIndex++
-
     }
 
     tryHighlightStacktrace(event, offset)
@@ -337,6 +340,13 @@ data class LineSegment(val start: Int, val end: Int, val id: Int): Comparable<Li
 
 data class LineEvent(val x: Int, val l: Int, val id: Int,  val isOpening: Boolean)
 
+/**
+ * Solves nested line segments and returns a list of non-overlapping line segments.
+ *
+ * @param lines The list of line segments to solve.
+ *              Each line segment consists of a start, end, and id.
+ * @return The list of non-overlapping line segments.
+ */
 fun solveNestedLines(lines: List<LineSegment>): List<LineSegment> {
   val result : MutableList<LineSegment> = mutableListOf()
   val events : MutableList<LineEvent> = mutableListOf()
