@@ -230,7 +230,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
           TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)),
           false
         )
-      ) // todo: lexeme type?
+      )
 
       eventPieces.addAll(
         // cut lines to remove overlapping regions
