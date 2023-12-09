@@ -103,10 +103,16 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
     eventPiecePointer = eventPieces.size - 1
   }
 
-  private fun linesSubSequence(lineRange: IntRange) = if(lineRange.last >= 0)
-    myEditor.document.immutableCharSequence.subSequence(myEditor.document.getLineStartOffset(lineRange.first), myEditor.document.getLineEndOffset(lineRange.last))
-  else
-    ""
+    private fun linesSubSequence(lineRange: IntRange): CharSequence {
+        if (lineRange.first < 0 || lineRange.last < lineRange.first)
+            return ""
+
+        val document = myEditor.document
+        val startOffset = document.getLineStartOffset(lineRange.first)
+        val endOffset = document.getLineEndOffset(min(document.lineCount - 1, lineRange.last))
+
+        return document.immutableCharSequence.subSequence(startOffset, endOffset)
+    }
 
   private fun reparsePiecesLines(prevEventLineRange: IntRange, lineRange: IntRange) {
     reparsePieces(linesSubSequence(prevEventLineRange), linesSubSequence(lineRange), document.getLineStartOffset(lineRange.first))
@@ -167,71 +173,67 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
     var valueIndex = 0
     val timeIndex = fileFormat.getTimeFieldIndex()
     parsedTokens.forEach { token ->
+      if(token.isSeparator)
+        return@forEach
       val value = token.takeFrom(event)
       var valueForeground = lineForeground
       var valueBackground = lineBackground
       var valueBold = bold
       var valueItalic = italic
 
-      if (!token.isSeparator && prevTime != null && currentTime != null && valueIndex == timeIndex && myEditor.getUserData(highlightTimeKey) == true) {
+      if (prevTime != null && currentTime != null && valueIndex == timeIndex && myEditor.getUserData(highlightTimeKey) == true) {
         val diff = abs(prevTime - currentTime)
 
         val diffLtd = min(timeDifferenceToRed, diff)
         valueBackground = Color(Color.HSBtoRGB((120 - diffLtd * 120 / timeDifferenceToRed) / 360.0f, if (myHsbVals[2] < 0.5f) 0.9f else 0.2f, if (myHsbVals[2] < 0.5f) 0.3f else 0.9f))
       }
 
-      if (!token.isSeparator) {
-        for ((pattern, info) in valueHighlighters) {
-          if (pattern.matcher(value).find()) {
-            valueForeground = info.foregroundColor ?: valueForeground
-            valueBackground = info.backgroundColor ?: valueBackground
-            valueBold = info.bold
-            valueItalic = info.italic
-            break
-          }
+      for ((pattern, info) in valueHighlighters) {
+        if (pattern.matcher(value).find()) {
+          valueForeground = info.foregroundColor ?: valueForeground
+          valueBackground = info.backgroundColor ?: valueBackground
+          valueBold = info.bold
+          valueItalic = info.italic
+          break
         }
       }
 
-      val newlineOffset = value.indexOf('\n')
+      val matchedPieces = partHighlighters.flatMap { (pattern, info) ->
+        Regex(pattern.toString(), RegexOption.DOT_MATCHES_ALL).findAll(value).flatMap {
+          it.groups.drop(1).mapNotNull { matchGroup ->
+            matchGroup?.let {
+              EventPiece(
+                token.startOffset + offset + matchGroup.range.first,
+                token.startOffset + offset + matchGroup.range.last + 1,
+                TextAttributes(
+                  info.foregroundColor ?: valueForeground,
+                  info.backgroundColor ?: valueBackground,
+                  null,
+                  null,
+                  getFont(info.bold, info.italic)
+                ),
+                false
+              )
 
-      val matchedPieces = when {
-        token.isSeparator -> emptyList()
-        else -> partHighlighters.flatMap { (pattern, info) ->
-          pattern.toRegex().findAll(value).flatMap {
-            it.groups.drop(1).mapNotNull { matchGroup ->
-              matchGroup?.let {
-                // TODO handle new lines
-                EventPiece(
-                  token.startOffset + offset + matchGroup.range.first,
-                  token.startOffset + offset + matchGroup.range.last + 1,
-                  TextAttributes(
-                    info.foregroundColor ?: valueForeground,
-                    info.backgroundColor ?: valueBackground,
-                    null,
-                    null,
-                    getFont(valueBold, valueItalic)
-                  ),
-                  false
-                )
-              }
             }
           }
         }
       }.toMutableList()
 
-
-      if (newlineOffset > 0 && newlineOffset < value.length - 1) {
-        matchedPieces.add(EventPiece(token.startOffset + offset, token.startOffset + newlineOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)), token.isSeparator))
-        matchedPieces.add(EventPiece(token.startOffset + newlineOffset + offset, token.endOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, 0), token.isSeparator))
-      } else{
-        matchedPieces.add(EventPiece(token.startOffset + offset, token.endOffset + offset, TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)), token.isSeparator)) // todo: lexeme type?
-      }
+      matchedPieces.add(
+        EventPiece(
+          token.startOffset + offset,
+          token.endOffset + offset + 1,
+          TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)),
+          false
+        )
+      ) // todo: lexeme type?
 
       eventPieces.addAll(
-        solveNestedLines(matchedPieces.mapIndexed { index, it ->
+        solveNestedLines(matchedPieces.mapIndexed { index, piece ->
           LineSegment(
-            it.offsetStart,
-            it.offsetEnd,
+            piece.offsetStart,
+            piece.offsetEnd,
             index
           )
         }).map { lineSegment ->
@@ -244,8 +246,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
         }
       )
 
-      if (!token.isSeparator)
-        valueIndex++
+      valueIndex++
 
     }
 
