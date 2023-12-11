@@ -58,6 +58,10 @@ class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
     return tokens.last { !it.isSeparator }
   }
 
+  fun validateFormatUUID(uuid: UUID?): Boolean =
+    uuid == null || myRegexLogParser?.uuid == uuid
+
+
   fun parseLogEventTimeSeconds(time: CharSequence): Long? {
     return myRegexLogParser?.let {
       try {

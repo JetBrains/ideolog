@@ -110,6 +110,8 @@ object DefaultSettingsStoreItems {
   val Error = LogHighlightingPattern(
     true,
     "^\\s*(e(rror)?|severe)\\s*$",
+    null,
+    -1,
     LogHighlightingAction.HIGHLIGHT_LINE,
     JBColor.RED.rgb,
     null,
@@ -121,6 +123,8 @@ object DefaultSettingsStoreItems {
   val Warning = LogHighlightingPattern(
     true,
     "^\\s*w(arn(ing)?)?\\s*$",
+    null,
+    -1,
     LogHighlightingAction.HIGHLIGHT_LINE,
     JBColor.ORANGE.rgb,
     null,
@@ -132,6 +136,8 @@ object DefaultSettingsStoreItems {
   val Info = LogHighlightingPattern(
     true,
     "^\\s*i(nfo)?\\s*$",
+    null,
+    -1,
     LogHighlightingAction.HIGHLIGHT_LINE,
     JBColor.GREEN.rgb,
     null,
@@ -434,6 +440,8 @@ data class LogParsingPattern(@Attribute("enabled") var enabled: Boolean,
 @Tag("LogHighlightingPattern")
 data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean,
                                   @Attribute("pattern") @Language("RegExp") var pattern: String,
+                                  @Attribute("formatId", converter = UUIDConverter::class) var formatId: UUID?,
+                                  @Attribute("captureGroup") var captureGroup: Int,
                                   @Attribute("action") var action: LogHighlightingAction,
                                   @Attribute("fg") var fgRgb: Int?,
                                   @Attribute("bg") var bgRgb: Int?,
@@ -443,7 +451,7 @@ data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean,
                                   @Attribute("uuid", converter = UUIDConverter::class) var uuid: UUID) : Cloneable {
 
   @Suppress("unused")
-  constructor() : this(true, "", LogHighlightingAction.HIGHLIGHT_FIELD, null, null, false, false, false, UUID.randomUUID())
+  constructor() : this(true, "", null, 0, LogHighlightingAction.HIGHLIGHT_FIELD, null, null, false, false, false, UUID.randomUUID())
 
   var foregroundColor: Color?
     @Transient get() = fgRgb?.let { JBColor(it, it) }
@@ -458,7 +466,7 @@ data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean,
     }
 
   public override fun clone(): LogHighlightingPattern {
-    return LogHighlightingPattern(enabled, pattern, action, fgRgb, bgRgb, bold, italic, showOnStripe, uuid)
+    return LogHighlightingPattern(enabled, pattern, formatId, captureGroup, action, fgRgb, bgRgb, bold, italic, showOnStripe, uuid)
   }
 }
 

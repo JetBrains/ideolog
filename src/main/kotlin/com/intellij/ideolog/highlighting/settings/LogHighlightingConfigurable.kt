@@ -91,7 +91,9 @@ class LogHighlightingConfigurable : BaseConfigurable() {
           val selectedIndex = patternsTable.selectedRow
           if (selectedIndex >= 0) {
             LogHighlightingPatternSettingsDialog(
-              patternTableModel.getValueAt(selectedIndex, 2) as LogHighlightingPattern).show()
+              patternTableModel.getValueAt(selectedIndex, 2) as LogHighlightingPattern,
+              formatsTableModel.getParsingPatterns()
+            ).show()
           }
         }
       }.createPanel()

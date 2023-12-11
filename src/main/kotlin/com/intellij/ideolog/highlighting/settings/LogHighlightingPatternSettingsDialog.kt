@@ -5,15 +5,22 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.ColorPanel
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.JBIntSpinner
 import java.awt.Component
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.util.*
 import javax.swing.*
 
-class LogHighlightingPatternSettingsDialog(private val item: LogHighlightingPattern) : DialogWrapper(null, true, IdeModalityType.PROJECT) {
+class LogHighlightingPatternSettingsDialog(
+  private val item: LogHighlightingPattern,
+  private val parsingPatterns: List<Pair<UUID, String>>
+) :
+  DialogWrapper(null, true, IdeModalityType.PROJECT) {
   private var myPatternText: EditorTextField? = null
   private var myActionCombo: JComboBox<LogHighlightingAction>? = null
+  private var myFormatCombo: JComboBox<Pair<UUID?, String>>? = null
+  private var myCaptureGroupId: JBIntSpinner? = null
   private var myForegroundCheck: JCheckBox? = null
   private var myBackgroundCheck: JCheckBox? = null
   private var myForegroundColor: ColorPanel? = null
@@ -59,8 +66,56 @@ class LogHighlightingPatternSettingsDialog(private val item: LogHighlightingPatt
     actionSelection.selectedItem = item.action
     myActionCombo = actionSelection
     panel.add(actionSelection, constraints)
-    constraints.gridx = 1
+    constraints.gridx = 0
     panel.add(JLabel("Action"), constraints)
+
+    constraints.gridx = 0
+    constraints.gridy = 2
+    panel.add(JLabel("Format"), constraints)
+    constraints.gridx = 1
+
+    val formatSelection = ComboBox(
+      (listOf(Pair(null, "Any")) + parsingPatterns).toTypedArray()
+    )
+    formatSelection.renderer = object : DefaultListCellRenderer() {
+      override fun getListCellRendererComponent(
+        list: JList<*>?,
+        value: Any?,
+        index: Int,
+        isSelected: Boolean,
+        cellHasFocus: Boolean
+      ): Component {
+        text = if (value is Pair<*, *>) {
+          if (value.first is UUID? && value.second is String) {
+            (value.second as String)
+          } else {
+            ""
+          }
+        } else {
+          ""
+        }
+        return this
+      }
+    }
+
+    formatSelection.selectedIndex = 0
+    for (i in 0 until formatSelection.itemCount) {
+      if (formatSelection.getItemAt(i).first == item.formatId) {
+        formatSelection.selectedIndex = i
+        break
+      }
+    }
+
+    panel.add(formatSelection, constraints)
+    myFormatCombo = formatSelection
+
+    constraints.gridx = 0
+    constraints.gridy = 3
+    panel.add(JLabel("Capture group"), constraints)
+    val groupSpinner = JBIntSpinner(item.captureGroup + 1, 0, 100)
+    myCaptureGroupId = groupSpinner
+    constraints.gridx++
+    panel.add(groupSpinner, constraints)
 
     val fgColor = ColorPanel()
     myForegroundColor = fgColor
@@ -87,20 +142,20 @@ class LogHighlightingPatternSettingsDialog(private val item: LogHighlightingPatt
     myItalicCheck = italicCheck
 
     constraints.gridx = 0
-    constraints.gridy = 2
+    constraints.gridy = 4
     panel.add(boldCheck, constraints)
 
     constraints.gridx = 1
     panel.add(italicCheck, constraints)
 
     constraints.gridx = 0
-    constraints.gridy = 3
+    constraints.gridy = 5
     panel.add(fgCheck, constraints)
 
     constraints.gridx = 1
     panel.add(fgColor, constraints)
 
-    constraints.gridy = 4
+    constraints.gridy = 6
     panel.add(bgColor, constraints)
 
     constraints.gridx = 0
@@ -120,6 +175,8 @@ class LogHighlightingPatternSettingsDialog(private val item: LogHighlightingPatt
     }
     myPatternText?.let { item.pattern = it.text }
     myActionCombo?.let { item.action = it.selectedItem as LogHighlightingAction }
+    myFormatCombo?.let { item.formatId = (it.selectedItem as Pair<*, *>).first as UUID? }
+    myCaptureGroupId?.let { item.captureGroup = it.number - 1 }
     myForegroundCheck?.let {
       item.foregroundColor = if (it.isSelected) myForegroundColor?.selectedColor else null
     }
