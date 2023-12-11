@@ -147,16 +147,35 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
     val highlightingSet = myEditor.getUserData(highlightingSetUserKey) ?: emptySet()
 
     for ((pattern, info) in myPatterns) {
+      if (!fileFormat.validateFormatUUID(info.formatId)) {
+        continue
+      }
       if (info.action == LogHighlightingAction.HIGHLIGHT_LINE) {
-        for (it in columnValues) {
-          if (pattern.matcher(it).find()) {
-            lineBackground = info.backgroundColor ?: lineBackground
-            lineForeground = info.foregroundColor ?: lineForeground
-            italic = info.italic
-            bold = info.bold
-            break
+        when {
+          info.captureGroup >= 0 -> {
+            val it = columnValues.getOrNull(info.captureGroup) ?: break
+            if (pattern.matcher(it).find()) {
+              lineBackground = info.backgroundColor ?: lineBackground
+              lineForeground = info.foregroundColor ?: lineForeground
+              italic = info.italic
+              bold = info.bold
+              break
+            }
+          }
+
+          else -> {
+            for (it in columnValues) {
+              if (pattern.matcher(it).find()) {
+                lineBackground = info.backgroundColor ?: lineBackground
+                lineForeground = info.foregroundColor ?: lineForeground
+                italic = info.italic
+                bold = info.bold
+                break
+              }
+            }
           }
         }
+
       }
     }
 
@@ -172,10 +191,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
 
     var valueIndex = 0
     val timeIndex = fileFormat.getTimeFieldIndex()
-    parsedTokens.forEach { token ->
-      if(token.isSeparator)
-        return@forEach
-
+    parsedTokens.filter{ !it.isSeparator }.forEachIndexed { captureGroup, token ->
       val value = token.takeFrom(event)
       var valueForeground = lineForeground
       var valueBackground = lineBackground
@@ -190,6 +206,11 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
       }
 
       for ((pattern, info) in valueHighlighters) {
+        if (!fileFormat.validateFormatUUID(info.formatId)
+          || (info.captureGroup >= 0 && info.captureGroup != captureGroup)) {
+          continue
+        }
+
         if (pattern.matcher(value).find()) {
           valueForeground = info.foregroundColor ?: valueForeground
           valueBackground = info.backgroundColor ?: valueBackground
@@ -200,7 +221,9 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
       }
 
       // find all matches for every patttern
-      val matchedPieces = partHighlighters.flatMap { (pattern, info) ->
+      val matchedPieces = partHighlighters.filter{
+          (_, info) -> fileFormat.validateFormatUUID(info.formatId) && (info.captureGroup < 0 || info.captureGroup == captureGroup)
+      }.flatMap { (pattern, info) ->
         pattern.toRegex().findAll(value).flatMap {
           it.groups.drop(1).mapNotNull { matchGroup ->
             matchGroup?.let {

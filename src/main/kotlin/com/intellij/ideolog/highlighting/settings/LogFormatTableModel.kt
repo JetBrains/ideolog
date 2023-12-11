@@ -72,4 +72,9 @@ class LogFormatTableModel(private var state: LogHighlightingSettingsStore.State)
     state.parsingPatterns.removeAt(index)
     fireTableRowsDeleted(index, index)
   }
+
+  fun getParsingPatterns() = state.parsingPatterns.map {
+    it.uuid to it.name
+  }
+
 }
