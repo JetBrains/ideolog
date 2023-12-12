@@ -24,8 +24,8 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.UsageSearchContext
 import com.intellij.util.Processor
 import com.intellij.util.indexing.FileBasedIndex
-import gnu.trove.TIntObjectHashMap
 import java.util.*
+import kotlin.collections.HashMap
 
 const val logDelimiters = "\\p{P}|\\s"
 
@@ -173,14 +173,14 @@ class LogJumpToSourceIntention : IntentionAction {
 
       ApplicationManager.getApplication().runReadAction {
         val cacheManager = CacheManager.getInstance(project)
-        val fileIdMap = TIntObjectHashMap<FileMatch>()
+        val fileIdMap = HashMap<Int, FileMatch>()
         val indexManager = FileBasedIndex.getInstance() as FileBasedIndex
         indexManager.processFilesContainingAllKeys(TrigramIndex.INDEX_ID, evt.messageTrigrams, GlobalSearchScope.projectScope(project), null, Processor {
           val fileId = (it as VirtualFileWithId).id
           var structure = fileIdMap.get(fileId)
           if (structure == null) {
             structure = FileMatch(evt)
-            fileIdMap.put(fileId, structure)
+            fileIdMap[fileId] = structure
           }
           structure.messageTrigramCount++
           return@Processor true
@@ -193,13 +193,13 @@ class LogJumpToSourceIntention : IntentionAction {
         val pfi = ProjectFileIndex.getInstance(project)
 
 
-        fileIdMap.forEachEntry { fileId, match ->
+        fileIdMap.entries.forEach { (fileId, match) ->
           val vf = fs.findFileById(fileId)
           if (vf == null
             || !pfi.isInSourceContent(vf)
             || vf.extension !in listOf("kt", "java", "cs", "vb", "cpp")
             ) {
-            return@forEachEntry true
+            return@forEach
           }
 
 
@@ -216,8 +216,6 @@ class LogJumpToSourceIntention : IntentionAction {
           }
 
           filtered.add(match)
-
-          true
         }
 
         filtered.addAll(getMatchesFromFiles(pfi, filesWithLevel, evt, filesWithCategory, true))
