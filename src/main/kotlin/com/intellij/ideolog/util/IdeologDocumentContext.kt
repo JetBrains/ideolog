@@ -15,7 +15,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
-import gnu.trove.TIntIntHashMap
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
@@ -34,8 +33,8 @@ class IdeologDocumentContext(val document: Document) {
     const val MIN_FORMAT_MATCHES = 1
   }
 
-  private val eventStartLines = TIntIntHashMap()
-  private val eventEndLines = TIntIntHashMap()
+  private val eventStartLines = HashMap<Int, Int>()
+  private val eventEndLines = HashMap<Int, Int>()
 
   private val eventParsingLock = Any()
 
@@ -106,8 +105,7 @@ class IdeologDocumentContext(val document: Document) {
     document.immutableCharSequence.subSequence(document.getLineStartOffset(line), document.getLineEndOffset(line))
 
   private fun getEventEndLine(atLine: Int): Int {
-    if (eventEndLines.containsKey(atLine))
-      return eventEndLines[atLine]
+    eventEndLines[atLine]?.let { return it }
 
     val format = detectLogFileFormat()
 
@@ -124,11 +122,7 @@ class IdeologDocumentContext(val document: Document) {
     while (currentLine < lineCount - 1 && !format.isLineEventStart(lineCharSequence(currentLine + 1))) {
       currentLine++
 
-      if (eventEndLines.containsKey(currentLine)) {
-        val result = eventEndLines[currentLine]
-        updateCache(currentLine, result)
-        return result
-      }
+      eventEndLines[currentLine]?.also { updateCache(currentLine, it) }?.let { return it }
     }
 
     updateCache(currentLine, currentLine)
@@ -136,8 +130,7 @@ class IdeologDocumentContext(val document: Document) {
   }
 
   private fun getEventStartLine(atLine: Int): Int {
-    if (eventStartLines.containsKey(atLine))
-      return eventStartLines[atLine]
+    eventStartLines[atLine]?.let { return it }
 
     val format = detectLogFileFormat()
 
@@ -149,11 +142,7 @@ class IdeologDocumentContext(val document: Document) {
     var currentLine = atLine
     while (currentLine > 0 && !format.isLineEventStart(lineCharSequence(currentLine))) {
       currentLine--
-      if (eventStartLines.containsKey(currentLine)) {
-        val result = eventStartLines[currentLine]
-        updateCache(currentLine, result)
-        return result
-      }
+      eventStartLines[currentLine]?.also { updateCache(currentLine, it) }?.let { return it }
     }
 
     updateCache(currentLine, currentLine)
