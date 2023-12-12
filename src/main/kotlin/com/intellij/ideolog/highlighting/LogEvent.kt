@@ -5,8 +5,8 @@ import com.intellij.ideolog.lex.LogToken
 import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.text.TrigramBuilder
-import gnu.trove.THashSet
 import java.util.*
+import kotlin.collections.HashSet
 
 class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFileFormat) {
   val endOffset = startOffset + rawText.length
@@ -19,7 +19,7 @@ class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFil
 
   val level: String
 
-  val messageTrigrams: THashSet<Int> = THashSet()
+  val messageTrigrams: HashSet<Int> = HashSet()
 
   init {
     val tokens: MutableList<LogToken> = ArrayList()
@@ -50,10 +50,9 @@ class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFil
   }
 
 
-  private fun parseTrigrams(text: String, res: THashSet<Int>) {
+  private fun parseTrigrams(text: String, res: HashSet<Int>) {
     TrigramBuilder.processTrigrams(text, object : TrigramBuilder.TrigramProcessor() {
       override fun consumeTrigramsCount(count: Int): Boolean {
-        res.ensureCapacity(count)
         return true
       }
 
