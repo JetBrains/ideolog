@@ -12,7 +12,6 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.util.Alarm
-import gnu.trove.TIntHashSet
 
 class LogHeavyFilterService(project: Project): Disposable {
 
@@ -21,7 +20,7 @@ class LogHeavyFilterService(project: Project): Disposable {
       return project.getService(LogHeavyFilterService::class.java)
     }
 
-    internal val markupHighlightedExceptionsKey = Key.create<TIntHashSet>("Log.ParsedExceptions")
+    internal val markupHighlightedExceptionsKey = Key.create<HashSet<Int>>("Log.ParsedExceptions")
     internal val markupHyperlinkSupportKey = Key.create<EditorHyperlinkSupport>("Log.ExceptionsHyperlinks")
   }
 
@@ -35,7 +34,7 @@ class LogHeavyFilterService(project: Project): Disposable {
     val markupModel = editor.markupModel
 
     val set = markupModel.getUserData(markupHighlightedExceptionsKey)
-      ?: TIntHashSet().also { markupModel.putUserData(markupHighlightedExceptionsKey, it) }
+      ?: HashSet<Int>().also { markupModel.putUserData(markupHighlightedExceptionsKey, it) }
 
     synchronized(set) {
       if (set.contains(eventOffset))
