@@ -35,21 +35,21 @@ class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
 
   fun extractDate(tokens: List<LogToken>): LogToken? {
     val idx = myRegexLogParser?.otherParsingSettings?.timeColumnId ?: return null
-    if(tokens.size > idx + 1)
+    if(tokens.size > idx)
       return tokens.asSequence().filter { !it.isSeparator }.elementAtOrNull(idx)
     return null
   }
 
   fun extractSeverity(tokens: List<LogToken>): LogToken? {
     val idx = myRegexLogParser?.otherParsingSettings?.severityColumnId ?: return null
-    if(tokens.size > idx + 1)
+    if(tokens.size > idx)
       return tokens.asSequence().filter { !it.isSeparator }.elementAtOrNull(idx)
     return null
   }
 
   fun extractCategory(tokens: List<LogToken>): LogToken? {
     val idx = myRegexLogParser?.otherParsingSettings?.categoryColumnId ?: return null
-    if(tokens.size > idx + 1)
+    if(tokens.size > idx)
       return tokens.asSequence().filter { !it.isSeparator }.elementAtOrNull(idx)
     return null
   }
