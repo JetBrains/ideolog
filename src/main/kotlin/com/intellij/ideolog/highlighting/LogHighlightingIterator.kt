@@ -249,7 +249,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
       matchedPieces.add(
         EventPiece(
           token.startOffset + offset,
-          token.endOffset + offset + 1,
+          token.endOffset + offset,
           TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)),
           false
         )
