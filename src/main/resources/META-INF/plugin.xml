@@ -40,6 +40,7 @@
     <editorHighlighterProvider filetype="Log" implementationClass="com.intellij.ideolog.highlighting.LogFileEditorHighlighterProvider" />
     <extendWordSelectionHandler implementation="com.intellij.ideolog.editorActions.ExtendsSelection"/>
     <fileEditorProvider implementation="com.intellij.ideolog.file.LogFileEditorProvider" />
+    <consoleFilterProvider implementation="com.intellij.ideolog.filters.StackTraceFileFilterProvider"/>
     <!--suppress PluginXmlValidity -->
     <lang.parserDefinition language="LOG" implementationClass="com.intellij.ideolog.psi.LogFileParserDefinition"/>
     <!--suppress PluginXmlValidity -->
