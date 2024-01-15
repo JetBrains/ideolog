@@ -58,7 +58,7 @@ class IdeologDocumentContext(val document: Document) {
 
   fun detectLogFileFormat(): LogFileFormat {
     val currentFormat = format
-    if (currentFormat != null) return currentFormat
+    if (currentFormat?.myRegexLogParser != null) return currentFormat
 
     val regexMatchers = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.mapNotNull {
       if (!it.enabled)
