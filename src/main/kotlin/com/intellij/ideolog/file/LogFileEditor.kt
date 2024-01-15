@@ -33,7 +33,7 @@ class LogFileEditor(val project: Project, file: VirtualFile, provider: TextEdito
     } else {
       editor.document.addDocumentListener(object : DocumentListener {
         override fun documentChanged(event: DocumentEvent) {
-          if (event.oldLength != 0 || event.offset != event.document.textLength - event.newLength) {
+          if (event.oldLength != 0 || event.newLength - event.oldLength > 1 || event.offset != event.document.textLength - event.newLength) {
               resetIdeologStoredData()
           }
         }
