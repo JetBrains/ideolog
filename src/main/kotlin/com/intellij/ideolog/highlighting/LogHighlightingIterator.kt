@@ -23,7 +23,12 @@ import kotlin.math.min
 
 const val timeDifferenceToRed = 15000L
 
-class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, val textGetter: () -> CharSequence, val colorGetter: () -> EditorColorsScheme) : HighlighterIterator {
+class LogHighlightingIterator(
+  startOffset: Int,
+  private val myEditor: Editor,
+  val textGetter: () -> CharSequence,
+  val colorGetter: () -> EditorColorsScheme
+) : HighlighterIterator {
   private val myText: CharSequence
     get() = textGetter()
 
@@ -34,7 +39,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
   private val myPatterns = settingsStore.myState.patterns.filter { it.enabled }.mapNotNull {
     try {
       Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it
-    } catch(e: PatternSyntaxException) {
+    } catch (e: PatternSyntaxException) {
       null
     }
   } // todo: notify user about invalid patterns
@@ -103,29 +108,40 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
     eventPiecePointer = eventPieces.size - 1
   }
 
-    private fun linesSubSequence(lineRange: IntRange): CharSequence {
-        if (lineRange.first < 0 || lineRange.last < lineRange.first)
-            return ""
+  private fun linesSubSequence(lineRange: IntRange): CharSequence {
+    if (lineRange.first < 0 || lineRange.last - lineRange.first < 0 || myEditor.document.lineCount <= 0)
+      return ""
 
-        val document = myEditor.document
-        val startOffset = document.getLineStartOffset(lineRange.first)
-        val endOffset = document.getLineEndOffset(min(document.lineCount - 1, lineRange.last))
 
-        return document.immutableCharSequence.subSequence(startOffset, endOffset)
-    }
+    val document = myEditor.document
+    val startOffset = document.getLineStartOffset(lineRange.first)
+    val endOffset = document.getLineEndOffset(min(document.lineCount - 1, lineRange.last))
+
+    return document.immutableCharSequence.subSequence(startOffset, endOffset)
+  }
 
   private fun reparsePiecesLines(prevEventLineRange: IntRange, lineRange: IntRange) {
-    reparsePieces(linesSubSequence(prevEventLineRange), linesSubSequence(lineRange), document.getLineStartOffset(lineRange.first))
+    reparsePieces(
+      linesSubSequence(prevEventLineRange),
+      linesSubSequence(lineRange),
+      document.getLineStartOffset(lineRange.first)
+    )
   }
 
   private fun reparsePieces(prevEvent: CharSequence, event: CharSequence, offset: Int) {
-    Color.RGBtoHSB(myColors.defaultBackground.red, myColors.defaultBackground.green, myColors.defaultBackground.blue, myHsbVals)
+    Color.RGBtoHSB(
+      myColors.defaultBackground.red,
+      myColors.defaultBackground.green,
+      myColors.defaultBackground.blue,
+      myHsbVals
+    )
     curEvent = event
 
     parsedTokens.clear()
     val fileFormat = detectLogFileFormat(myEditor)
     fileFormat.tokenize(prevEvent, parsedTokens)
-    val prevTime = fileFormat.extractDate(parsedTokens)?.takeFrom(prevEvent)?.let { fileFormat.parseLogEventTimeSeconds(it) }
+    val prevTime =
+      fileFormat.extractDate(parsedTokens)?.takeFrom(prevEvent)?.let { fileFormat.parseLogEventTimeSeconds(it) }
 
     eventPieces.clear()
     var lineForeground = myColors.defaultForeground
@@ -135,7 +151,8 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
 
     parsedTokens.clear()
     fileFormat.tokenize(event, parsedTokens)
-    val currentTime = fileFormat.extractDate(parsedTokens)?.takeFrom(event)?.let { fileFormat.parseLogEventTimeSeconds(it) }
+    val currentTime =
+      fileFormat.extractDate(parsedTokens)?.takeFrom(event)?.let { fileFormat.parseLogEventTimeSeconds(it) }
 
     val columnValues = parsedTokens.filter { !it.isSeparator }.map { it.takeFrom(event) }
     val numColumns = columnValues.size
@@ -191,7 +208,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
 
     var valueIndex = 0
     val timeIndex = fileFormat.getTimeFieldIndex()
-    parsedTokens.filter{ !it.isSeparator }.forEachIndexed { captureGroup, token ->
+    parsedTokens.filter { !it.isSeparator }.forEachIndexed { captureGroup, token ->
       val value = token.takeFrom(event)
       var valueForeground = lineForeground
       var valueBackground = lineBackground
@@ -202,12 +219,19 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
         val diff = abs(prevTime - currentTime)
 
         val diffLtd = min(timeDifferenceToRed, diff)
-        valueBackground = Color(Color.HSBtoRGB((120 - diffLtd * 120 / timeDifferenceToRed) / 360.0f, if (myHsbVals[2] < 0.5f) 0.9f else 0.2f, if (myHsbVals[2] < 0.5f) 0.3f else 0.9f))
+        valueBackground = Color(
+          Color.HSBtoRGB(
+            (120 - diffLtd * 120 / timeDifferenceToRed) / 360.0f,
+            if (myHsbVals[2] < 0.5f) 0.9f else 0.2f,
+            if (myHsbVals[2] < 0.5f) 0.3f else 0.9f
+          )
+        )
       }
 
       for ((pattern, info) in valueHighlighters) {
         if (!fileFormat.validateFormatUUID(info.formatId)
-          || (info.captureGroup >= 0 && info.captureGroup != captureGroup)) {
+          || (info.captureGroup >= 0 && info.captureGroup != captureGroup)
+        ) {
           continue
         }
 
@@ -221,8 +245,8 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
       }
 
       // find all matches for every patttern
-      val matchedPieces = partHighlighters.filter{
-          (_, info) -> fileFormat.validateFormatUUID(info.formatId) && (info.captureGroup < 0 || info.captureGroup == captureGroup)
+      val matchedPieces = partHighlighters.filter { (_, info) ->
+        fileFormat.validateFormatUUID(info.formatId) && (info.captureGroup < 0 || info.captureGroup == captureGroup)
       }.flatMap { (pattern, info) ->
         pattern.toRegex().findAll(value).flatMap {
           it.groups.drop(1).mapNotNull { matchGroup ->
@@ -336,7 +360,13 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
     return myEditor.document
   }
 
-  private data class EventPiece(val offsetStart: Int, val offsetEnd: Int, val textAttributes: TextAttributes, val isSeparator: Boolean)
+  private data class EventPiece(
+    val offsetStart: Int,
+    val offsetEnd: Int,
+    val textAttributes: TextAttributes,
+    val isSeparator: Boolean
+  )
+
   companion object {
     val myHsbVals = FloatArray(3)
     fun getLineBackground(columnValue: CharSequence?, defaultBackground: Color): Color? {
@@ -357,11 +387,11 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
 }
 
 
-data class LineSegment(val start: Int, val end: Int, val id: Int): Comparable<LineSegment> {
+data class LineSegment(val start: Int, val end: Int, val id: Int) : Comparable<LineSegment> {
   override fun compareTo(other: LineSegment) = compareValuesBy(this, other, { it.start }, { it.end })
 }
 
-data class LineEvent(val x: Int, val l: Int, val id: Int,  val isOpening: Boolean)
+data class LineEvent(val x: Int, val l: Int, val id: Int, val isOpening: Boolean)
 
 /**
  * Solves nested line segments and returns a list of non-overlapping line segments.
@@ -371,8 +401,8 @@ data class LineEvent(val x: Int, val l: Int, val id: Int,  val isOpening: Boolea
  * @return The list of non-overlapping line segments.
  */
 fun solveNestedLines(lines: List<LineSegment>): List<LineSegment> {
-  val result : MutableList<LineSegment> = mutableListOf()
-  val events : MutableList<LineEvent> = mutableListOf()
+  val result: MutableList<LineSegment> = mutableListOf()
+  val events: MutableList<LineEvent> = mutableListOf()
   lines.forEach {
     events.add(LineEvent(it.start, it.end - it.start, it.id, true))
     events.add(LineEvent(it.end, it.end - it.start, it.id, false))
@@ -384,7 +414,7 @@ fun solveNestedLines(lines: List<LineSegment>): List<LineSegment> {
   var x = 0
   val closed = hashSetOf<Int>()
   events.forEach {
-    when{
+    when {
       it.isOpening -> {
         if (it.x > x) {
           if (stack.isNotEmpty()) {
@@ -394,13 +424,14 @@ fun solveNestedLines(lines: List<LineSegment>): List<LineSegment> {
         }
         stack.addLast(it)
       }
+
       else -> {
-        if (it.id == stack.last().id){
-          result.add(LineSegment(x, it.x,  stack.last().id))
+        if (it.id == stack.last().id) {
+          result.add(LineSegment(x, it.x, stack.last().id))
           x = it.x
         }
         closed.add(it.id)
-        while (stack.isNotEmpty() && closed.contains(stack.last().id)){
+        while (stack.isNotEmpty() && closed.contains(stack.last().id)) {
           stack.removeLast()
         }
       }
