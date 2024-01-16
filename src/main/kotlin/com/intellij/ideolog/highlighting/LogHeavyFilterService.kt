@@ -4,6 +4,7 @@ import com.intellij.execution.filters.CompositeFilter
 import com.intellij.execution.filters.ConsoleFilterProvider
 import com.intellij.execution.filters.Filter
 import com.intellij.execution.impl.EditorHyperlinkSupport
+import com.intellij.ideolog.filters.StackTraceFileFilter
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
@@ -24,7 +25,9 @@ class LogHeavyFilterService(project: Project): Disposable {
     internal val markupHyperlinkSupportKey = Key.create<EditorHyperlinkSupport>("Log.ExceptionsHyperlinks")
   }
 
-  private val myFilters: List<Filter> = ConsoleFilterProvider.FILTER_PROVIDERS.extensions.flatMap { it.getDefaultFilters(project).asIterable() }
+  private val myFilters: List<Filter> = ConsoleFilterProvider.FILTER_PROVIDERS.extensions
+    .flatMap { it.getDefaultFilters(project).asIterable() }
+    .sortedBy { if (it is StackTraceFileFilter) -1 else 1 } // basically, we want StackTraceFileFilter to be first
   private val myCompositeFilter = CompositeFilter(project, myFilters)
   private val myAlarm = Alarm(Alarm.ThreadToUse.POOLED_THREAD, this)
 
@@ -69,7 +72,7 @@ class LogHeavyFilterService(project: Project): Disposable {
     var offset = 0
     lines.forEach { line ->
       offset += line.length
-      consumeResult(myCompositeFilter.applyFilter(line, eventOffset + offset), false)
+      consumeResult(myCompositeFilter.applyFilter(line, offset), true)
       offset += 1
     }
     myAlarm.addRequest({
