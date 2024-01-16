@@ -38,7 +38,7 @@ open class StackTraceFileFilter(
       filterNestedResults(
         collectFilterResultItems(textStartOffset, LINUX_MACOS_FILE_PATTERN.matcher(bombedCharSequence)) +
           collectFilterResultItems(textStartOffset, WINDOWS_FILE_PATTERN.matcher(bombedCharSequence))
-      ).filter { it.hyperlinkInfo != null }
+      )//.filter { it.hyperlinkInfo != null }
 
     return when (filterResultItems.size) {
       0 -> null
