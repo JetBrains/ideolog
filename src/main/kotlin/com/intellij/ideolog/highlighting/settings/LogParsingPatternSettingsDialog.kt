@@ -29,7 +29,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import kotlin.collections.ArrayList
 
-class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : DialogWrapper(null, true, IdeModalityType.PROJECT) {
+class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : DialogWrapper(null, true, IdeModalityType.IDE) {
   private var myNameText: EditorTextField? = null
   private var myParsingPatternText: EditorTextField? = null
   private var myLineStartPatternText: EditorTextField? = null

@@ -16,7 +16,7 @@ class LogHighlightingPatternSettingsDialog(
   private val item: LogHighlightingPattern,
   private val parsingPatterns: List<Pair<UUID, String>>
 ) :
-  DialogWrapper(null, true, IdeModalityType.PROJECT) {
+  DialogWrapper(null, true, IdeModalityType.IDE) {
   private var myPatternText: EditorTextField? = null
   private var myActionCombo: JComboBox<LogHighlightingAction>? = null
   private var myFormatCombo: JComboBox<Pair<UUID?, String>>? = null
