@@ -2,11 +2,16 @@ package com.intellij.ideolog.editorActions
 
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.intentions.LogJumpToSourceIntention
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 
 class JumpToSourceAction : AnAction() {
+  override fun getActionUpdateThread(): ActionUpdateThread {
+    return ActionUpdateThread.EDT
+  }
+
   override fun update(e: AnActionEvent) {
     e.presentation.isEnabled = canExecute(e)
   }
