@@ -3,12 +3,17 @@ package com.intellij.ideolog.editorActions
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.highlighting.LogEvent
 import com.intellij.ideolog.util.getGoToActionContext
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 
 class GoToNextEntryAction : AnAction() {
+  override fun getActionUpdateThread(): ActionUpdateThread {
+    return ActionUpdateThread.EDT
+  }
+
   override fun update(e: AnActionEvent) {
     e.presentation.isEnabled = e.dataContext.getData(CommonDataKeys.PSI_FILE)?.fileType == LogFileType
   }
