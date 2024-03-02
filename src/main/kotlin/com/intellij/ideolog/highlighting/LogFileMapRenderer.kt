@@ -12,6 +12,7 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.Key
+import com.intellij.ui.JBColor
 import java.awt.Color
 import java.awt.Font
 import java.awt.Point
@@ -83,14 +84,14 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
                   breadcrumbBuckets[nBucket] = bc + (1 - bc) * growRate
               }
 
-              // Paint buckets partly hit by glow, before
+              // Paint buckets partly hit by the glow before
               for (nBucket in max(nBucketStart - glowSize, 0) until nBucketStart) {
                 val opacity = (1 - (nBucketStart - nBucket + 1).toDouble() / (glowSize + 1))
                 val bc = breadcrumbBuckets[nBucket]
                 if (bc < opacity)
                   breadcrumbBuckets[nBucket] = bc + (opacity - bc) * growRate
               }
-              // Paint buckets partly hit by glow, after
+              // Paint buckets partly hit by the glow after
               for (nBucket in nBucketEnd until min(nBucketEnd + glowSize, numBuckets - 1)) {
                 val opacity = (1 - (nBucket - nBucketEnd + 1).toDouble() / (glowSize + 1))
                 val bc = breadcrumbBuckets[nBucket]
@@ -151,9 +152,9 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
               return
             if (isCurBucketError) {
               isCurBucketError = false
-              highlighterBuckets[nBucketCur] = Color.red
-              if (highlighterBuckets[max(nBucketCur - 1, 0)] != Color.red) // Min size of two buckets
-                highlighterBuckets[max(nBucketCur - 1, 0)] = Color.red
+              highlighterBuckets[nBucketCur] = JBColor.RED
+              if (highlighterBuckets[max(nBucketCur - 1, 0)] != JBColor.RED) // Min size of two buckets
+                highlighterBuckets[max(nBucketCur - 1, 0)] = JBColor.RED
             } else {
               highlighterBuckets[nBucketCur] = colorCurCustomHighlighter
               if (highlighterBuckets[max(nBucketCur - 1, 0)] != colorCurCustomHighlighter) // Min size of two buckets
@@ -199,8 +200,8 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
 
             // Roll to affected buckets
             val nBucketEnd = getBucketForOffset(logEvent.startOffset + logEvent.rawText.length - 1)
-            for (nBucket in nBucketCur..nBucketEnd) {
-              // Apply attrs to bucket
+            (nBucketCur..nBucketEnd).forEach {
+                // Apply attrs to bucket
               nCurBucketMaxTimeDelta = max(nCurBucketMaxTimeDelta, timeDelta)
               isCurBucketError = isCurBucketError || isError
               colorCurCustomHighlighter = colorCurCustomHighlighter ?: colorCustomHighlighter
