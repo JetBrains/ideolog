@@ -29,8 +29,9 @@ val Document.ideologContext: IdeologDocumentContext
 
 class IdeologDocumentContext(val document: Document) {
   companion object {
-    const val NUMBER_FIRST_LINES = 10000
+    const val NUMBER_FIRST_LINES = 25
     const val MIN_FORMAT_MATCHES = 1
+    const val INTERRUPT_AFTER_NS = 500 * 1_000_000
   }
 
   private val eventStartLines = HashMap<Int, Int>()
@@ -58,7 +59,7 @@ class IdeologDocumentContext(val document: Document) {
 
   fun detectLogFileFormat(): LogFileFormat {
     val currentFormat = format
-    if (currentFormat?.myRegexLogParser != null) return currentFormat
+    if (currentFormat != null) return currentFormat
 
     val regexMatchers = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.mapNotNull {
       if (!it.enabled)
@@ -80,10 +81,16 @@ class IdeologDocumentContext(val document: Document) {
 
     val doc = document.charsSequence
     val firstLines = doc.lineSequence().take(NUMBER_FIRST_LINES)
-    val sumByMatcher = regexMatchers.map { it to firstLines.count { line -> it.regex.matcher(line).find() } }
+    val startTime = System.nanoTime()
+    val sumByMatcher = regexMatchers.map {
+      it to firstLines.count { line ->
+        System.nanoTime() - startTime < INTERRUPT_AFTER_NS && it.regex.matcher(line).find()
+      }
+    }
 
-    return LogFileFormat(sumByMatcher.filter { it.second >= MIN_FORMAT_MATCHES }
-      .maxByOrNull { it.second }?.first).also { format = it }
+    val detectedLogFormat = LogFileFormat(sumByMatcher.filter { it.second >= MIN_FORMAT_MATCHES }.maxByOrNull { it.second }?.first)
+    format = detectedLogFormat
+    return detectedLogFormat
   }
 
   /**
