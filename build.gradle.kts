@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-  val kotlinVersion = "1.9.21"
+  val kotlinVersion = "1.9.22"
 
   repositories {
     mavenCentral()
@@ -14,7 +14,7 @@ buildscript {
 
 plugins {
   id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
-  id("org.jetbrains.intellij") version "1.16.1"
+  id("org.jetbrains.intellij") version "1.17.2"
 }
 
 apply(plugin = "kotlin")
