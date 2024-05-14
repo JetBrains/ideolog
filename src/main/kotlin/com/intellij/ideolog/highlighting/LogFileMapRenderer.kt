@@ -5,7 +5,6 @@ import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.ex.MarkupModelEx
 import com.intellij.openapi.editor.markup.EffectType
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
@@ -37,7 +36,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
 
   private var detachedFromEditor = false
 
-  private val myMarkupModel: MarkupModelEx = (myLogFileEditor.editor as EditorEx).markupModel
+  private val myMarkupModel: MarkupModelEx = myLogFileEditor.editor.markupModel
 
   init {
     composeBuckets()

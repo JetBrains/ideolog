@@ -7,7 +7,6 @@ import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
-import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.fileEditor.FileEditorState
 import com.intellij.openapi.fileEditor.impl.text.PsiAwareTextEditorImpl
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider
@@ -16,7 +15,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 
-class LogFileEditor(val project: Project, file: VirtualFile, provider: TextEditorProvider) : PsiAwareTextEditorImpl(project, file, provider) {
+class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorProvider) : PsiAwareTextEditorImpl(project, file, provider) {
   val log = Logger.getInstance(LogFileEditor::class.java)
   private val isReadOnly: Boolean
 
@@ -39,7 +38,7 @@ class LogFileEditor(val project: Project, file: VirtualFile, provider: TextEdito
         }
       })
     }
-    (editor as EditorEx).isViewer = isReadOnly
+    editor.isViewer = isReadOnly
   }
 
   private fun resetIdeologStoredData() {

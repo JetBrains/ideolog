@@ -29,7 +29,7 @@ val buildNumber: String by rootProject.extra
 version = buildNumber
 
 intellij {
-  version.set("2022.2")
+  version.set("2023.3")
   pluginName.set("ideolog")
   tasks {
     withType<org.jetbrains.intellij.tasks.PatchPluginXmlTask> {
