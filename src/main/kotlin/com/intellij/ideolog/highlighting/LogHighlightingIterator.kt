@@ -4,7 +4,7 @@ import com.intellij.ideolog.highlighting.settings.LogHighlightingAction
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.lex.LogToken
 import com.intellij.ideolog.lex.detectLogFileFormat
-import com.intellij.ideolog.util.ideologContext
+import com.intellij.ideolog.util.detectIdeologContext
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
@@ -16,14 +16,15 @@ import java.awt.Color
 import java.awt.Font
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
-import kotlin.collections.ArrayDeque
-import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.min
 
 const val timeDifferenceToRed = 15000L
 
-class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, val textGetter: () -> CharSequence, val colorGetter: () -> EditorColorsScheme) : HighlighterIterator {
+open class LogHighlightingIterator(startOffset: Int,
+                                   private val myEditor: Editor,
+                                   val textGetter: () -> CharSequence,
+                                   val colorGetter: () -> EditorColorsScheme) : HighlighterIterator {
   private val myText: CharSequence
     get() = textGetter()
 
@@ -48,8 +49,8 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
   init {
     val startLine = myEditor.document.getLineNumber(startOffset)
 
-    currentEventLineRange = myEditor.document.ideologContext.getEvent(startLine)
-    val prevEventLineRange = myEditor.document.ideologContext.getEvent(currentEventLineRange.first - 1)
+    currentEventLineRange = detectIdeologContext(myEditor).getEvent(startLine)
+    val prevEventLineRange = detectIdeologContext(myEditor).getEvent(currentEventLineRange.first - 1)
 
     reparsePiecesLines(prevEventLineRange, currentEventLineRange)
 
@@ -80,7 +81,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
       }
     }
 
-    val nextLineRange = document.ideologContext.getEvent(nextStartLine)
+    val nextLineRange = detectIdeologContext(myEditor).getEvent(nextStartLine)
 
     reparsePiecesLines(currentEventLineRange, nextLineRange)
     currentEventLineRange = nextLineRange
@@ -94,8 +95,8 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
       return
     }
 
-    val prevLineRange = document.ideologContext.getEvent(currentEventLineRange.first - 1)
-    val prevPrevLineRange = document.ideologContext.getEvent(prevLineRange.first - 1)
+    val prevLineRange = detectIdeologContext(myEditor).getEvent(currentEventLineRange.first - 1)
+    val prevPrevLineRange = detectIdeologContext(myEditor).getEvent(prevLineRange.first - 1)
 
     reparsePiecesLines(prevPrevLineRange, prevLineRange)
     currentEventLineRange = prevLineRange
@@ -279,7 +280,7 @@ class LogHighlightingIterator(startOffset: Int, private val myEditor: Editor, va
     tryHighlightStacktrace(event, offset)
   }
 
-  private fun tryHighlightStacktrace(event: CharSequence, eventOffset: Int) {
+  protected open fun tryHighlightStacktrace(event: CharSequence, eventOffset: Int) {
     val project = myEditor.project ?: return
     if (!settingsStore.myState.highlightLinks || !ApplicationManager.getApplication().isDispatchThread)// || event.indexOf('\n').let { it < 0 || it >= event.length - 1 })
       return

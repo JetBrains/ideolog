@@ -7,7 +7,6 @@ import com.intellij.execution.impl.EditorHyperlinkSupport
 import com.intellij.ideolog.filters.StackTraceFileFilter
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
@@ -15,15 +14,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.util.Alarm
 
-@Service(Service.Level.PROJECT)
-class LogHeavyFilterService(project: Project): Disposable {
+open class LogHeavyFilterService(project: Project): Disposable {
 
   companion object {
     fun getInstance(project: Project): LogHeavyFilterService {
       return project.getService(LogHeavyFilterService::class.java)
     }
 
-    internal val markupHighlightedExceptionsKey = Key.create<HashSet<Int>>("Log.ParsedExceptions")
+    val markupHighlightedExceptionsKey = Key.create<HashSet<Int>>("Log.ParsedExceptions")
     internal val markupHyperlinkSupportKey = Key.create<EditorHyperlinkSupport>("Log.ExceptionsHyperlinks")
   }
 
@@ -33,7 +31,7 @@ class LogHeavyFilterService(project: Project): Disposable {
   private val myCompositeFilter = CompositeFilter(project, myFilters)
   private val myAlarm = Alarm(Alarm.ThreadToUse.POOLED_THREAD, this)
 
-  fun enqueueHeavyFiltering(editor: Editor, eventOffset: Int, event: CharSequence) {
+  open fun enqueueHeavyFiltering(editor: Editor, eventOffset: Int, event: CharSequence) {
     if (editor.isDisposed) return
 
     val markupModel = editor.markupModel
@@ -59,10 +57,14 @@ class LogHeavyFilterService(project: Project): Disposable {
         val extraOffset = if (addOffset) eventOffset else 0
         result.resultItems.forEach {
           val hyperlinkInfo = it.hyperlinkInfo
+          val highlightStartOffset = it.highlightStartOffset + extraOffset
+          val highlightEndOffset = it.highlightEndOffset + extraOffset
+          if (highlightEndOffset > editor.document.textLength) return@forEach
           if (hyperlinkInfo != null)
-            hyperlinkSupport.createHyperlink(it.highlightStartOffset + extraOffset, it.highlightEndOffset + extraOffset, it.highlightAttributes, hyperlinkInfo)
+            hyperlinkSupport.createHyperlink(highlightStartOffset, highlightEndOffset, it.highlightAttributes, hyperlinkInfo)
           else
-            markupModel.addRangeHighlighter(it.highlightStartOffset + extraOffset, it.highlightEndOffset + extraOffset, it.highlighterLayer, it.highlightAttributes, HighlighterTargetArea.EXACT_RANGE)
+            markupModel.addRangeHighlighter(highlightStartOffset, highlightEndOffset, it.highlighterLayer, it.highlightAttributes,
+                                            HighlighterTargetArea.EXACT_RANGE)
         }
       }
     }

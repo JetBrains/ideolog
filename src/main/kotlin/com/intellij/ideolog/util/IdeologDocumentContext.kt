@@ -27,15 +27,22 @@ val Document.ideologContext: IdeologDocumentContext
     getUserData(documentContextKey)!! // get again in case of multithreading writes (UDH is thread-safe)
   }
 
-class IdeologDocumentContext(val document: Document) {
+open class IdeologDocumentContext(val document: Document, private val cache: EventCache? = EventCache()) {
   companion object {
     const val NUMBER_FIRST_LINES = 25
     const val MIN_FORMAT_MATCHES = 1
     const val INTERRUPT_AFTER_NS = 500 * 1_000_000
   }
 
-  private val eventStartLines = HashMap<Int, Int>()
-  private val eventEndLines = HashMap<Int, Int>()
+  data class EventCache(
+    val eventStartLines: HashMap<Int, Int> = HashMap(),
+    val eventEndLines: HashMap<Int, Int> = HashMap(),
+  ) {
+    fun clear() {
+      eventStartLines.clear()
+      eventEndLines.clear()
+    }
+  }
 
   private val eventParsingLock = Any()
 
@@ -50,14 +57,13 @@ class IdeologDocumentContext(val document: Document) {
 
   fun clear() {
     synchronized(eventParsingLock) {
-      eventStartLines.clear()
-      eventEndLines.clear()
+      cache?.clear()
     }
 
     format = null
   }
 
-  fun detectLogFileFormat(): LogFileFormat {
+  open fun detectLogFileFormat(): LogFileFormat {
     val currentFormat = format
     if (currentFormat != null) return currentFormat
 
@@ -112,7 +118,7 @@ class IdeologDocumentContext(val document: Document) {
     document.immutableCharSequence.subSequence(document.getLineStartOffset(line), document.getLineEndOffset(line))
 
   private fun getEventEndLine(atLine: Int): Int {
-    eventEndLines[atLine]?.let { return it }
+    cache?.eventEndLines?.get(atLine)?.let { return it }
 
     val format = detectLogFileFormat()
 
@@ -122,14 +128,14 @@ class IdeologDocumentContext(val document: Document) {
 
     fun updateCache(highLine: Int, value: Int) {
       for (i in atLine..highLine) {
-        eventEndLines.put(i, value)
+        cache?.eventEndLines?.put(i, value)
       }
     }
 
     while (currentLine < lineCount - 1 && !format.isLineEventStart(lineCharSequence(currentLine + 1))) {
       currentLine++
 
-      eventEndLines[currentLine]?.also { updateCache(currentLine, it) }?.let { return it }
+      cache?.eventEndLines?.get(currentLine)?.also { updateCache(currentLine, it) }?.let { return it }
     }
 
     updateCache(currentLine, currentLine)
@@ -137,19 +143,19 @@ class IdeologDocumentContext(val document: Document) {
   }
 
   private fun getEventStartLine(atLine: Int): Int {
-    eventStartLines[atLine]?.let { return it }
+    cache?.eventStartLines?.get(atLine)?.let { return it }
 
     val format = detectLogFileFormat()
 
     fun updateCache(lowLine: Int, targetLine: Int) {
       for (i in lowLine..atLine)
-        eventStartLines.put(i, targetLine)
+        cache?.eventStartLines?.put(i, targetLine)
     }
 
     var currentLine = atLine
     while (currentLine > 0 && !format.isLineEventStart(lineCharSequence(currentLine))) {
       currentLine--
-      eventStartLines[currentLine]?.also { updateCache(currentLine, it) }?.let { return it }
+      cache?.eventStartLines?.get(currentLine)?.also { updateCache(currentLine, it) }?.let { return it }
     }
 
     updateCache(currentLine, currentLine)

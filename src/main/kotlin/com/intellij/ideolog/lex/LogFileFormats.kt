@@ -1,7 +1,7 @@
 package com.intellij.ideolog.lex
 
 import com.intellij.ideolog.highlighting.settings.LogParsingPattern
-import com.intellij.ideolog.util.ideologContext
+import com.intellij.ideolog.util.detectIdeologContext
 import com.intellij.openapi.editor.Editor
 import java.text.DateFormat
 import java.text.ParseException
@@ -78,4 +78,4 @@ class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
   }
 }
 
-fun detectLogFileFormat(editor: Editor) = editor.document.ideologContext.detectLogFileFormat()
+fun detectLogFileFormat(editor: Editor) = detectIdeologContext(editor).detectLogFileFormat()

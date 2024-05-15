@@ -3,7 +3,7 @@ package com.intellij.ideolog.file
 
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ideolog.highlighting.settings.LogHighlightingConfigurable
-import com.intellij.ideolog.util.ideologContext
+import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.options.ShowSettingsUtil
@@ -31,7 +31,7 @@ class LogFileFormatNotificationProvider : EditorNotificationProvider, DumbAware 
       val editor = (it as TextEditor).editor
 
       val propertiesComponent = PropertiesComponent.getInstance()
-      if (editor.document.ideologContext.detectLogFileFormat().myRegexLogParser != null || propertiesComponent.getBoolean(DONT_SHOW_AGAIN_KEY) || editor.getUserData(HIDDEN_KEY) != null)
+      if (detectLogFileFormat(editor).myRegexLogParser != null || propertiesComponent.getBoolean(DONT_SHOW_AGAIN_KEY) || editor.getUserData(HIDDEN_KEY) != null)
         return@Function null
 
       val panel = EditorNotificationPanel().apply {

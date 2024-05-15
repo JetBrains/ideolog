@@ -32,10 +32,10 @@ class LogFileEditorHighlighterProvider : EditorHighlighterProvider {
   }
 }
 
-class LogEditorHighlighter(colors: EditorColorsScheme) : EditorHighlighter {
+open class LogEditorHighlighter(colors: EditorColorsScheme) : EditorHighlighter {
   private var myColors: EditorColorsScheme = colors
   private var myText: CharSequence = ""
-  private var myEditor: HighlighterClient? = null
+  protected var myEditor: HighlighterClient? = null
 
 
   override fun createIterator(startOffset: Int): HighlighterIterator {
