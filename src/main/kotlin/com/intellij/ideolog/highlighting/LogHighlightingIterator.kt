@@ -2,6 +2,7 @@ package com.intellij.ideolog.highlighting
 
 import com.intellij.ideolog.highlighting.settings.LogHighlightingAction
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
+import com.intellij.ideolog.lex.LogFileFormat
 import com.intellij.ideolog.lex.LogToken
 import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.ideolog.util.detectIdeologContext
@@ -12,6 +13,7 @@ import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.highlighter.HighlighterIterator
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.psi.tree.IElementType
+import org.jetbrains.plugins.terminal.exp.TerminalDataContextUtils.isOutputEditor
 import java.awt.Color
 import java.awt.Font
 import java.util.regex.Pattern
@@ -124,7 +126,7 @@ open class LogHighlightingIterator(startOffset: Int,
     curEvent = event
 
     parsedTokens.clear()
-    val fileFormat = detectLogFileFormat(myEditor)
+    val fileFormat = if (!myEditor.isOutputEditor) detectLogFileFormat(myEditor) else detectLogFileFormat(myEditor, offset)
     fileFormat.tokenize(prevEvent, parsedTokens)
     val prevTime = fileFormat.extractDate(parsedTokens)?.takeFrom(prevEvent)?.let { fileFormat.parseLogEventTimeSeconds(it) }
 
@@ -354,6 +356,10 @@ open class LogHighlightingIterator(startOffset: Int,
       if (bgHsl[2] < 0.5f) bgHsl[2] = 0.3f
       return Color(Color.HSBtoRGB(bgHsl[0], bgHsl[1], bgHsl[2]))
     }
+  }
+
+  open fun detectLogFileFormatByOffset(editor: Editor, offset: Int = 0): LogFileFormat {
+    return detectLogFileFormat(myEditor)
   }
 }
 

@@ -34,6 +34,9 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
     const val INTERRUPT_AFTER_NS = 500 * 1_000_000
   }
 
+  open val numberFirstLines: Int
+    get() = NUMBER_FIRST_LINES
+
   data class EventCache(
     val eventStartLines: HashMap<Int, Int> = HashMap(),
     val eventEndLines: HashMap<Int, Int> = HashMap(),
@@ -55,7 +58,7 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
 
   private var format: LogFileFormat? = null
 
-  fun clear() {
+  open fun clear() {
     synchronized(eventParsingLock) {
       cache?.clear()
     }
@@ -63,9 +66,11 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
     format = null
   }
 
-  open fun detectLogFileFormat(): LogFileFormat {
-    val currentFormat = format
-    if (currentFormat != null) return currentFormat
+  open fun detectLogFileFormat(startOffset: Int = 0): LogFileFormat {
+    if (cache != null || startOffset == 0) {
+      val currentFormat = format
+      if (currentFormat != null) return currentFormat
+    }
 
     val regexMatchers = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.mapNotNull {
       if (!it.enabled)
@@ -85,18 +90,22 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
       }
     }
 
-    val doc = document.charsSequence
-    val firstLines = doc.lineSequence().take(NUMBER_FIRST_LINES)
+    val doc = document.charsSequence.drop(startOffset)
+    val firstLines = doc.lineSequence().take(numberFirstLines)
+
+    val detectedLogFormat = getLogFileFormat(firstLines, regexMatchers)
+    format = detectedLogFormat
+    return detectedLogFormat
+  }
+
+  open fun getLogFileFormat(checkedLines: Sequence<String>, regexMatchers: List<RegexLogParser>): LogFileFormat {
     val startTime = System.nanoTime()
     val sumByMatcher = regexMatchers.map {
-      it to firstLines.count { line ->
+      it to checkedLines.count { line ->
         System.nanoTime() - startTime < INTERRUPT_AFTER_NS && it.regex.matcher(line).find()
       }
     }
-
-    val detectedLogFormat = LogFileFormat(sumByMatcher.filter { it.second >= MIN_FORMAT_MATCHES }.maxByOrNull { it.second }?.first)
-    format = detectedLogFormat
-    return detectedLogFormat
+    return LogFileFormat(sumByMatcher.filter { it.second >= MIN_FORMAT_MATCHES }.maxByOrNull { it.second }?.first)
   }
 
   /**
@@ -120,7 +129,7 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
   private fun getEventEndLine(atLine: Int): Int {
     cache?.eventEndLines?.get(atLine)?.let { return it }
 
-    val format = detectLogFileFormat()
+    val format = detectLogFileFormat(document.getLineStartOffset(atLine))
 
     val lineCount = document.lineCount
 
@@ -145,7 +154,7 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
   private fun getEventStartLine(atLine: Int): Int {
     cache?.eventStartLines?.get(atLine)?.let { return it }
 
-    val format = detectLogFileFormat()
+    val format = detectLogFileFormat(document.getLineStartOffset(atLine))
 
     fun updateCache(lowLine: Int, targetLine: Int) {
       for (i in lowLine..atLine)

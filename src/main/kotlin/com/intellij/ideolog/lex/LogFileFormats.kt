@@ -79,3 +79,5 @@ class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
 }
 
 fun detectLogFileFormat(editor: Editor) = detectIdeologContext(editor).detectLogFileFormat()
+
+fun detectLogFileFormat(editor: Editor, offset: Int) = detectIdeologContext(editor).detectLogFileFormat(offset)

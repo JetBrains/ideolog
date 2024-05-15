@@ -94,7 +94,7 @@ object DefaultSettingsStoreItems {
   )
   val Symfony = LogParsingPattern(
     true,
-    "Loguru",
+    "Symfony",
     "^\\[([\\d\\-T:\\+\\.)]+)\\]\\s(\\w+)\\.([A-Z]+):\\s(.*)\$",
     "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX",
     "^\\[",
@@ -262,6 +262,22 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         return@lambda newState
       }
     )
+    val externalSettingsUpgraders = setOf<(State) -> State> { oldState ->
+      val newState = oldState.clone()
+
+      newState.parsingPatterns.addAll(
+        ExternalPatternsStore.parsingPatterns.filter { parsingPattern ->
+          newState.parsingPatterns.none { storedParsingPattern -> storedParsingPattern.uuid == parsingPattern.uuid }
+        }
+      )
+      newState.patterns.addAll(
+        ExternalPatternsStore.highlightingPatterns.filter { highlightingPattern ->
+          newState.patterns.none { storedHighlightingPattern -> storedHighlightingPattern.uuid == highlightingPattern.uuid }
+        }
+      )
+
+      return@setOf newState
+    }
   }
 
   var myState = cleanState.clone()
@@ -296,6 +312,9 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       } else {
         upgrader(newState)
       }
+    }
+    externalSettingsUpgraders.forEach { externalUpgrader ->
+      newState = externalUpgrader(newState)
     }
 
     return newState
