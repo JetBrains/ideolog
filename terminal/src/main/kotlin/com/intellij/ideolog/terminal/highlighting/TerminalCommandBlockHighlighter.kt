@@ -14,10 +14,9 @@ private val fileReadCommands = listOf("cat", "head", "tail", "less", "more")
 
 class TerminalCommandBlockHighlighter(
   colorsScheme: EditorColorsScheme
-): TerminalCommandBlockHighlighter {
-  private val highlightingInfos = TreeSet<HighlightingInfo> { first, second -> first.commandStartOffset - second.commandStartOffset }
+) : TerminalCommandBlockHighlighter {
+  private val highlightingInfos = TreeSet<HighlightingInfo>()
   private val highlighter = TerminalLogEditorHighlighter(highlightingInfos, colorsScheme)
-  private val infoSetLock = Any()
   private lateinit var editor: HighlighterClient
 
   override fun shouldHighlight(startOffset: Int): Boolean {
@@ -25,25 +24,28 @@ class TerminalCommandBlockHighlighter(
     val document = editor.document
     val lineNumber = document.getLineNumber(startOffset)
     val dummyHighlightingInfo = HighlightingInfo(startOffset)
-    synchronized(infoSetLock) {
-      val lowerBoundOutput = highlightingInfos.floor(dummyHighlightingInfo) ?: return false
+    synchronized(highlightingInfos) {
+      val lowerBoundInfo = highlightingInfos.floor(dummyHighlightingInfo) ?: return false
 
-      return if (lowerBoundOutput.commandStartOffset == startOffset)
+      return if (lowerBoundInfo.commandStartOffset == startOffset)
         false
       else {
-        val nextOutput = highlightingInfos.higher(dummyHighlightingInfo) ?: return lowerBoundOutput.shouldHighlight // startOffset from the last command
-        if (document.lineCount > lineNumber + 1 && nextOutput.commandStartOffset == document.getLineStartOffset(lineNumber + 1)) false else lowerBoundOutput.shouldHighlight
+        val followingInfo = highlightingInfos.higher(dummyHighlightingInfo)
+                            ?: return lowerBoundInfo.shouldHighlight // startOffset from the last command
+        if (document.lineCount > lineNumber + 1 && followingInfo.commandStartOffset == document.getLineStartOffset(lineNumber + 1)) false
+        else lowerBoundInfo.shouldHighlight
       }
     }
   }
 
   override fun applyHighlightingInfoToBlock(block: CommandBlock) {
-    if (block.command != null) {
-      synchronized(infoSetLock) {
+    val command = block.command
+    if (command != null) {
+      synchronized(highlightingInfos) {
         highlightingInfos.add(
           HighlightingInfo(
             block.commandStartOffset,
-            shouldHighlightCommandOutputInfo(block.command!!)
+            shouldHighlightCommandBlock(command)
           )
         )
       }
@@ -52,14 +54,14 @@ class TerminalCommandBlockHighlighter(
 
   override fun documentChanged(event: DocumentEvent) {
     if (event.document.textLength == 0) {
-      synchronized(infoSetLock) {
+      synchronized(highlightingInfos) {
         highlightingInfos.clear()
       }
       return
     }
     val isRemovedNonEmptyPrompt = event.oldLength > event.newLength && !event.oldFragment.isNotBlank()
     if (isRemovedNonEmptyPrompt) {
-      synchronized(infoSetLock) {
+      synchronized(highlightingInfos) {
         highlightingInfos.forEach { info ->
           if (event.offset < info.commandStartOffset) {
             info.commandStartOffset -= event.oldLength - event.newLength
@@ -67,8 +69,10 @@ class TerminalCommandBlockHighlighter(
         }
         highlightingInfos.removeIf { info -> info.commandStartOffset < 0 }
       }
-      (editor as? Editor)?.run {
-        detectIdeologContext(this).clear()
+      if (::editor.isInitialized) {
+        (editor as? Editor)?.run {
+          detectIdeologContext(this).clear()
+        }
       }
     }
   }
@@ -82,12 +86,16 @@ class TerminalCommandBlockHighlighter(
     this.editor = editor
   }
 
-  private fun shouldHighlightCommandOutputInfo(command: CharSequence): Boolean {
+  private fun shouldHighlightCommandBlock(command: CharSequence): Boolean {
     return fileReadCommands.any { baseCommand -> command.startsWith(baseCommand) } && command.endsWith(".log", ignoreCase = true)
   }
 
   data class HighlightingInfo(
     var commandStartOffset: Int,
     var shouldHighlight: Boolean = false,
-  )
+  ) : Comparable<HighlightingInfo> {
+    override fun compareTo(other: HighlightingInfo): Int {
+      return commandStartOffset.compareTo(other.commandStartOffset)
+    }
+  }
 }

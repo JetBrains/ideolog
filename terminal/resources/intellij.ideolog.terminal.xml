@@ -1,7 +1,9 @@
-<?xml version="1.0"?>
-<idea-plugin>
+<idea-plugin package="com.intellij.ideolog.terminal">
+  <dependencies>
+    <plugin id="org.jetbrains.plugins.terminal"/>
+  </dependencies>
   <extensions defaultExtensionNs="org.jetbrains.plugins.terminal.exp">
-    <terminalCommandBlockHighlighterProvider
+    <commandBlockHighlighterProvider
       implementation="com.intellij.ideolog.terminal.highlighting.TerminalCommandBlockHighlighterProvider"/>
   </extensions>
 </idea-plugin>

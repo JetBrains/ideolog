@@ -3,7 +3,6 @@
   <name>Ideolog</name>
   <vendor>JetBrains</vendor>
   <depends>com.intellij.modules.lang</depends>
-  <depends optional="true" config-file="ideolog-terminal.xml">org.jetbrains.plugins.terminal</depends>
   <description><![CDATA[
     <h1>Interactive viewer for '.log' files.</h1>
     <p>
@@ -28,6 +27,7 @@
 
   <content>
     <module name="intellij.php.ideolog"/>
+    <module name="intellij.ideolog.terminal"/>
   </content>
 
   <extensions defaultExtensionNs="com.intellij">

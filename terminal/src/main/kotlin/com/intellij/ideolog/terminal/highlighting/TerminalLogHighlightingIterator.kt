@@ -13,7 +13,7 @@ class TerminalLogHighlightingIterator(
   myEditor: Editor,
   textGetter: () -> CharSequence,
   colorGetter: () -> EditorColorsScheme
-): LogHighlightingIterator(startOffset, myEditor, textGetter, colorGetter) {
+) : LogHighlightingIterator(startOffset, myEditor, textGetter, colorGetter) {
   override fun detectLogFileFormatByOffset(editor: Editor, offset: Int): LogFileFormat {
     val dummyOutputInfo = TerminalCommandBlockHighlighter.HighlightingInfo(offset)
     val lowerBoundInfo = highlightingInfos?.floor(dummyOutputInfo) // first call happens before highlightingInfos initialization
