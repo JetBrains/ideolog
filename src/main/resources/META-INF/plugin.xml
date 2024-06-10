@@ -25,13 +25,9 @@
     </p>
   ]]></description>
 
-  <change-notes><![CDATA[
-    <p>
-    <ul>
-      <li>Compatibility with IntelliJ platform 2020.2+</li>
-    </ul>
-    </p>
-  ]]></change-notes>
+  <content>
+    <module name="intellij.php.ideolog"/>
+  </content>
 
   <extensions defaultExtensionNs="com.intellij">
     <applicationService serviceImplementation="com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore"/>
@@ -126,6 +122,10 @@
       <categoryKey>intention.category.log</categoryKey>
     </intentionAction>
   </extensions>
+
+  <extensionPoints>
+    <extensionPoint interface="com.intellij.ideolog.util.IdeologContextDetector" dynamic="true" name="ideologContextDetector"/>
+  </extensionPoints>
 
   <actions>
     <action id="Log.JumpToSource" class="com.intellij.ideolog.editorActions.JumpToSourceAction" text="Jump To Source">
