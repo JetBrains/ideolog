@@ -1,5 +1,7 @@
 package com.intellij.ideolog.terminal.highlighting
 
+import com.intellij.ideolog.util.detectIdeologContext
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.highlighter.HighlighterClient
@@ -53,6 +55,21 @@ class TerminalCommandBlockHighlighter(
       synchronized(infoSetLock) {
         highlightingInfos.clear()
       }
+      return
+    }
+    val isRemovedNonEmptyPrompt = event.oldLength > event.newLength && !event.oldFragment.isNotBlank()
+    if (isRemovedNonEmptyPrompt) {
+      synchronized(infoSetLock) {
+        highlightingInfos.forEach { info ->
+          if (event.offset < info.commandStartOffset) {
+            info.commandStartOffset -= event.oldLength - event.newLength
+          }
+        }
+        highlightingInfos.removeIf { info -> info.commandStartOffset < 0 }
+      }
+      (editor as? Editor)?.run {
+        detectIdeologContext(this).clear()
+      }
     }
   }
 
@@ -70,7 +87,7 @@ class TerminalCommandBlockHighlighter(
   }
 
   data class HighlightingInfo(
-    val commandStartOffset: Int,
+    var commandStartOffset: Int,
     var shouldHighlight: Boolean = false,
   )
 }
