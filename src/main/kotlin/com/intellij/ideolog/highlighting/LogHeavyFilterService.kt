@@ -7,6 +7,7 @@ import com.intellij.execution.impl.EditorHyperlinkSupport
 import com.intellij.ideolog.filters.StackTraceFileFilter
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
@@ -14,6 +15,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.util.Alarm
 
+@Service(Service.Level.PROJECT)
 class LogHeavyFilterService(project: Project): Disposable {
 
   companion object {

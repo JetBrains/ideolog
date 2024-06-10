@@ -35,7 +35,6 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <applicationService serviceImplementation="com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore"/>
-    <projectService serviceImplementation="com.intellij.ideolog.highlighting.LogHeavyFilterService" />
     <applicationConfigurable displayName="Log Highlighting (Ideolog)" instance="com.intellij.ideolog.highlighting.settings.LogHighlightingConfigurable" id="LogHighlighting" groupId="editor"/>
     <editorHighlighterProvider filetype="Log" implementationClass="com.intellij.ideolog.highlighting.LogFileEditorHighlighterProvider" />
     <extendWordSelectionHandler implementation="com.intellij.ideolog.editorActions.ExtendsSelection"/>
