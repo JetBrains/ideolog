@@ -13,7 +13,6 @@ import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.highlighter.HighlighterIterator
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.psi.tree.IElementType
-import org.jetbrains.plugins.terminal.exp.TerminalDataContextUtils.isOutputEditor
 import java.awt.Color
 import java.awt.Font
 import java.util.regex.Pattern
@@ -126,7 +125,7 @@ open class LogHighlightingIterator(startOffset: Int,
     curEvent = event
 
     parsedTokens.clear()
-    val fileFormat = if (!myEditor.isOutputEditor) detectLogFileFormat(myEditor) else detectLogFileFormat(myEditor, offset)
+    val fileFormat = detectLogFileFormat(myEditor, offset)
     fileFormat.tokenize(prevEvent, parsedTokens)
     val prevTime = fileFormat.extractDate(parsedTokens)?.takeFrom(prevEvent)?.let { fileFormat.parseLogEventTimeSeconds(it) }
 

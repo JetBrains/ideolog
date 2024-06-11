@@ -15,8 +15,7 @@
     <orderEntry type="module" module-name="intellij.platform.util.jdom" />
     <orderEntry type="library" name="miglayout-swing" level="project" />
     <orderEntry type="module" module-name="intellij.regexp" />
-    <orderEntry type="module" module-name="intellij.terminal" />
     <orderEntry type="module" module-name="intellij.platform.testFramework" scope="TEST" />
-    <orderEntry type="module" module-name="intellij.ideolog.terminal" />
+    <orderEntry type="module" module-name="intellij.ideolog.terminal" scope="RUNTIME" />
   </component>
 </module>
