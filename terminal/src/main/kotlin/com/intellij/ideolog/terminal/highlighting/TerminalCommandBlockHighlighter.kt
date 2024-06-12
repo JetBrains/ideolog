@@ -6,8 +6,8 @@ import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.highlighter.HighlighterClient
 import com.intellij.openapi.editor.highlighter.HighlighterIterator
-import org.jetbrains.plugins.terminal.exp.CommandBlock
-import org.jetbrains.plugins.terminal.exp.TerminalCommandBlockHighlighter
+import org.jetbrains.plugins.terminal.block.output.highlighting.TerminalCommandBlockHighlighter
+import org.jetbrains.plugins.terminal.block.output.CommandBlock
 import java.util.*
 
 private val fileReadCommands = listOf("cat", "head", "tail", "less", "more")
