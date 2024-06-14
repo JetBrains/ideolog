@@ -1,6 +1,6 @@
 package com.intellij.ideolog.largeFile
 
-import com.intellij.ideolog.fileType.LogFileType
+import com.intellij.ideolog.largeFile.fileType.LargeLogFileType
 import com.intellij.largeFilesEditor.editor.LargeFileEditor
 import com.intellij.largeFilesEditor.editor.LargeFileEditorProvider
 import com.intellij.openapi.editor.colors.EditorColorsManager
@@ -21,7 +21,7 @@ class LargeLogFileEditorProvider : FileEditorProvider, DumbAware {
 
   override fun createEditor(project: Project, file: VirtualFile): FileEditor {
     val scheme = EditorColorsManager.getInstance().globalScheme
-    val editorHighlighter = EditorHighlighterFactory.getInstance().createEditorHighlighter(LogFileType, scheme, project)
+    val editorHighlighter = EditorHighlighterFactory.getInstance().createEditorHighlighter(LargeLogFileType, scheme, project)
 
     val largeFileEditor = largeFileEditorProvider.createEditor(project, file) as LargeFileEditor
     largeFileEditor.trySetHighlighter(editorHighlighter)
