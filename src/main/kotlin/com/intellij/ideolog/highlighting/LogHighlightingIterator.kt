@@ -23,7 +23,7 @@ import kotlin.math.min
 const val timeDifferenceToRed = 15000L
 
 open class LogHighlightingIterator(startOffset: Int,
-                                   private val myEditor: Editor,
+                                   protected val myEditor: Editor,
                                    val textGetter: () -> CharSequence,
                                    val colorGetter: () -> EditorColorsScheme) : HighlighterIterator {
   private val myText: CharSequence
@@ -32,7 +32,7 @@ open class LogHighlightingIterator(startOffset: Int,
   private val myColors: EditorColorsScheme
     get() = colorGetter()
 
-  private val settingsStore = LogHighlightingSettingsStore.getInstance()
+  protected val settingsStore = LogHighlightingSettingsStore.getInstance()
   private val myPatterns = settingsStore.myState.patterns.filter { it.enabled }.mapNotNull {
     try {
       Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it

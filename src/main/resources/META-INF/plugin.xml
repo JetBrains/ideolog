@@ -45,6 +45,11 @@
     <editorNotificationProvider implementation="com.intellij.ideolog.file.LogLargeFileNotificationProvider"/>
     <editorNotificationProvider implementation="com.intellij.ideolog.file.LogFileFormatNotificationProvider"/>
 
+    <fileEditorProvider implementation="com.intellij.ideolog.largeFile.LargeLogFileEditorProvider"/>
+    <editorNotificationProvider implementation="com.intellij.ideolog.largeFile.LargeLogFileNotificationProvider"/>
+    <editorNotificationProvider implementation="com.intellij.ideolog.largeFile.LargeLogFileRegexSearchNotificationProvider"/>
+    <editorHighlighterProvider filetype="LargeLog" implementationClass="com.intellij.ideolog.largeFile.highlighting.LargeLogFileEditorHighlighterProvider"/>
+
     <intentionAction>
       <className>com.intellij.ideolog.intentions.LogHighlightColumnIntention</className>
       <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
