@@ -10,7 +10,7 @@ import org.jetbrains.plugins.terminal.block.output.highlighting.TerminalCommandB
 import org.jetbrains.plugins.terminal.block.output.CommandBlock
 import java.util.*
 
-private val fileReadCommands = listOf("cat", "head", "tail", "less", "more")
+private val fileReadCommands = listOf("cat", "head", "tail")
 
 class TerminalCommandBlockHighlighter(
   colorsScheme: EditorColorsScheme
