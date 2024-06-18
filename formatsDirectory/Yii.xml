@@ -1,0 +1,8 @@
+<State>
+  <highlightingPatterns />
+  <hiddenSubstrings />
+  <parsingPatterns>
+    <LogParsingPattern enabled="true" name="Yii" pattern="^([\d-: ]+)\[(.*?)\]\[(.*?)\]\[(.*?)\]\[(.*?)\]\[(.*?)\] (.*)" timePattern="yyyy-MM-dd HH:mm:ss " linePattern="^\d" timeId="0" severityId="4" categoryId="5" fullmatch="true" uuid="30cf250d-0be5-4608-9ccb-57cdc604fb5c" />
+  </parsingPatterns>
+  <settingsVersion>8</settingsVersion>
+</State>
