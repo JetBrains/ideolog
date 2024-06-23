@@ -6,4 +6,7 @@
     <commandBlockHighlighterProvider
       implementation="com.intellij.ideolog.terminal.highlighting.TerminalCommandBlockHighlighterProvider"/>
   </extensions>
+  <extensions defaultExtensionNs="com.intellij.ideolog">
+    <ideologContextDetector implementation="com.intellij.ideolog.terminal.IdeologTerminalContextDetector"/>
+  </extensions>
 </idea-plugin>
