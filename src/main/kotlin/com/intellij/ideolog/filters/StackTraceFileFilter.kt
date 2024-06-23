@@ -51,6 +51,10 @@ open class StackTraceFileFilter(
       }
 
       else -> Filter.Result(filterResultItems)
+    }.apply {
+      if (this?.firstHyperlinkInfo == null) {
+        this?.nextAction = Filter.NextAction.CONTINUE_FILTERING
+      }
     }
   }
 
