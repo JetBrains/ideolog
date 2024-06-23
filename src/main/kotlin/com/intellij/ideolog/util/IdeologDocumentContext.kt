@@ -126,6 +126,10 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
   private fun lineCharSequence(line: Int) =
     document.immutableCharSequence.subSequence(document.getLineStartOffset(line), document.getLineEndOffset(line))
 
+  open fun isLineEventStart(format: LogFileFormat, line: CharSequence): Boolean {
+    return format.isLineEventStart(line)
+  }
+
   private fun getEventEndLine(atLine: Int): Int {
     cache?.eventEndLines?.get(atLine)?.let { return it }
 
@@ -141,7 +145,7 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
       }
     }
 
-    while (currentLine < lineCount - 1 && !format.isLineEventStart(lineCharSequence(currentLine + 1))) {
+    while (currentLine < lineCount - 1 && !isLineEventStart(format, lineCharSequence(currentLine + 1))) {
       currentLine++
 
       cache?.eventEndLines?.get(currentLine)?.also { updateCache(currentLine, it) }?.let { return it }
@@ -162,7 +166,7 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
     }
 
     var currentLine = atLine
-    while (currentLine > 0 && !format.isLineEventStart(lineCharSequence(currentLine))) {
+    while (currentLine > 0 && !isLineEventStart(format, lineCharSequence(currentLine))) {
       currentLine--
       cache?.eventStartLines?.get(currentLine)?.also { updateCache(currentLine, it) }?.let { return it }
     }
