@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ui.ColoredTableCellRenderer
 import com.intellij.ui.SimpleTextAttributes
 import javax.swing.JTable
@@ -15,6 +16,6 @@ class LogPatternActionRenderer : ColoredTableCellRenderer() {
       style = style or SimpleTextAttributes.STYLE_ITALIC
     append(value.action.printableName(), SimpleTextAttributes(value.backgroundColor ?: defaultStyle.bgColor, value.foregroundColor ?: defaultStyle.fgColor, null, style))
     if (value.showOnStripe)
-      append("+stripe", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+      append(IdeologBundle.message("plus.stripe"), SimpleTextAttributes.GRAYED_ATTRIBUTES)
   }
 }

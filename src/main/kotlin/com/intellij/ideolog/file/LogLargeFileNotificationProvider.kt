@@ -2,6 +2,7 @@
 package com.intellij.ideolog.file
 
 import com.intellij.diagnostic.VMOptions
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.fileEditor.FileEditor
@@ -39,25 +40,25 @@ class LogLargeFileNotificationProvider : EditorNotificationProvider {
       }
 
       val panel = EditorNotificationPanel().apply {
-        createActionLabel("Increase limits to 1Gb") {
+        createActionLabel(IdeologBundle.message("link.label.increase.limits.to.1gb")) {
           VMOptions.setOption("idea.max.content.load.filesize", "1000000")
           VMOptions.setOption("idea.max.content.load.large.preview.size", "1000000")
           VMOptions.setOption("idea.max.intellisense.filesize", "1000000")
 
           update(file, project)
         }
-        createActionLabel("Hide notification") {
+        createActionLabel(IdeologBundle.message("link.label.hide.notification")) {
           editor.putUserData(HIDDEN_KEY, "true")
           update(file, project)
         }
-        createActionLabel("Don't show again") {
+        createActionLabel(IdeologBundle.message("link.label.don.t.show.again")) {
           dontShowAgain = true
           update(file, project)
         }
       }
 
       return@Function panel.text(String.format(
-        "File content is truncated. Please increase limits in custom vm options, patch maximum memory (-Xmx) and restart.",
+        IdeologBundle.message("label.file.content.truncated.please.increase.limits"),
         StringUtil.formatFileSize(file.length),
         StringUtil.formatFileSize(FileUtilRt.LARGE_FILE_PREVIEW_SIZE.toLong())
       ))

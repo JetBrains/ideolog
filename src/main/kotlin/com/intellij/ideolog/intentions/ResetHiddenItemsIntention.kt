@@ -1,17 +1,18 @@
 package com.intellij.ideolog.intentions
 
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.fileType.LogFileType
-import com.intellij.ideolog.foldings.*
+import com.intellij.ideolog.foldings.FoldingCalculatorTask
 import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 
 class ResetHiddenItemsIntention : IntentionAction {
-  override fun getText() = "Restore all hidden lines"
+  override fun getText() = IdeologBundle.message("intention.name.restore.all.hidden.lines")
 
-  override fun getFamilyName() = "Logs"
+  override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
 
   override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
     if (file?.fileType != LogFileType)

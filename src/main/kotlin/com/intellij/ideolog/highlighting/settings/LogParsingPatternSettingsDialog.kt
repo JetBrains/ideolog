@@ -1,7 +1,7 @@
 package com.intellij.ideolog.highlighting.settings
 
-import com.intellij.icons.AllIcons
 import com.intellij.ide.BrowserUtil
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.project.ProjectManager
@@ -10,15 +10,12 @@ import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBIntSpinner
-import com.intellij.ui.components.Link
-import com.intellij.ui.components.labels.LinkLabel
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
 import com.intellij.util.ui.update.MergingUpdateQueue
 import com.intellij.util.ui.update.Update
 import net.miginfocom.swing.MigLayout
 import org.intellij.lang.regexp.RegExpFileType
-import java.awt.BorderLayout
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
@@ -27,7 +24,6 @@ import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
-import kotlin.collections.ArrayList
 
 class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : DialogWrapper(null, true, IdeModalityType.IDE) {
   private var myNameText: EditorTextField? = null
@@ -48,27 +44,27 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
   override fun createCenterPanel(): JComponent {
     val panel = JPanel(MigLayout("fill, wrap 2", "[right][fill]"))
 
-    panel.add(JLabel("Name: "))
+    panel.add(JLabel(IdeologBundle.message("settings.dialog.label.name")))
     val nameText = EditorTextField(item.name)
     myNameText = nameText
     panel.add(nameText)
 
-    panel.add(JLabel("Message pattern: "))
+    panel.add(JLabel(IdeologBundle.message("settings.dialog.label.message.pattern")))
     val patternText = EditorTextField(item.pattern, ProjectManager.getInstance().defaultProject, RegExpFileType.INSTANCE)
     myParsingPatternText = patternText
     panel.add(patternText)
 
-    panel.add(JLabel("Message start pattern: "))
+    panel.add(JLabel(IdeologBundle.message("settings.dialog.label.message.start.pattern")))
     val linePatternText = EditorTextField(item.lineStartPattern, ProjectManager.getInstance().defaultProject, RegExpFileType.INSTANCE)
     myLineStartPatternText = linePatternText
     panel.add(linePatternText)
 
-    panel.add(JLabel("Time format: "))
+    panel.add(JLabel(IdeologBundle.message("settings.dialog.label.time.format")))
     val timeFormatText = EditorTextField(item.timePattern)
     myTimePatternText = timeFormatText
     panel.add(timeFormatText)
     panel.add(
-      JLabel("Preview: ").apply {
+      JLabel(IdeologBundle.message("settings.dialog.label.preview")).apply {
         foreground = UIUtil.getLabelDisabledForeground()
       }
     )
@@ -88,29 +84,29 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
 
     val linkLbl = BorderLayoutPanel().apply {
       addToLeft(HyperlinkLabel().apply {
-        setHyperlinkText("Documentation")
+        setHyperlinkText(IdeologBundle.message("link.label.documentation"))
         setHyperlinkTarget("https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html")
       })
     }
     panel.add(linkLbl)
 
 
-    panel.add(JLabel("Time capture group: "))
+    panel.add(JLabel(IdeologBundle.message("time.capture.group")))
     val timeSpinner = JBIntSpinner(item.timeColumnId + 1, 0, 100)
     myTimeColumnId = timeSpinner
     panel.add(timeSpinner)
 
-    panel.add(JLabel("Severity capture group: "))
+    panel.add(JLabel(IdeologBundle.message("severity.capture.group")))
     val severitySpinner = JBIntSpinner(item.severityColumnId + 1, 0, 100)
     mySeverityColumnId = severitySpinner
     panel.add(severitySpinner)
 
-    panel.add(JLabel("Category capture group: "))
+    panel.add(JLabel(IdeologBundle.message("category.capture.group")))
     val categorySpinner = JBIntSpinner(item.categoryColumnId + 1, 0, 100)
     myCategoryColumnId = categorySpinner
     panel.add(categorySpinner)
 
-    val firstLineRegexCheckbox = JCheckBox("Apply message pattern to all message lines", item.regexMatchFullEvent)
+    val firstLineRegexCheckbox = JCheckBox(IdeologBundle.message("apply.message.pattern.to.all.message.lines"), item.regexMatchFullEvent)
     myOnlyFirstLineRegexCheckbox = firstLineRegexCheckbox
     panel.add(firstLineRegexCheckbox, "span 2, left")
 

@@ -1,6 +1,7 @@
 package com.intellij.ideolog.intentions
 
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.highlighting.LogParsingUtils
 import com.intellij.ideolog.highlighting.highlightingUserKey
@@ -11,10 +12,10 @@ import com.intellij.psi.PsiFile
 
 class LogHighlightColumnIntention : IntentionAction {
   override fun getText(): String {
-    return "Highlight this column"
+    return IdeologBundle.message("intention.name.highlight.this.column")
   }
 
-  override fun getFamilyName() = "Logs"
+  override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
 
   override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
     if (file?.fileType != LogFileType)

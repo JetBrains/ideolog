@@ -2,6 +2,7 @@ package com.intellij.ideolog.intentions
 
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.find.ngrams.TrigramIndex
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.highlighting.LogEvent
 import com.intellij.openapi.application.ApplicationManager
@@ -24,8 +25,6 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.UsageSearchContext
 import com.intellij.util.Processor
 import com.intellij.util.indexing.FileBasedIndex
-import java.util.*
-import kotlin.collections.HashMap
 
 const val logDelimiters = "\\p{P}|\\s"
 
@@ -130,10 +129,10 @@ class FileMatch(private val evt: LogEvent) {
 class LogJumpToSourceIntention : IntentionAction {
 
   override fun getText(): String {
-    return "Jump to source"
+    return IdeologBundle.message("intention.name.jump.to.source")
   }
 
-  override fun getFamilyName() = "Logs"
+  override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
 
   override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
     return (file?.fileType == LogFileType)
@@ -237,11 +236,11 @@ class LogJumpToSourceIntention : IntentionAction {
     }
 
     fun doIt(project: Project, editor: Editor) {
-      ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Finding a source", false) {
+      ProgressManager.getInstance().run(object : Task.Backgroundable(project, IdeologBundle.message("progress.title.finding.source"), false) {
         override fun run(indicator: ProgressIndicator) {
           println("\n<JumpToSource>")
 
-          indicator.text = "Finding a source"
+          indicator.text = IdeologBundle.message("progress.text.finding.source")
           indicator.isIndeterminate = true
 
           val event = ReadAction.compute<LogEvent, Throwable> {

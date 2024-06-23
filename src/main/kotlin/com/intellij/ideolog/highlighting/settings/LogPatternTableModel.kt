@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.ideolog.IdeologBundle
 import java.util.*
 import javax.swing.table.AbstractTableModel
 
@@ -27,9 +28,9 @@ class LogPatternTableModel(private var store: LogHighlightingSettingsStore.State
 
   override fun getColumnName(column: Int): String {
     return when (column) {
-      0 -> "Enabled"
-      1 -> "Pattern"
-      2 -> "Action"
+      0 -> IdeologBundle.message("column.enabled")
+      1 -> IdeologBundle.message("column.pattern")
+      2 -> IdeologBundle.message("column.action")
       else -> ""
     }
   }

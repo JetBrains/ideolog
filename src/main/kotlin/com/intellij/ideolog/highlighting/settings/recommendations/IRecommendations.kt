@@ -1,7 +1,9 @@
 package com.intellij.ideolog.highlighting.settings.recommendations
 
+import org.jetbrains.annotations.Nls
+
 data class SpecificRecommendation(
-  val name: String,
+  @Nls val name: String,
   val url: String
 )
 

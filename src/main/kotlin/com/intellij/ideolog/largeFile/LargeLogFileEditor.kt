@@ -1,9 +1,10 @@
 package com.intellij.ideolog.largeFile
 
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.largeFilesEditor.editor.LargeFileEditor
 
 class LargeLogFileEditor(delegate: LargeFileEditor) : LargeFileEditor by delegate {
-  override fun getName() = "Logos Large"
+  override fun getName() = IdeologBundle.message("large.log")
 
   init {
     editor.settings.isUseSoftWraps = false

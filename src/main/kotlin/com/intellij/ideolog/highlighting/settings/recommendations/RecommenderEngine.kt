@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings.recommendations
 
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.openapi.util.text.HtmlBuilder
 import com.intellij.openapi.util.text.HtmlChunk
 import com.intellij.ui.HyperlinkLabel
@@ -17,7 +18,7 @@ class RecommenderEngine {
   fun getComponent(): JComponent {
     // JLabel(fullHtml().wrapWithHtmlBody().toString())
     return HyperlinkLabel().apply {
-      setTextWithHyperlink("Browse the list of  <hyperlink>custom log formats</hyperlink>.")
+      setTextWithHyperlink(IdeologBundle.message("link.label.browse.list.hyperlink.custom.log.formats.hyperlink"))
       font = font.deriveFont(font.size-1.0f)
       foreground = UIUtil.getLabelDisabledForeground()
       setHyperlinkTarget(wikiUrl)
@@ -32,8 +33,8 @@ class RecommenderEngine {
 
   private fun recommendation(): HtmlBuilder {
     return HtmlBuilder()
-      .append("Browse the ")
-      .append(HtmlChunk.Element.link(wikiUrl, "list of custom log formats. "))
+      .append(IdeologBundle.message("browse.the"))
+      .append(HtmlChunk.Element.link(wikiUrl, IdeologBundle.message("list.of.custom.log.formats")))
   }
 
   private fun specificRecommendations(): HtmlBuilder {
@@ -49,14 +50,14 @@ class RecommenderEngine {
 
     if (links.isEmpty()) return HtmlBuilder()
 
-    val highlightersWord = if (links.size == 1) "log format" else "log formats"
+    val highlightersWord = if (links.size == 1) IdeologBundle.message("log.format") else IdeologBundle.message("log.formats")
 
     return HtmlBuilder()
-      .append("For example, $technologiesNames users will find ")
+      .append(IdeologBundle.message("for.example.0.users.will.find", technologiesNames))
       .appendRaw(links.customTrallJoiner())
       .append(" ")
       .append(highlightersWord)
-      .append(" useful")
+      .append(IdeologBundle.message("useful"))
   }
 
   private fun List<String>.customTrallJoiner(): String {

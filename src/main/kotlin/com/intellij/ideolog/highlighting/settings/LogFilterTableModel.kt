@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.ideolog.IdeologBundle
 import javax.swing.table.AbstractTableModel
 
 class LogFilterTableModel(private var state: LogHighlightingSettingsStore.State) : AbstractTableModel() {
@@ -31,7 +32,7 @@ class LogFilterTableModel(private var state: LogHighlightingSettingsStore.State)
   }
 
   override fun getColumnName(column: Int): String {
-    return "Filter"
+    return IdeologBundle.message("column.filter")
   }
 
   override fun getColumnClass(columnIndex: Int) = java.lang.String::class.java

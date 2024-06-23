@@ -1,6 +1,7 @@
 package com.intellij.ideolog.intentions
 
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.highlighting.LogFileMapRenderer
 import com.intellij.ideolog.highlighting.highlightingSetUserKey
@@ -9,15 +10,14 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
-import java.util.*
 
 class LogHighlightValueIntention : IntentionAction {
   private var lastSelection = ""
   override fun getText(): String {
-    return "Highlight '${if (lastSelection.length > 25) lastSelection.substring(0, 25) + "..." else lastSelection}'"
+    return IdeologBundle.message("intention.name.highlight", if (lastSelection.length > 25) lastSelection.substring(0, 25) + "..." else lastSelection)
   }
 
-  override fun getFamilyName() = "Logs"
+  override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
 
   fun getText(editor: Editor): CharSequence? {
     return editor.getSelectedText()

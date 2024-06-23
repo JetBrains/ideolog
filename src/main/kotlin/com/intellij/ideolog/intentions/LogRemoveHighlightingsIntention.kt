@@ -1,6 +1,7 @@
 package com.intellij.ideolog.intentions
 
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.highlighting.LogFileMapRenderer
 import com.intellij.ideolog.highlighting.highlightingSetUserKey
@@ -11,9 +12,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 
 class LogRemoveHighlightingsIntention : IntentionAction {
-  override fun getText() = "Remove all highlightings"
+  override fun getText() = IdeologBundle.message("intention.name.remove.all.highlightings")
 
-  override fun getFamilyName() = "Logs"
+  override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
 
   override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
     if (file?.fileType != LogFileType)

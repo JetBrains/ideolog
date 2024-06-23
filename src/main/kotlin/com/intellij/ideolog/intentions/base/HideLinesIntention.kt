@@ -1,6 +1,7 @@
 package com.intellij.ideolog.intentions.base
 
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.foldings.FoldingCalculatorTask
 import com.intellij.ideolog.util.IdeologDocumentContext
@@ -16,7 +17,7 @@ abstract class HideLinesIntention(private val setAccessor: (IdeologDocumentConte
   val shortSelection: String
     get() = if (lastSelection.length > 25) lastSelection.substring(0, 25) + "..." else lastSelection
 
-  override fun getFamilyName() = "Logs"
+  override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
 
   fun getText(editor: Editor): CharSequence? {
     return editor.getSelectedText()

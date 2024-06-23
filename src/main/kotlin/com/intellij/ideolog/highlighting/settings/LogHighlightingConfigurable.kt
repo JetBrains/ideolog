@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.highlighting.settings.recommendations.RecommenderEngine
 import com.intellij.ideolog.util.application
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
@@ -10,7 +11,10 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.JDOMUtil
 import com.intellij.openapi.vfs.VfsUtil
-import com.intellij.ui.*
+import com.intellij.ui.IdeBorderFactory
+import com.intellij.ui.JBIntSpinner
+import com.intellij.ui.OnePixelSplitter
+import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.table.JBTable
 import com.intellij.util.toByteArray
 import com.intellij.util.ui.FormBuilder
@@ -39,7 +43,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
 
   override fun createComponent(): JComponent? {
     val heatmapCheckbox = JCheckBox(
-      "Display heat map on error stripe/scrollbar",
+      IdeologBundle.message("display.heat.map.on.error.stripe.scrollbar"),
       myLogHighlightingState.errorStripeMode == "heatmap").apply {
       addChangeListener {
         myLogHighlightingState.errorStripeMode = if (this.isSelected) "heatmap" else "normal"
@@ -47,7 +51,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     }
 
     val linksCheckbox = JCheckBox(
-      "Highlight links and code references in logs",
+      IdeologBundle.message("highlight.links.and.code.references.in.logs"),
       myLogHighlightingState.highlightLinks).apply {
       addChangeListener {
         myLogHighlightingState.highlightLinks = this.isSelected
@@ -76,11 +80,12 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     }
 
     val patternsPanel = JPanel(BorderLayout()).apply {
-      border = IdeBorderFactory.createTitledBorder("Patterns")
+      border = IdeBorderFactory.createTitledBorder(IdeologBundle.message("border.title.patterns"))
 
       val panel = ToolbarDecorator.createDecorator(patternsTable).apply {
         setAddAction {
-          val result = Messages.showInputDialog("Enter new pattern (regex supported):", "New Highlighting Pattern", null) ?: return@setAddAction
+          val result = Messages.showInputDialog(IdeologBundle.message("dialog.message.enter.new.pattern.regex.supported"),
+                                                IdeologBundle.message("dialog.title.new.highlighting.pattern"), null) ?: return@setAddAction
           patternTableModel.addNewPattern(result)
         }
         setRemoveAction {
@@ -104,12 +109,12 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     }
 
     val filtersPanel = JPanel(BorderLayout()).apply {
-      border = IdeBorderFactory.createTitledBorder("Filters")
+      border = IdeBorderFactory.createTitledBorder(IdeologBundle.message("border.title.filters"))
       val panel = ToolbarDecorator.createDecorator(filtersTable).apply {
         setAddAction {
           val string = Messages.showInputDialog(
-            "Enter new pattern (exact match)",
-            "New Filter Pattern", null) ?: return@setAddAction
+            IdeologBundle.message("dialog.message.enter.new.pattern.exact.match"),
+            IdeologBundle.message("dialog.title.new.filter.pattern"), null) ?: return@setAddAction
           filterTableModel.addItem(string)
         }
         setRemoveAction {
@@ -125,12 +130,12 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     }
 
     val formatsPanel = JPanel(BorderLayout()).apply {
-      border = IdeBorderFactory.createTitledBorder("Log Formats")
+      border = IdeBorderFactory.createTitledBorder(IdeologBundle.message("border.title.log.formats"))
       val panel = ToolbarDecorator.createDecorator(formatsTable).apply {
         setAddAction {
           val result = Messages.showInputDialog(
-            "Enter new format name:",
-            "New Log Format", null) ?: return@setAddAction
+            IdeologBundle.message("dialog.message.enter.new.format.name"),
+            IdeologBundle.message("dialog.title.new.log.format"), null) ?: return@setAddAction
           val (newIndex, newFormat) = formatsTableModel.addNewFormat(result)
           val isOk = LogParsingPatternSettingsDialog(newFormat).showAndGet()
 
@@ -175,14 +180,14 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     var patternsTableRange: IntRange? = null
     var filtersTableRange: IntRange? = null
 
-    val theLabel = JLabel("Select (shift+click for many) items to export them").apply {
+    val theLabel = JLabel(IdeologBundle.message("select.shift.click.for.many.items.to.export.them")).apply {
       foreground = UIUtil.getLabelDisabledForeground()
       border = JBUI.Borders.emptyLeft(10)
     }
-    val resetBtn = JButton("Reset selection").apply {
+    val resetBtn = JButton(IdeologBundle.message("reset.selection")).apply {
       isVisible = false
     }
-    val exportBtn = JButton("Export").apply {
+    val exportBtn = JButton(IdeologBundle.message("export")).apply {
       isVisible = false
 
       addPropertyChangeListener("enabled") {
@@ -205,7 +210,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
       addActionListener {
         // Export button
         val saver = FileChooserFactory.getInstance().createSaveFileDialog(
-          FileSaverDescriptor("Save XML", "", "xml"),
+          FileSaverDescriptor(IdeologBundle.message("dialog.title.save.xml"), "", "xml"),
           this
         )
 
@@ -230,7 +235,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
       }
     }
 
-    val importBtn = JButton("Import").apply {
+    val importBtn = JButton(IdeologBundle.message("import")).apply {
       addActionListener {
         val chooser = FileChooserFactory.getInstance().createFileChooser(
           FileChooserDescriptorFactory.createSingleFileDescriptor("xml"), null, this
@@ -295,7 +300,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     return FormBuilder().run {
       addComponent(heatmapCheckbox)
       addComponent(linksCheckbox)
-      addLabeledComponent("Allow editing log files smaller than (KB, editing can cause performance issues):", logSizeSpinner)
+      addLabeledComponent(IdeologBundle.message("label.allow.editing.small.log.files"), logSizeSpinner)
       addComponent(JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
         add(importBtn)
         add(exportBtn)
@@ -331,6 +336,6 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     formatsTableModel.updateStore(myLogHighlightingState)
   }
 
-  override fun getDisplayName(): String = "Log Highlighting (Ideolog)"
+  override fun getDisplayName(): String = IdeologBundle.message("configurable.name.log.highlighting.ideolog")
 }
 

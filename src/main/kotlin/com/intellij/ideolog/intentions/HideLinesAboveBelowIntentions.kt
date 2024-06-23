@@ -1,6 +1,7 @@
 package com.intellij.ideolog.intentions
 
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.foldings.FoldingCalculatorTask
 import com.intellij.ideolog.util.IdeologDocumentContext
@@ -11,11 +12,11 @@ import com.intellij.psi.PsiFile
 
 abstract class HideLinesAboveBelowIntentionBase(val setter: (IdeologDocumentContext, Int) -> Unit, private val directionText: String) : IntentionAction {
   override fun getText(): String {
-    return "Hide lines $directionText"
+    return IdeologBundle.message("intention.name.hide.lines", directionText)
   }
 
   override fun getFamilyName(): String {
-    return "Logs"
+    return IdeologBundle.message("intention.family.name.logs")
   }
 
   override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {

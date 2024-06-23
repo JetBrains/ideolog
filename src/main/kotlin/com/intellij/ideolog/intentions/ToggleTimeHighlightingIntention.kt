@@ -1,6 +1,7 @@
 package com.intellij.ideolog.intentions
 
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.highlighting.LogFileMapRenderer
 import com.intellij.ideolog.highlighting.LogParsingUtils
@@ -13,10 +14,10 @@ import com.intellij.psi.PsiFile
 
 class ToggleTimeHighlightingIntention : IntentionAction {
   override fun getText(): String {
-    return "Toggle time highlighting"
+    return IdeologBundle.message("intention.name.toggle.time.highlighting")
   }
 
-  override fun getFamilyName() = "Logs"
+  override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
 
   override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
     if (file?.fileType != LogFileType)

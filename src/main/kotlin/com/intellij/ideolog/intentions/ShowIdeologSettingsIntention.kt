@@ -2,6 +2,7 @@ package com.intellij.ideolog.intentions
 
 import com.intellij.codeInsight.intention.HighPriorityAction
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.highlighting.settings.LogHighlightingConfigurable
 import com.intellij.ideolog.lex.detectLogFileFormat
@@ -16,7 +17,7 @@ class ShowIdeologSettingsIntention: IntentionAction, HighPriorityAction {
   }
 
   override fun getFamilyName(): String {
-    return "Logs"
+    return IdeologBundle.message("intention.family.name.logs")
   }
 
   override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
@@ -29,7 +30,7 @@ class ShowIdeologSettingsIntention: IntentionAction, HighPriorityAction {
   }
 
   override fun getText(): String {
-    return "Show log highlighting settings"
+    return IdeologBundle.message("intention.name.show.log.highlighting.settings")
   }
 
   override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {

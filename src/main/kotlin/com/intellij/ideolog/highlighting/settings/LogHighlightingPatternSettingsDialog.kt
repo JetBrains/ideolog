@@ -1,6 +1,7 @@
 package com.intellij.ideolog.highlighting.settings
 
 import com.intellij.ide.BrowserUtil
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.ColorPanel
@@ -48,7 +49,7 @@ class LogHighlightingPatternSettingsDialog(
       anchor = GridBagConstraints.SOUTHEAST
     }
 
-    panel.add(JLabel("Pattern: "), constraints)
+    panel.add(JLabel(IdeologBundle.message("label.pattern")), constraints)
 
     val patternText = EditorTextField(item.pattern)
     myPatternText = patternText
@@ -67,11 +68,11 @@ class LogHighlightingPatternSettingsDialog(
     myActionCombo = actionSelection
     panel.add(actionSelection, constraints)
     constraints.gridx = 0
-    panel.add(JLabel("Action"), constraints)
+    panel.add(JLabel(IdeologBundle.message("label.action")), constraints)
 
     constraints.gridx = 0
     constraints.gridy = 2
-    panel.add(JLabel("Format"), constraints)
+    panel.add(JLabel(IdeologBundle.message("label.format")), constraints)
     constraints.gridx = 1
 
     val formatSelection = ComboBox(
@@ -111,7 +112,7 @@ class LogHighlightingPatternSettingsDialog(
 
     constraints.gridx = 0
     constraints.gridy = 3
-    panel.add(JLabel("Capture group"), constraints)
+    panel.add(JLabel(IdeologBundle.message("capture.group")), constraints)
     val groupSpinner = JBIntSpinner(item.captureGroup + 1, 0, 100)
     myCaptureGroupId = groupSpinner
     constraints.gridx++
@@ -127,16 +128,16 @@ class LogHighlightingPatternSettingsDialog(
     bgColor.selectedColor = item.backgroundColor
     bgColor.isEnabled = item.backgroundColor != null
 
-    val fgCheck = JCheckBox("Foreground", fgColor.isEnabled)
+    val fgCheck = JCheckBox(IdeologBundle.message("foreground"), fgColor.isEnabled)
     myForegroundCheck = fgCheck
     fgCheck.addChangeListener { fgColor.isEnabled = fgCheck.isSelected }
 
-    val bgCheck = JCheckBox("Background", bgColor.isEnabled)
+    val bgCheck = JCheckBox(IdeologBundle.message("background"), bgColor.isEnabled)
     myBackgroundCheck = bgCheck
     bgCheck.addActionListener { bgColor.isEnabled = bgCheck.isSelected }
 
-    val boldCheck = JCheckBox("Bold", item.bold)
-    val italicCheck = JCheckBox("Italic", item.italic)
+    val boldCheck = JCheckBox(IdeologBundle.message("bold"), item.bold)
+    val italicCheck = JCheckBox(IdeologBundle.message("italic"), item.italic)
 
     myBoldCheck = boldCheck
     myItalicCheck = italicCheck
@@ -161,7 +162,7 @@ class LogHighlightingPatternSettingsDialog(
     constraints.gridx = 0
     panel.add(bgCheck, constraints)
 
-    val stripeCheck = JCheckBox("Show on stripe", item.showOnStripe)
+    val stripeCheck = JCheckBox(IdeologBundle.message("show.on.stripe"), item.showOnStripe)
     myStripeCheck = stripeCheck
     constraints.gridy++
     panel.add(stripeCheck, constraints)

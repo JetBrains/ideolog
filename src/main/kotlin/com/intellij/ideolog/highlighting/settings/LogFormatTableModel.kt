@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.ideolog.IdeologBundle
 import java.util.*
 import javax.swing.table.AbstractTableModel
 
@@ -26,11 +27,11 @@ class LogFormatTableModel(private var state: LogHighlightingSettingsStore.State)
 
   override fun getColumnName(column: Int): String {
     return when(column) {
-      0 -> "Enabled"
-      1 -> "Name"
-      2 -> "Message pattern"
-      3 -> "Message start pattern"
-      4 -> "Time format"
+      0 -> IdeologBundle.message("column.enabled")
+      1 -> IdeologBundle.message("column.name")
+      2 -> IdeologBundle.message("column.message.pattern")
+      3 -> IdeologBundle.message("column.message.start.pattern")
+      4 -> IdeologBundle.message("column.time.format")
       else -> ""
     }
   }

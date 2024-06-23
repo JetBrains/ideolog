@@ -1,5 +1,6 @@
 package com.intellij.ideolog.foldings
 
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.lex.LogToken
 import com.intellij.ideolog.lex.detectLogFileFormat
@@ -12,9 +13,9 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
-import java.util.*
 
-class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: String) : Task.Backgroundable(project, "Calculating foldings for $fileName", true) {
+class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: String) :
+  Task.Backgroundable(project, IdeologBundle.message("progress.title.calculating.foldings.for", fileName), true) {
 
   companion object {
     private var lastLaunchedTask: FoldingCalculatorTask? = null

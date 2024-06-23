@@ -2,6 +2,7 @@
 package com.intellij.ideolog.file
 
 import com.intellij.ide.util.PropertiesComponent
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.highlighting.settings.LogHighlightingConfigurable
 import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.openapi.fileEditor.FileEditor
@@ -35,24 +36,24 @@ class LogFileFormatNotificationProvider : EditorNotificationProvider, DumbAware 
         return@Function null
 
       val panel = EditorNotificationPanel().apply {
-        createActionLabel("Configure log formats") {
+        createActionLabel(IdeologBundle.message("link.label.configure.log.formats")) {
           ShowSettingsUtil.getInstance().editConfigurable(project, LogHighlightingConfigurable())
 
           update(file, project)
         }
-        createActionLabel("Hide this notification") {
+        createActionLabel(IdeologBundle.message("link.label.hide.notification")) {
           editor.putUserData(HIDDEN_KEY, HIDDEN_KEY)
 
           update(file, project)
         }
-        createActionLabel("Don't show again") {
+        createActionLabel(IdeologBundle.message("link.label.don.t.show.again")) {
           propertiesComponent.setValue(DONT_SHOW_AGAIN_KEY, true)
 
           update(file, project)
         }
       }
 
-      return@Function panel.text("Log format not recognized")
+      return@Function panel.text(IdeologBundle.message("label.log.format.not.recognized"))
     }
   }
 }
