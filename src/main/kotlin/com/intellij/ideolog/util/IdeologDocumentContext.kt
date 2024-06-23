@@ -98,10 +98,10 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
     return detectedLogFormat
   }
 
-  open fun getLogFileFormat(checkedLines: Sequence<String>, regexMatchers: List<RegexLogParser>): LogFileFormat {
+  open fun getLogFileFormat(fileLines: Sequence<String>, regexMatchers: List<RegexLogParser>): LogFileFormat {
     val startTime = System.nanoTime()
     val sumByMatcher = regexMatchers.map {
-      it to checkedLines.count { line ->
+      it to fileLines.count { line ->
         System.nanoTime() - startTime < INTERRUPT_AFTER_NS && it.regex.matcher(line).find()
       }
     }
