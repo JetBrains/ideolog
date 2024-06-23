@@ -130,6 +130,13 @@
       <bundleName>com.intellij.ideolog.intentions.IntentionResources</bundleName>
       <categoryKey>intention.category.log</categoryKey>
     </intentionAction>
+
+    <registryKey key="ideolog.terminal.enabled" defaultValue="false"
+                 description="Enable ideolog highlighting inside the terminal for log files"
+                 restartRequired="true"/>
+    <registryKey key="ideolog.large.file.editor.enabled" defaultValue="false"
+                 description="Enable ideolog highlighting inside the large file editor for log files"
+                 restartRequired="true"/>
   </extensions>
 
   <extensionPoints>

@@ -5,6 +5,7 @@ import com.intellij.ideolog.util.IdeologDocumentContext
 import com.intellij.largeFilesEditor.editor.LargeFileEditor.LARGE_FILE_EDITOR_KEY
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.registry.Registry
 
 private val documentContextKey = Key.create<IdeologLargeFileDocumentContext>("IdeologLargeFileDocumentContext")
 
@@ -18,5 +19,6 @@ class IdeologLargeFileContextDetector : IdeologContextDetector {
     }
   }
 
-  override fun isApplicable(editor: Editor): Boolean = editor.getUserData(LARGE_FILE_EDITOR_KEY) != null
+  override fun isApplicable(editor: Editor): Boolean = editor.getUserData(LARGE_FILE_EDITOR_KEY) != null &&
+                                                       Registry.`is`("ideolog.large.file.editor.enabled")
 }

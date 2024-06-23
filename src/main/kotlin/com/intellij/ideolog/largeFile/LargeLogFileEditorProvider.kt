@@ -10,13 +10,14 @@ import com.intellij.openapi.fileEditor.FileEditorPolicy
 import com.intellij.openapi.fileEditor.FileEditorProvider
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.registry.Registry
 import com.intellij.openapi.vfs.VirtualFile
 
 class LargeLogFileEditorProvider : FileEditorProvider, DumbAware {
   private val largeFileEditorProvider = LargeFileEditorProvider()
 
   override fun accept(project: Project, file: VirtualFile): Boolean {
-    return largeFileEditorProvider.accept(project, file)
+    return largeFileEditorProvider.accept(project, file) && Registry.`is`("ideolog.large.file.editor.enabled")
   }
 
   override fun createEditor(project: Project, file: VirtualFile): FileEditor {
