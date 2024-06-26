@@ -268,11 +268,10 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       val externalParsingPatternUuids = ExternalPatternsStore.parsingPatterns.map { it.uuid }
       newState.parsingPatterns.removeIf { existingParsingPattern -> existingParsingPattern.uuid in externalParsingPatternUuids }
       newState.parsingPatterns.addAll(ExternalPatternsStore.parsingPatterns)
-      newState.patterns.addAll(
-        ExternalPatternsStore.highlightingPatterns.filter { highlightingPattern ->
-          newState.patterns.none { storedHighlightingPattern -> storedHighlightingPattern.uuid == highlightingPattern.uuid }
-        }
-      )
+
+      val externalHighlightingPatternUuids = ExternalPatternsStore.highlightingPatterns.map { it.uuid }
+      newState.patterns.removeIf { existingHighlightingPattern -> existingHighlightingPattern.uuid in externalHighlightingPatternUuids }
+      newState.patterns.addAll(ExternalPatternsStore.highlightingPatterns)
 
       return@setOf newState
     }
