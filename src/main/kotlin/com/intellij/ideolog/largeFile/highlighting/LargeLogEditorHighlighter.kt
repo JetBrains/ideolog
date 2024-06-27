@@ -21,4 +21,8 @@ class LargeLogEditorHighlighter(colors: EditorColorsScheme) : LogEditorHighlight
 
   override fun documentChanged(event: DocumentEvent) {
   }
+
+  override fun setColorScheme(scheme: EditorColorsScheme) {
+    myColors = scheme
+  }
 }
