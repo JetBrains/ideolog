@@ -13,7 +13,7 @@ class LargeLogHighlightingIterator(
 ) : LogHighlightingIterator(startOffset, editor, textGetter, colorGetter) {
   override fun tryHighlightStacktrace(event: CharSequence, eventOffset: Int) {
     val project = myEditor.project ?: return
-    if (!settingsStore.myState.highlightLinks || !ApplicationManager.getApplication().isDispatchThread || event.indexOf('\n').let { it < 0 || it >= event.length - 1 })
+    if (!settingsStore.myState.highlightLinks || !ApplicationManager.getApplication().isDispatchThread)
       return
 
     ApplicationManager.getApplication().executeOnPooledThread {
