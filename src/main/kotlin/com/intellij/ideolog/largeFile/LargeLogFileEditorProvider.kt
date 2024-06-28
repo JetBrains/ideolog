@@ -1,10 +1,7 @@
 package com.intellij.ideolog.largeFile
 
-import com.intellij.ideolog.largeFile.fileType.LargeLogFileType
 import com.intellij.largeFilesEditor.editor.LargeFileEditor
 import com.intellij.largeFilesEditor.editor.LargeFileEditorProvider
-import com.intellij.openapi.editor.colors.EditorColorsManager
-import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory
 import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.fileEditor.FileEditorPolicy
 import com.intellij.openapi.fileEditor.FileEditorProvider
@@ -12,6 +9,8 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.registry.Registry
 import com.intellij.openapi.vfs.VirtualFile
+
+private const val PROVIDER_ID = "LargeLogFileEditorProvider"
 
 class LargeLogFileEditorProvider : FileEditorProvider, DumbAware {
   private val largeFileEditorProvider = LargeFileEditorProvider()
@@ -21,15 +20,11 @@ class LargeLogFileEditorProvider : FileEditorProvider, DumbAware {
   }
 
   override fun createEditor(project: Project, file: VirtualFile): FileEditor {
-    val scheme = EditorColorsManager.getInstance().globalScheme
-    val editorHighlighter = EditorHighlighterFactory.getInstance().createEditorHighlighter(LargeLogFileType, scheme, project)
-
     val largeFileEditor = largeFileEditorProvider.createEditor(project, file) as LargeFileEditor
-    largeFileEditor.trySetHighlighter(editorHighlighter)
     return LargeLogFileEditor(largeFileEditor)
   }
 
-  override fun getEditorTypeId() = largeFileEditorProvider.editorTypeId
+  override fun getEditorTypeId() = PROVIDER_ID
 
   override fun getPolicy() = FileEditorPolicy.HIDE_OTHER_EDITORS
 }
