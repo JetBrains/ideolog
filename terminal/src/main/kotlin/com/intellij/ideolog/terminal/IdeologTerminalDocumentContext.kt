@@ -34,8 +34,18 @@ class IdeologTerminalDocumentContext(document: Document) : IdeologDocumentContex
     return getLogFileFormatByFirstMatch(fileLines, regexMatchers)
   }
 
-  override fun isLineEventStart(format: LogFileFormat, line: CharSequence): Boolean {
-    return super.isLineEventStart(format, line) ||
-           fileReadCommands.any { baseCommand -> line.startsWith(baseCommand) } && line.endsWith(".log", ignoreCase = true)
+  override fun isLineEventStart(atLine: Int): Boolean {
+    val line = lineCharSequence(atLine)
+    if (isLogFileReadCommand(line)) return true
+    val lineStartOffset = document.getLineStartOffset(atLine)
+    val format = detectLogFileFormat(lineStartOffset).also {
+      formatByOffsetMap[lineStartOffset] = it
+    }
+    if (format.myRegexLogParser == null && line.isNotEmpty()) return false
+    return format.isLineEventStart(lineCharSequence(atLine))
+  }
+
+  private fun isLogFileReadCommand(line: CharSequence): Boolean {
+    return fileReadCommands.any { baseCommand -> line.startsWith(baseCommand) } && line.endsWith(".log", ignoreCase = true)
   }
 }

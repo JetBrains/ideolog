@@ -123,17 +123,16 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
     }
   }
 
-  private fun lineCharSequence(line: Int) =
+  protected fun lineCharSequence(line: Int) =
     document.immutableCharSequence.subSequence(document.getLineStartOffset(line), document.getLineEndOffset(line))
 
-  open fun isLineEventStart(format: LogFileFormat, line: CharSequence): Boolean {
-    return format.isLineEventStart(line)
+  open fun isLineEventStart(atLine: Int): Boolean {
+    val format = detectLogFileFormat(document.getLineStartOffset(atLine))
+    return format.isLineEventStart(lineCharSequence(atLine))
   }
 
   private fun getEventEndLine(atLine: Int): Int {
     cache?.eventEndLines?.get(atLine)?.let { return it }
-
-    val format = detectLogFileFormat(document.getLineStartOffset(atLine))
 
     val lineCount = document.lineCount
 
@@ -145,7 +144,7 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
       }
     }
 
-    while (currentLine < lineCount - 1 && !isLineEventStart(format, lineCharSequence(currentLine + 1))) {
+    while (currentLine < lineCount - 1 && !isLineEventStart(currentLine + 1)) {
       currentLine++
 
       cache?.eventEndLines?.get(currentLine)?.also { updateCache(currentLine, it) }?.let { return it }
@@ -158,15 +157,13 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
   private fun getEventStartLine(atLine: Int): Int {
     cache?.eventStartLines?.get(atLine)?.let { return it }
 
-    val format = detectLogFileFormat(document.getLineStartOffset(atLine))
-
     fun updateCache(lowLine: Int, targetLine: Int) {
       for (i in lowLine..atLine)
         cache?.eventStartLines?.put(i, targetLine)
     }
 
     var currentLine = atLine
-    while (currentLine > 0 && !isLineEventStart(format, lineCharSequence(currentLine))) {
+    while (currentLine > 0 && !isLineEventStart(currentLine)) {
       currentLine--
       cache?.eventStartLines?.get(currentLine)?.also { updateCache(currentLine, it) }?.let { return it }
     }
