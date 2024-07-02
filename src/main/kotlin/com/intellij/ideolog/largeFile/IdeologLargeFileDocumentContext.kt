@@ -11,8 +11,7 @@ private const val FORMAT_DETECTION_DELAY_MILLIS: Long = 100
 
 fun getLogFileFormatByFirstMatch(fileLines: Sequence<String>, regexMatchers: List<RegexLogParser>): LogFileFormat {
   fileLines.forEach { line ->
-    val bombedCharSequence = StringUtil.newBombedCharSequence(line, FORMAT_DETECTION_DELAY_MILLIS)
-    val matchedRegex = matchLogFileFormatRegex(bombedCharSequence, regexMatchers)
+    val matchedRegex = matchLogFileFormatRegex(line, regexMatchers)
     if (matchedRegex != null) {
       return LogFileFormat(matchedRegex)
     }
@@ -21,9 +20,10 @@ fun getLogFileFormatByFirstMatch(fileLines: Sequence<String>, regexMatchers: Lis
 }
 
 fun matchLogFileFormatRegex(input: CharSequence, regexMatchers: List<RegexLogParser>): RegexLogParser? {
+  val bombedInput = StringUtil.newBombedCharSequence(input, FORMAT_DETECTION_DELAY_MILLIS)
   regexMatchers.forEach { regexMatcher ->
     try {
-      if (regexMatcher.regex.matcher(input).find()) {
+      if (regexMatcher.regex.matcher(bombedInput).find()) {
         return regexMatcher
       }
     }
