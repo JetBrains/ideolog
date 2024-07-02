@@ -47,8 +47,6 @@
     <editorNotificationProvider implementation="com.intellij.ideolog.file.LogFileFormatNotificationProvider"/>
 
     <fileEditorProvider implementation="com.intellij.ideolog.largeFile.LargeLogFileEditorProvider"/>
-    <editorNotificationProvider implementation="com.intellij.ideolog.largeFile.LargeLogFileNotificationProvider"/>
-    <editorNotificationProvider implementation="com.intellij.ideolog.largeFile.LargeLogFileRegexSearchNotificationProvider"/>
     <editorHighlighterProvider filetype="LargeLog" implementationClass="com.intellij.ideolog.largeFile.highlighting.LargeLogFileEditorHighlighterProvider"/>
     <fileType name="LargeLog" language="LARGE_LOG" implementationClass="com.intellij.ideolog.largeFile.fileType.LargeLogFileType" extensions="log" fieldName="INSTANCE"/>
     <ideolog.ideologContextDetector implementation="com.intellij.ideolog.largeFile.IdeologLargeFileContextDetector"/>
