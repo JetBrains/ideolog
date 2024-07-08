@@ -7,6 +7,7 @@ import com.intellij.openapi.components.*
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.JBColor
+import com.intellij.util.PlatformUtils
 import com.intellij.util.xmlb.Converter
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.util.xmlb.annotations.Attribute
@@ -265,15 +266,34 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     val externalSettingsUpgraders = setOf<(State) -> State> { oldState ->
       val newState = oldState.clone()
 
-      val externalParsingPatternUuids = ExternalPatternsStore.parsingPatterns.map { it.uuid }
-      newState.parsingPatterns.removeIf { existingParsingPattern -> existingParsingPattern.uuid in externalParsingPatternUuids }
-      newState.parsingPatterns.addAll(ExternalPatternsStore.parsingPatterns)
+      if (PlatformUtils.isPhpStorm() && !isExternalParamsUpToDate(newState)) {
+        newState.externalParsingPatterns = arrayListOf(*ExternalPatternsStore.parsingPatterns.toTypedArray())
+        newState.externalHighlightingPatterns = arrayListOf(*ExternalPatternsStore.highlightingPatterns.toTypedArray())
+        newState.parsingPatterns.forEach { parsingPattern -> parsingPattern.enabled = false }
 
-      val externalHighlightingPatternUuids = ExternalPatternsStore.highlightingPatterns.map { it.uuid }
-      newState.patterns.removeIf { existingHighlightingPattern -> existingHighlightingPattern.uuid in externalHighlightingPatternUuids }
-      newState.patterns.addAll(ExternalPatternsStore.highlightingPatterns)
+        val externalParsingPatternUuids = ExternalPatternsStore.parsingPatterns.map { it.uuid }
+        newState.parsingPatterns.removeIf { existingParsingPattern -> existingParsingPattern.uuid in externalParsingPatternUuids }
+        newState.parsingPatterns.addAll(ExternalPatternsStore.parsingPatterns)
+
+        val externalHighlightingPatternUuids = ExternalPatternsStore.highlightingPatterns.map { it.uuid }
+        newState.patterns.removeIf { existingHighlightingPattern -> existingHighlightingPattern.uuid in externalHighlightingPatternUuids }
+        newState.patterns.addAll(ExternalPatternsStore.highlightingPatterns)
+      }
 
       return@setOf newState
+    }
+
+    private fun isExternalParamsUpToDate(state: State): Boolean {
+      if (state.externalParsingPatterns.size != ExternalPatternsStore.parsingPatterns.size ||
+          state.externalHighlightingPatterns.size != ExternalPatternsStore.highlightingPatterns.size
+      ) {
+        return false
+      }
+
+      return state.externalParsingPatterns.toHashSet().containsAll(ExternalPatternsStore.parsingPatterns) &&
+             ExternalPatternsStore.parsingPatterns.toHashSet().containsAll(state.externalParsingPatterns) &&
+             state.externalHighlightingPatterns.toHashSet().containsAll(ExternalPatternsStore.highlightingPatterns) &&
+             ExternalPatternsStore.highlightingPatterns.toHashSet().containsAll(state.externalHighlightingPatterns)
     }
   }
 
@@ -384,7 +404,13 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     @Tag("readonlySizeThreshold")
     var readonlySizeThreshold: String,
     @Tag("highlight_links")
-    var highlightLinks: Boolean
+    var highlightLinks: Boolean,
+    @XCollection(style = XCollection.Style.v2)
+    @Tag("externalParsingPatterns")
+    var externalParsingPatterns: ArrayList<LogParsingPattern>,
+    @XCollection(style = XCollection.Style.v2)
+    @Tag("externalHighlightingPatterns")
+    var externalHighlightingPatterns: ArrayList<LogHighlightingPattern>,
   ) : Cloneable {
     @Suppress("unused")
     constructor() : this(
@@ -407,13 +433,22 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it },
       "heatmap",
       "16",
-      true)
+      true,
+      arrayListOf(),
+      arrayListOf(),
+    )
 
     @Suppress("unused")
-    constructor(patterns: ArrayList<LogHighlightingPattern>, hidden: ArrayList<String>, parsingPatterns: ArrayList<LogParsingPattern>) : this(patterns, hidden, parsingPatterns, "-1", "-1", "heatmap", "16", true)
+    constructor(
+      patterns: ArrayList<LogHighlightingPattern>,
+      hidden: ArrayList<String>,
+      parsingPatterns: ArrayList<LogParsingPattern>,
+    ) : this(patterns, hidden, parsingPatterns, "-1", "-1", "heatmap", "16", true,
+             arrayListOf(), arrayListOf())
 
     public override fun clone(): State {
-      val result = State(ArrayList(), ArrayList(), ArrayList(), version, lastAddedDefaultFormat, errorStripeMode, readonlySizeThreshold, highlightLinks)
+      val result = State(ArrayList(), ArrayList(), ArrayList(), version, lastAddedDefaultFormat, errorStripeMode, readonlySizeThreshold,
+                         highlightLinks, arrayListOf(), arrayListOf())
       patterns.forEach {
         result.patterns.add(it.clone())
       }
@@ -422,6 +457,12 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       }
       parsingPatterns.forEach {
         result.parsingPatterns.add(it.clone())
+      }
+      externalParsingPatterns.forEach {
+        result.externalParsingPatterns.add(it.clone())
+      }
+      externalHighlightingPatterns.forEach {
+        result.externalHighlightingPatterns.add(it.clone())
       }
       return result
     }
