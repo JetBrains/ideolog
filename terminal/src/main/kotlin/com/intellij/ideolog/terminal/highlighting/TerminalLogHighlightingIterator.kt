@@ -20,4 +20,7 @@ class TerminalLogHighlightingIterator(
     val realOffset = lowerBoundInfo?.commandStartOffset ?: offset
     return detectLogFileFormat(editor, realOffset)
   }
+
+  override fun tryHighlightStacktrace(event: CharSequence, eventOffset: Int) {
+  }
 }
