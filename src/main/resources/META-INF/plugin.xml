@@ -48,7 +48,7 @@
 
     <fileEditorProvider implementation="com.intellij.ideolog.largeFile.LargeLogFileEditorProvider"/>
     <editorHighlighterProvider filetype="LargeLog" implementationClass="com.intellij.ideolog.largeFile.highlighting.LargeLogFileEditorHighlighterProvider"/>
-    <fileType name="LargeLog" language="LARGE_LOG" implementationClass="com.intellij.ideolog.largeFile.fileType.LargeLogFileType" extensions="log" fieldName="INSTANCE"/>
+    <fileType name="LargeLog" implementationClass="com.intellij.ideolog.largeFile.fileType.LargeLogFileType" fieldName="INSTANCE"/>
     <ideolog.ideologContextDetector implementation="com.intellij.ideolog.largeFile.IdeologLargeFileContextDetector"/>
 
     <intentionAction>
