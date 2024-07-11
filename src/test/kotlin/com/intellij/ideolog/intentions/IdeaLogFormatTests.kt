@@ -155,6 +155,38 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
     assertEquals(DefaultSettingsStoreItems.LaravelLog.uuid, format.myRegexLogParser?.uuid)
   }
 
+  fun `test should detect Yii format`() {
+    val document = MockDocument()
+    document.replaceText(
+      "2024-07-10 11:08:10 [::1][-][4equ70k0id0d16rud0mjp8av2m][info][yii\\web\\Session::open] Session started\n" +
+      "2024-07-10 11:08:10 [::1][-][4equ70k0id0d16rud0mjp8av2m][info][yii\\filters\\RateLimiter::beforeAction] Rate limit skipped: user not logged in.\n" +
+      "2024-07-10 11:08:10 [::1][-][4equ70k0id0d16rud0mjp8av2m][error][yii\\db\\Exception] yii\\db\\Exception: Redis error: ERR wrong number of arguments for 'hset' command\n" +
+      "Redis command was: HSET in C:\\Server\\htdocs\\api\\vendor\\yiisoft\\yii2-redis\\src\\Connection.php:867\n" +
+      "Stack trace:\n" +
+      "#0 C:\\Server\\htdocs\\api\\vendor\\yiisoft\\yii2-redis\\src\\Connection.php(835): yii\\redis\\Connection->parseResponse(Array, '*1\r\n$4\r\nHSET\r\n')\n" +
+      "#1 C:\\Server\\htdocs\\api\\vendor\\yiisoft\\yii2-redis\\src\\Connection.php(801): yii\\redis\\Connection->sendRawCommand('*1\r\n$4\r\nHSET\r\n', Array)\n" +
+      "#2 C:\\Server\\htdocs\\api\\vendor\\yiisoft\\yii2-redis\\src\\Connection.php(729): yii\\redis\\Connection->executeCommand('HSET', Array)\n" +
+      "#3 C:\\Server\\htdocs\\api\\controllers\\BoostyController.php(52): yii\\redis\\Connection->__call('hset', Array)\n" +
+      "#4 [internal function]: app\\controllers\\BoostyController->actionGetTotalMembersCount()\n" +
+      "#5 C:\\Server\\htdocs\\api\\vendor\\yiisoft\\yii2\\base\\InlineAction.php(57): call_user_func_array(Array, Array)\n" +
+      "#6 C:\\Server\\htdocs\\api\\vendor\\yiisoft\\yii2\\base\\Controller.php(178): yii\\base\\InlineAction->runWithParams(Array)\n" +
+      "#7 C:\\Server\\htdocs\\api\\vendor\\yiisoft\\yii2\\base\\Module.php(552): yii\\base\\Controller->runAction('get-total-membe...', Array)\n" +
+      "#8 C:\\Server\\htdocs\\api\\vendor\\yiisoft\\yii2\\web\\Application.php(103): yii\\base\\Module->runAction('boosty/get-tota...', Array)\n" +
+      "#9 C:\\Server\\htdocs\\api\\vendor\\yiisoft\\yii2\\base\\Application.php(384): yii\\web\\Application->handleRequest(Object(yii\\web\\Request))\n" +
+      "#10 C:\\Server\\htdocs\\api\\web\\index.php(14): yii\\base\\Application->run()\n" +
+      "#11 {main}\n" +
+      "Additional Information:\n" +
+      "Array\n" +
+      "(\n" +
+      ")\n" +
+      "\n",
+      0
+    )
+    val format = document.ideologContext.detectLogFileFormat()
+    assertEquals(DefaultSettingsStoreItems.Yii.uuid, format.myRegexLogParser?.uuid)
+  }
+
+
   fun `test should detect Logcat format`() {
     val document = MockDocument()
     document.replaceText(

@@ -104,7 +104,19 @@ object DefaultSettingsStoreItems {
     true,
     UUID.fromString("c1c8800e-b27c-4433-8d4a-3ec5a28f72a9")
   )
-  private val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog, LaravelLog, Logcat, Loguru, Symfony)
+  val Yii = LogParsingPattern(
+    true,
+    "Yii",
+    "^([\\d-: ]+)\\[(.*?)\\]\\[(.*?)\\]\\[(.*?)\\]\\[(.*?)\]\\[(.*?)\\] (.*)",
+    "yyyy-MM-dd HH:mm:ss ",
+    "^\\d",
+    0,
+    4,
+    5,
+    true,
+    UUID.fromString("30cf250d-0be5-4608-9ccb-57cdc604fb5c")
+  )
+  private val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog, LaravelLog, Logcat, Loguru, Symfony, Yii)
   val ParsingPatternsUUIDs = ParsingPatterns.map { it.uuid }
 
   val Error = LogHighlightingPattern(
@@ -209,6 +221,8 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
               it.uuid = DefaultSettingsStoreItems.Loguru.uuid
             DefaultSettingsStoreItems.Symfony.name ->
               it.uuid = DefaultSettingsStoreItems.Symfony.uuid
+            DefaultSettingsStoreItems.Yii.name ->
+              it.uuid = DefaultSettingsStoreItems.Yii.uuid
             else ->
               it.uuid = UUID.randomUUID()
           }
@@ -405,6 +419,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         DefaultSettingsStoreItems.Loguru,
         DefaultSettingsStoreItems.Logcat,
         DefaultSettingsStoreItems.Symfony,
+        DefaultSettingsStoreItems.Yii,
       ),
       CURRENT_SETTINGS_VERSION,
       DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it },
