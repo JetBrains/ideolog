@@ -1,0 +1,8 @@
+<State>
+  <highlightingPatterns />
+  <hiddenSubstrings />
+  <parsingPatterns>
+    <LogParsingPattern enabled="true" name="Slog" pattern="^time=(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}-\d{2}:\d{2}) level=(\w+) msg=&quot;(.*)&quot;$" timePattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX" linePattern="^time=" timeId="0" severityId="1" categoryId="2" fullmatch="false" uuid="331f2426-a678-4f30-bcc6-2b53f1fa10d7" />
+  </parsingPatterns>
+  <settingsVersion>8</settingsVersion>
+</State>
