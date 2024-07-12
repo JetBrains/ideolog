@@ -67,7 +67,8 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
   }
 
   open fun detectLogFileFormat(startOffset: Int = 0): LogFileFormat {
-    if (cache != null || startOffset == 0) {
+    val logFileOffset = if (this::class == IdeologDocumentContext::class) 0 else startOffset
+    if (cache != null || logFileOffset == 0) {
       val currentFormat = format
       if (currentFormat != null) return currentFormat
     }
@@ -90,10 +91,10 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
       }
     }
 
-    val doc = document.charsSequence.drop(startOffset)
-    val firstLines = doc.lineSequence().take(numberFirstLines)
+    val documentAfterOffset = document.charsSequence.drop(logFileOffset)
+    val firstLinesAfterOffset = documentAfterOffset.lineSequence().take(numberFirstLines)
 
-    val detectedLogFormat = getLogFileFormat(firstLines, regexMatchers)
+    val detectedLogFormat = getLogFileFormat(firstLinesAfterOffset, regexMatchers)
     format = detectedLogFormat
     return detectedLogFormat
   }
