@@ -1,5 +1,6 @@
 package com.intellij.ideolog.terminal.highlighting
 
+import com.intellij.ideolog.statistics.IdeologUsagesCollector
 import com.intellij.ideolog.util.detectIdeologContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColorsScheme
@@ -44,10 +45,14 @@ class TerminalCommandBlockHighlighter(
     val command = block.command
     if (command != null) {
       synchronized(highlightingInfos) {
+        val shouldHighlight = shouldHighlightCommandBlock(command)
+        if (shouldHighlight && ::editor.isInitialized) {
+          IdeologUsagesCollector.logOpenLogFileInTerminal(editor.project)
+        }
         highlightingInfos.add(
           HighlightingInfo(
             block.commandStartOffset,
-            shouldHighlightCommandBlock(command)
+            shouldHighlight
           )
         )
       }

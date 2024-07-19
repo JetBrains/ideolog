@@ -3,8 +3,10 @@ package com.intellij.ideolog.util
 import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.highlighting.LogEvent
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
+import com.intellij.ideolog.largeFile.IdeologLargeFileDocumentContext
 import com.intellij.ideolog.lex.LogFileFormat
 import com.intellij.ideolog.lex.RegexLogParser
+import com.intellij.ideolog.statistics.IdeologUsagesCollector
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.thisLogger
@@ -58,6 +60,8 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
 
   private var format: LogFileFormat? = null
 
+  private val needLogging = this::class == IdeologDocumentContext::class || this::class == IdeologLargeFileDocumentContext::class
+
   open fun clear() {
     synchronized(eventParsingLock) {
       cache?.clear()
@@ -96,6 +100,9 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
 
     val detectedLogFormat = getLogFileFormat(firstLinesAfterOffset, regexMatchers)
     format = detectedLogFormat
+    if (needLogging) {
+      IdeologUsagesCollector.logDetectedLogFormat(format)
+    }
     return detectedLogFormat
   }
 
