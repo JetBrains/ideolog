@@ -1,0 +1,6 @@
+- name: lib/ideolog.jar
+  modules:
+  - name: intellij.ideolog
+  contentModules:
+  - name: intellij.ideolog.terminal
+  - name: intellij.php.ideolog
