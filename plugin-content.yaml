@@ -3,4 +3,5 @@
   - name: intellij.ideolog
   contentModules:
   - name: intellij.ideolog.terminal
+  - name: intellij.ideolog.textmate
   - name: intellij.php.ideolog
