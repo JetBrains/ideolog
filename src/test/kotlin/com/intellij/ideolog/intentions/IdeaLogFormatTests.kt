@@ -2,6 +2,8 @@ package com.intellij.ideolog.intentions
 
 import com.intellij.ideolog.highlighting.LogEvent
 import com.intellij.ideolog.highlighting.settings.DefaultSettingsStoreItems
+import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
+import com.intellij.ideolog.highlighting.settings.LogParsingPattern
 import com.intellij.ideolog.lex.LogFileFormat
 import com.intellij.ideolog.lex.RegexLogParser
 import com.intellij.ideolog.util.ideologContext
@@ -9,11 +11,30 @@ import com.intellij.mock.MockDocument
 import com.intellij.testFramework.RunsInEdt
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import java.text.SimpleDateFormat
-import java.util.*
 import java.util.regex.Pattern
 
 @RunsInEdt
 internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
+  private lateinit var parsingPatternsBackup: List<LogParsingPattern>
+
+  override fun setUp() {
+    super.setUp()
+    parsingPatternsBackup = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.toList()
+  }
+
+  override fun tearDown() {
+    try {
+      LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.clear()
+      LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.addAll(parsingPatternsBackup)
+    }
+    catch (e: Throwable) {
+      addSuppressedException(e)
+    }
+    finally {
+      super.tearDown()
+    }
+  }
+
   fun `test match info log category`() {
     val event = LogEvent(
       "2023-05-02 23:09:07,110 [    142]   INFO - #c.i.i.StartupUtil - JVM: 17.0.3+7-b469.32 (OpenJDK 64-Bit Server VM)",
@@ -210,5 +231,18 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
     )
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.Symfony.uuid, format.myRegexLogParser?.uuid)
+  }
+
+  fun `test should not detect TeamCity format`() {
+    val document = MockDocument()
+    document.replaceText(
+      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}",
+      0
+    )
+    LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.removeIf { parsingPattern ->
+      parsingPattern.uuid != DefaultSettingsStoreItems.LaravelLog.uuid
+    }
+    val format = document.ideologContext.detectLogFileFormat()
+    assertNull(format.myRegexLogParser)
   }
 }

@@ -3,7 +3,10 @@ package com.intellij.ideolog.highlighting.settings
 import com.intellij.ideolog.util.application
 import com.intellij.ideolog.util.getService
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.components.*
+import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.RoamingType
+import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.JBColor
@@ -17,8 +20,6 @@ import com.intellij.util.xmlb.annotations.XCollection
 import org.intellij.lang.annotations.Language
 import java.awt.Color
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 object DefaultSettingsStoreItems {
   val PipeSeparated = LogParsingPattern(
@@ -60,7 +61,7 @@ object DefaultSettingsStoreItems {
   val LaravelLog = LogParsingPattern(
     true,
     "Laravel",
-    "^\\[([\\d\\-: ]*)] [\\s\\S]*?\\.(.*?(?=:)): ([\\s\\S]*?(?=(^\\[[\\d\\-: ]*])|\\Z))\$",
+    "^\\[([\\d\\-: ]*)] (?!:)[\\s\\S]*?\\.(.*?(?=:)): ([\\s\\S]*?(?=(^\\[[\\d\\-: ]*])|\\Z))$",
     "yyyy-MM-dd HH:mm:ss",
     "^\\[\\d",
     0,
@@ -157,7 +158,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     fun getInstance() = getService<LogHighlightingSettingsStore>()
     val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
-    const val CURRENT_SETTINGS_VERSION = "8"
+    const val CURRENT_SETTINGS_VERSION = "9"
 
     val cleanState = State()
 
@@ -260,6 +261,14 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         val newState = oldState.clone()
 
         newState.version = "8"
+        return@lambda newState
+      },
+      "8" to lambda@{ oldState ->
+        val newState = oldState.clone()
+
+        newState.parsingPatterns.find { it.uuid == DefaultSettingsStoreItems.LaravelLog.uuid }?.pattern = DefaultSettingsStoreItems.LaravelLog.pattern
+
+        newState.version = "9"
         return@lambda newState
       }
     )
