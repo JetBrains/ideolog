@@ -1,6 +1,7 @@
 package com.intellij.ideolog.terminal.highlighting
 
 import com.intellij.ideolog.highlighting.LogHighlightingIterator
+import com.intellij.ideolog.highlighting.settings.LogHighlightingPattern
 import com.intellij.ideolog.lex.LogFileFormat
 import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.openapi.editor.Editor
@@ -22,5 +23,9 @@ class TerminalLogHighlightingIterator(
   }
 
   override fun tryHighlightStacktrace(event: CharSequence, eventOffset: Int) {
+  }
+
+  override fun acceptHighlighter(logHighlightingPattern: LogHighlightingPattern, fileFormat: LogFileFormat, captureGroup: Int): Boolean {
+    return fileFormat.myRegexLogParser != null && super.acceptHighlighter(logHighlightingPattern, fileFormat, captureGroup)
   }
 }
