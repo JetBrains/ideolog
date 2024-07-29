@@ -1,6 +1,7 @@
 package com.intellij.ideolog.highlighting
 
 import com.intellij.ideolog.highlighting.settings.LogHighlightingAction
+import com.intellij.ideolog.highlighting.settings.LogHighlightingPattern
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.lex.LogFileFormat
 import com.intellij.ideolog.lex.LogToken
@@ -125,7 +126,7 @@ open class LogHighlightingIterator(startOffset: Int,
     curEvent = event
 
     parsedTokens.clear()
-    val fileFormat = detectLogFileFormat(myEditor, offset)
+    val fileFormat = detectLogFileFormatByOffset(myEditor, offset)
     fileFormat.tokenize(prevEvent, parsedTokens)
     val prevTime = fileFormat.extractDate(parsedTokens)?.takeFrom(prevEvent)?.let { fileFormat.parseLogEventTimeSeconds(it) }
 
@@ -208,8 +209,7 @@ open class LogHighlightingIterator(startOffset: Int,
       }
 
       for ((pattern, info) in valueHighlighters) {
-        if (!fileFormat.validateFormatUUID(info.formatId)
-          || (info.captureGroup >= 0 && info.captureGroup != captureGroup)) {
+        if (!acceptHighlighter(info, fileFormat, captureGroup)) {
           continue
         }
 
@@ -224,7 +224,7 @@ open class LogHighlightingIterator(startOffset: Int,
 
       // find all matches for every patttern
       val matchedPieces = partHighlighters.filter{
-          (_, info) -> fileFormat.validateFormatUUID(info.formatId) && (info.captureGroup < 0 || info.captureGroup == captureGroup)
+          (_, info) -> acceptHighlighter(info, fileFormat, captureGroup)
       }.flatMap { (pattern, info) ->
         pattern.toRegex().findAll(value).flatMap {
           it.groups.drop(1).mapNotNull { matchGroup ->
@@ -279,6 +279,13 @@ open class LogHighlightingIterator(startOffset: Int,
     }
 
     tryHighlightStacktrace(event, offset)
+  }
+  
+  protected open fun acceptHighlighter(logHighlightingPattern: LogHighlightingPattern,
+                                       fileFormat: LogFileFormat,
+                                       captureGroup: Int): Boolean {
+    return fileFormat.validateFormatUUID(logHighlightingPattern.formatId) &&
+           (logHighlightingPattern.captureGroup < 0 || logHighlightingPattern.captureGroup == captureGroup)
   }
 
   protected open fun tryHighlightStacktrace(event: CharSequence, eventOffset: Int) {
