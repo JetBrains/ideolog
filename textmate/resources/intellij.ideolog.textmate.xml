@@ -1,0 +1,8 @@
+<idea-plugin package="com.intellij.ideolog.textmate">
+  <dependencies>
+    <plugin id="org.jetbrains.plugins.textmate"/>
+  </dependencies>
+  <extensions defaultExtensionNs="com.intellij.ideolog">
+    <defaultLogEditorHighlighterProvider implementation="com.intellij.ideolog.textmate.highlighting.TextMateLogFileHighlighterProvider"/>
+  </extensions>
+</idea-plugin>
