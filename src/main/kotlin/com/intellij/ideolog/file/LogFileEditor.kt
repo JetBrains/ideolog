@@ -7,6 +7,7 @@ import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.editor.ex.EditorMarkupModel
 import com.intellij.openapi.fileEditor.FileEditorState
 import com.intellij.openapi.fileEditor.impl.text.PsiAwareTextEditorImpl
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider
@@ -26,6 +27,7 @@ class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorPro
     LogHighlightingSettingsStore.getInstance().addSettingsListener(this) {
       resetIdeologStoredData()
     }
+    (editor.markupModel as? EditorMarkupModel)?.setTrafficLightIconVisible(false)
     if (isReadOnly) {
       editor.settings.isUseSoftWraps = false
       editor.putUserData(Key.create("forced.soft.wraps"), java.lang.Boolean.FALSE)
