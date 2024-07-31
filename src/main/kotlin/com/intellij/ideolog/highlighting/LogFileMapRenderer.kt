@@ -11,7 +11,6 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.Key
-import com.intellij.ui.JBColor
 import java.awt.Color
 import java.awt.Font
 import java.awt.Point
@@ -135,30 +134,25 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
           val fileFormat = detectLogFileFormat(myLogFileEditor.editor)
           var offs = 0
           val isRenderingTimeHighlighting = myIsRenderingTimeHighlighting
-          val customPatterns = LogHighlightingSettingsStore.getInstance().myState.patterns.filter { it.enabled && it.showOnStripe }.map { Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it }.toTypedArray()
+          val customPatterns = LogHighlightingSettingsStore.getInstance().myState.patterns
+            .filter { it.enabled && it.showOnStripe && fileFormat.validateFormatUUID(it.uuid) }
+            .map { Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it }
+            .toTypedArray()
           val customHighlightings = myLogFileEditor.editor.getUserData(highlightingSetUserKey) ?: emptySet()
-          println(customHighlightings.joinToString { ", " })
           val colorDefaultBackground = myLogFileEditor.editor.colorsScheme.defaultBackground
 
           var nBucketCur = 0
           var nCurBucketMaxTimeDelta = 0L
-          var isCurBucketError = false
           var colorCurCustomHighlighter: Color? = null
           var timestampPrev: Long? = null
 
           fun commitBucket() {
             if (nBucketCur >= numBuckets)
               return
-            if (isCurBucketError) {
-              isCurBucketError = false
-              highlighterBuckets[nBucketCur] = JBColor.RED
-              if (highlighterBuckets[max(nBucketCur - 1, 0)] != JBColor.RED) // Min size of two buckets
-                highlighterBuckets[max(nBucketCur - 1, 0)] = JBColor.RED
-            } else {
-              highlighterBuckets[nBucketCur] = colorCurCustomHighlighter
-              if (highlighterBuckets[max(nBucketCur - 1, 0)] != colorCurCustomHighlighter) // Min size of two buckets
-                highlighterBuckets[max(nBucketCur - 1, 0)] = colorCurCustomHighlighter
-            }
+
+            highlighterBuckets[nBucketCur] = colorCurCustomHighlighter
+            if (highlighterBuckets[max(nBucketCur - 1, 0)] != colorCurCustomHighlighter) // Min size of two buckets
+              highlighterBuckets[max(nBucketCur - 1, 0)] = colorCurCustomHighlighter
             colorCurCustomHighlighter = null
 
             val maxSec = timeDifferenceToRed.toDouble()
@@ -182,27 +176,22 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
               ?: timestampPrev) else 0
             val timeDelta = if ((timestamp != null) && (timestampPrev != null)) timestamp - timestampPrev else 0
             timestampPrev = timestamp
-            val isError = logEvent.level == "ERROR"
-            var colorCustomHighlighter: Color? = null
-            if (!isError) {
-              colorCustomHighlighter = customPatterns.firstOrNull { it.first.matcher(logEvent.rawText).find() }?.second?.let {
-                it.foregroundColor ?: it.backgroundColor
-              }
-              @Suppress("LoopToCallChain")
-              if (colorCustomHighlighter == null)
-                for (word in customHighlightings) {
-                  if (logEvent.rawText.contains(word)) {
-                    colorCustomHighlighter = LogHighlightingIterator.getLineBackground(word, colorDefaultBackground)
-                  }
-                }
+            var colorCustomHighlighter: Color? = customPatterns.firstOrNull { it.first.matcher(logEvent.rawText).find() }?.second?.let {
+              it.foregroundColor ?: it.backgroundColor
             }
+            @Suppress("LoopToCallChain")
+            if (colorCustomHighlighter == null)
+              for (word in customHighlightings) {
+                if (logEvent.rawText.contains(word)) {
+                  colorCustomHighlighter = LogHighlightingIterator.getLineBackground(word, colorDefaultBackground)
+                }
+              }
 
             // Roll to affected buckets
             val nBucketEnd = getBucketForOffset(logEvent.startOffset + logEvent.rawText.length - 1)
             (nBucketCur..nBucketEnd).forEach {
                 // Apply attrs to bucket
               nCurBucketMaxTimeDelta = max(nCurBucketMaxTimeDelta, timeDelta)
-              isCurBucketError = isCurBucketError || isError
               colorCurCustomHighlighter = colorCurCustomHighlighter ?: colorCustomHighlighter
 
               // Commit unless the last one (or the only one)
