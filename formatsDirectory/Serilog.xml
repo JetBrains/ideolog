@@ -1,0 +1,12 @@
+<State>
+  <highlightingPatterns>
+    <LogHighlightingPattern enabled="true" pattern="^\s*err\s*$" captureGroup="-1" action="HIGHLIGHT_LINE" fg="-39836" bold="true" italic="false" stripe="true" uuid="5bcf6a90-78f1-43a4-9a8c-375910f23b12" />
+    <LogHighlightingPattern enabled="true" pattern="^\s*wrn\s*$" captureGroup="-1" action="HIGHLIGHT_LINE" fg="-6329600" bold="true" italic="false" stripe="false" uuid="3cb63bd6-2f81-4bb6-8944-0a0a674cb427" />
+    <LogHighlightingPattern enabled="true" pattern="^\s*inf\s*$" captureGroup="-1" action="HIGHLIGHT_LINE" fg="-10316203" bold="false" italic="false" stripe="false" uuid="0f8ad928-941b-4ebe-8e50-ec601c49b5a7" />
+  </highlightingPatterns>
+  <hiddenSubstrings />
+  <parsingPatterns>
+	<LogParsingPattern enabled="true" name="Serilog (default)" pattern="^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} [+-]?\d{2}:\d{2}) \[([A-Z]+)\] (.*)$" timePattern="yyyy-MM-dd HH:mm:ss.SSS XXX" linePattern="^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}" timeId="0" severityId="1" categoryId="-1" fullmatch="false" uuid="496412b0-aed0-4b48-a539-30522f90d3ce" />
+  </parsingPatterns>
+  <settingsVersion>9</settingsVersion>
+</State>
