@@ -17,6 +17,10 @@ import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.Tag
 import com.intellij.util.xmlb.annotations.Transient
 import com.intellij.util.xmlb.annotations.XCollection
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.intellij.lang.annotations.Language
 import java.awt.Color
 import java.util.*
@@ -115,7 +119,7 @@ object DefaultSettingsStoreItems {
     null,
     -1,
     LogHighlightingAction.HIGHLIGHT_LINE,
-    JBColor.RED.rgb,
+    LogColors.RED,
     null,
     bold = true,
     italic = false,
@@ -128,7 +132,7 @@ object DefaultSettingsStoreItems {
     null,
     -1,
     LogHighlightingAction.HIGHLIGHT_LINE,
-    JBColor.ORANGE.rgb,
+    LogColors.ORANGE,
     null,
     bold = true,
     italic = false,
@@ -141,7 +145,7 @@ object DefaultSettingsStoreItems {
     null,
     -1,
     LogHighlightingAction.HIGHLIGHT_LINE,
-    JBColor.GREEN.rgb,
+    LogColors.GREEN,
     null,
     bold = false,
     italic = false,
@@ -520,8 +524,8 @@ data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean,
                                   @Attribute("formatId", converter = UUIDConverter::class) var formatId: UUID?,
                                   @Attribute("captureGroup") var captureGroup: Int,
                                   @Attribute("action") var action: LogHighlightingAction,
-                                  @Attribute("fg") var fgRgb: Int?,
-                                  @Attribute("bg") var bgRgb: Int?,
+                                  @Attribute("fg", converter = LogColorConverter::class) var fgRgb: LogColor?,
+                                  @Attribute("bg", converter = LogColorConverter::class) var bgRgb: LogColor?,
                                   @Attribute("bold") var bold: Boolean,
                                   @Attribute("italic") var italic: Boolean,
                                   @Attribute("stripe") var showOnStripe: Boolean,
@@ -531,15 +535,23 @@ data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean,
   constructor() : this(true, "", null, 0, LogHighlightingAction.HIGHLIGHT_FIELD, null, null, false, false, false, UUID.randomUUID())
 
   var foregroundColor: Color?
-    @Transient get() = fgRgb?.let { JBColor(it, it) }
+    @Transient get() = fgRgb?.let { logColor -> JBColor(logColor.lightRgb, logColor.darkRgb) }
     @Transient set(value) {
-      fgRgb = value?.rgb
+      fgRgb = value?.let { color ->
+        fgRgb?.let { prevLogColor ->
+          if (JBColor.isBright()) prevLogColor.copy(lightRgb = color.rgb) else prevLogColor.copy(darkRgb = color.rgb)
+        }
+      }
     }
 
   var backgroundColor: Color?
-    @Transient get() = bgRgb?.let { JBColor(it, it) }
+    @Transient get() = bgRgb?.let { logColor -> JBColor(logColor.lightRgb, logColor.darkRgb) }
     @Transient set(value) {
-      bgRgb = value?.rgb
+      bgRgb = value?.let { color ->
+        bgRgb?.let { prevLogColor ->
+          if (JBColor.isBright()) prevLogColor.copy(lightRgb = color.rgb) else prevLogColor.copy(darkRgb = color.rgb)
+        }
+      }
     }
 
   public override fun clone(): LogHighlightingPattern {
@@ -558,5 +570,24 @@ enum class LogHighlightingAction {
     HIGHLIGHT_FIELD -> "Highlight field"
     HIGHLIGHT_LINE -> "Highlight line"
     HIDE -> "Hide"
+  }
+}
+
+/**
+ * It was impossible to serialize both light and dark colors of JBColor
+ */
+@Serializable
+data class LogColor(
+  val lightRgb: Int,
+  val darkRgb: Int,
+)
+
+private class LogColorConverter : Converter<LogColor>() {
+  override fun toString(value: LogColor) = Json.encodeToString(value)
+  override fun fromString(value: String): LogColor? = try {
+    Json.decodeFromString(value)
+  } catch (_: SerializationException) {
+    val rgb = value.toIntOrNull()
+    rgb?.let { LogColor(it, it) }
   }
 }
