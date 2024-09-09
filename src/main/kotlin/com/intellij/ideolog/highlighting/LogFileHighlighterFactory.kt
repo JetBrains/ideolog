@@ -69,13 +69,10 @@ open class LogEditorHighlighter(
 
   override fun setEditor(editor: HighlighterClient) {
     myEditor = editor
-    val logFileFormat = detectLogFileFormat(myEditor as Editor)
-    if (logFileFormat.myRegexLogParser == null) {
-      DEFAULT_LOG_EDITOR_HIGHLIGHTER_PROVIDER_EP_NAME.extensionList.map { provider ->
-        provider.getEditorHighlighter(editor.project, null, virtualFile, myColors)
-      }.firstOrNull()?.let { highlighter ->
-        defaultLogEditorHighlighter = highlighter
-      }
+    DEFAULT_LOG_EDITOR_HIGHLIGHTER_PROVIDER_EP_NAME.extensionList.map { provider ->
+      provider.getEditorHighlighter(editor.project, null, virtualFile, myColors)
+    }.firstOrNull()?.let { highlighter ->
+      defaultLogEditorHighlighter = highlighter
     }
   }
 
