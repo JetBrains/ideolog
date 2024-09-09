@@ -74,7 +74,10 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
     val logFileOffset = if (this::class == IdeologDocumentContext::class) 0 else startOffset
     if (cache != null || logFileOffset == 0) {
       val currentFormat = format
-      if (currentFormat != null) return currentFormat
+      if (currentFormat?.isEnabled() == true) {
+        return currentFormat
+      }
+      clear()
     }
 
     val regexMatchers = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.mapNotNull {
@@ -179,6 +182,11 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
     updateCache(currentLine, currentLine)
     return currentLine
   }
+}
+
+private fun LogFileFormat.isEnabled(): Boolean {
+  return LogHighlightingSettingsStore.getInstance().myState.parsingPatterns
+    .firstOrNull { pattern -> pattern.uuid == this.myRegexLogParser?.uuid }?.enabled == true
 }
 
 fun Editor.getSelectedText(): CharSequence? {

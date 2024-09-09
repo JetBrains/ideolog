@@ -19,7 +19,7 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
 
   override fun setUp() {
     super.setUp()
-    parsingPatternsBackup = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.toList()
+    parsingPatternsBackup = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.map { it.copy() }
   }
 
   override fun tearDown() {
@@ -244,5 +244,59 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
     }
     val format = document.ideologContext.detectLogFileFormat()
     assertNull(format.myRegexLogParser)
+  }
+
+  fun `test remove format without restarting`() {
+    val document = MockDocument()
+    document.replaceText(
+      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}",
+      0
+    )
+    val format = document.ideologContext.detectLogFileFormat()
+    assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
+    LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.clear()
+    val unknownFormat = document.ideologContext.detectLogFileFormat()
+    assertNull(unknownFormat.myRegexLogParser)
+  }
+
+  fun `test disable format without restarting`() {
+    val document = MockDocument()
+    document.replaceText(
+      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}",
+      0
+    )
+    val format = document.ideologContext.detectLogFileFormat()
+    assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
+    LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.first { it.uuid == DefaultSettingsStoreItems.TeamCityBuildLog.uuid }.enabled = false
+    val unknownFormat = document.ideologContext.detectLogFileFormat()
+    assertNull(unknownFormat.myRegexLogParser)
+  }
+
+  fun `test enable format without restarting`() {
+    val document = MockDocument()
+    document.replaceText(
+      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}",
+      0
+    )
+    LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.forEach { it.enabled = false }
+    val unknownFormat = document.ideologContext.detectLogFileFormat()
+    assertNull(unknownFormat.myRegexLogParser)
+    LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.first { it.uuid == DefaultSettingsStoreItems.TeamCityBuildLog.uuid }.enabled = true
+    val format = document.ideologContext.detectLogFileFormat()
+    assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
+  }
+
+  fun `test add format without restarting`() {
+    val document = MockDocument()
+    document.replaceText(
+      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}",
+      0
+    )
+    LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.clear()
+    val unknownFormat = document.ideologContext.detectLogFileFormat()
+    assertNull(unknownFormat.myRegexLogParser)
+    LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.add(DefaultSettingsStoreItems.TeamCityBuildLog)
+    val format = document.ideologContext.detectLogFileFormat()
+    assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
   }
 }
