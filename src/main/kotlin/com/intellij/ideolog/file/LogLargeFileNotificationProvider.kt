@@ -9,9 +9,10 @@ import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.isTooLarge
+import com.intellij.openapi.vfs.limits.FileSizeLimit
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotificationProvider
 import com.intellij.ui.EditorNotifications
@@ -35,7 +36,7 @@ class LogLargeFileNotificationProvider : EditorNotificationProvider {
       val productName = ApplicationNamesInfo.getInstance().productName.lowercase(Locale.getDefault())
       val versionName = ApplicationInfo.getInstance().majorVersion
       val isSupported = productName == "rider" && versionName >= "2018"
-      if (editor.getUserData(HIDDEN_KEY) != null || dontShowAgain || !FileUtilRt.isTooLarge(file.length) || !isSupported) {
+      if (editor.getUserData(HIDDEN_KEY) != null || dontShowAgain || !file.isTooLarge() || !isSupported) {
         return@Function null
       }
 
@@ -60,7 +61,7 @@ class LogLargeFileNotificationProvider : EditorNotificationProvider {
       return@Function panel.text(String.format(
         IdeologBundle.message("label.file.content.truncated.please.increase.limits"),
         StringUtil.formatFileSize(file.length),
-        StringUtil.formatFileSize(FileUtilRt.LARGE_FILE_PREVIEW_SIZE.toLong())
+        StringUtil.formatFileSize(FileSizeLimit.getPreviewLimit(file.extension).toLong())
       ))
     }
   }
