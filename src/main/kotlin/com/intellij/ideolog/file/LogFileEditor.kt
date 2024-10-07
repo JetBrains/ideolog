@@ -4,7 +4,6 @@ import com.intellij.ideolog.highlighting.LogFileMapRenderer
 import com.intellij.ideolog.highlighting.LogHeavyFilterService
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.util.ideologContext
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.ex.EditorMarkupModel
@@ -17,7 +16,6 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 
 class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorProvider) : PsiAwareTextEditorImpl(project, file, provider) {
-  val log = Logger.getInstance(LogFileEditor::class.java)
   private val isReadOnly: Boolean
 
   init {
@@ -30,7 +28,7 @@ class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorPro
     (editor.markupModel as? EditorMarkupModel)?.setTrafficLightIconVisible(false)
     if (isReadOnly) {
       editor.settings.isUseSoftWraps = false
-      editor.putUserData(Key.create("forced.soft.wraps"), java.lang.Boolean.FALSE)
+      editor.putUserData(Key.create("forced.soft.wraps"), false)
     } else {
       editor.document.addDocumentListener(object : DocumentListener {
         override fun documentChanged(event: DocumentEvent) {
@@ -49,7 +47,7 @@ class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorPro
     LogFileMapRenderer.LogFileMapRendererKey.get(editor)?.detachFromEditor()
     LogFileMapRenderer.getOrCreateLogFileMapRenderer(this)
 
-    LogFileFormatNotificationProvider.update(file, project)
+    update(file, project)
   }
 
   override fun setState(state: FileEditorState) {
