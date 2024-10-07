@@ -127,7 +127,9 @@ open class LogHighlightingIterator(startOffset: Int,
 
     parsedTokens.clear()
     val fileFormat = detectLogFileFormatByOffset(myEditor, offset)
-    fileFormat.tokenize(prevEvent, parsedTokens)
+    if (myEditor.getUserData(highlightTimeKey) == true) {
+      fileFormat.tokenize(prevEvent, parsedTokens)
+    }
     val prevTime = fileFormat.extractDate(parsedTokens)?.takeFrom(prevEvent)?.let { fileFormat.parseLogEventTimeSeconds(it) }
 
     eventPieces.clear()
