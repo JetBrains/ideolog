@@ -8,26 +8,18 @@ import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.isTooLarge
 import com.intellij.openapi.vfs.limits.FileSizeLimit
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotificationProvider
-import com.intellij.ui.EditorNotifications
 import java.util.*
 import java.util.function.Function
 import javax.swing.JComponent
 
 class LogLargeFileNotificationProvider : EditorNotificationProvider {
-    companion object {
-        private val HIDDEN_KEY = Key.create<String>("log.large.file.editor.notification.hidden")
-
-        private fun update(file: VirtualFile, project: Project) = EditorNotifications.getInstance(project).updateNotifications(file)
-
-        private var dontShowAgain = false
-    }
+  private var dontShowAgain = false
 
   override fun collectNotificationData(project: Project, file: VirtualFile): Function<in FileEditor, out JComponent?> {
     return Function {
