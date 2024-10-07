@@ -20,10 +20,7 @@ import javax.swing.JComponent
 
 class LogFileFormatNotificationProvider : EditorNotificationProvider, DumbAware {
   companion object {
-    private val HIDDEN_KEY = Key.create<Any>("log.file.format.editor.notification.hidden")
     private const val DONT_SHOW_AGAIN_KEY = "log.file.format.editor.notification.disabled"
-
-    fun update(file: VirtualFile, project: Project) = EditorNotifications.getInstance(project).updateNotifications(file)
   }
 
   override fun collectNotificationData(project: Project, file: VirtualFile): Function<in FileEditor, out JComponent?> {
@@ -57,3 +54,7 @@ class LogFileFormatNotificationProvider : EditorNotificationProvider, DumbAware 
     }
   }
 }
+
+internal val HIDDEN_KEY = Key.create<Any>("log.file.format.editor.notification.hidden")
+
+internal fun update(file: VirtualFile, project: Project) = EditorNotifications.getInstance(project).updateNotifications(file)
