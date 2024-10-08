@@ -14,6 +14,7 @@ import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.highlighter.HighlighterIterator
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.psi.tree.IElementType
+import com.intellij.util.containers.addIfNotNull
 import java.awt.Color
 import java.awt.Font
 import java.util.regex.Pattern
@@ -140,7 +141,8 @@ open class LogHighlightingIterator(startOffset: Int,
 
     parsedTokens.clear()
     fileFormat.tokenize(event, parsedTokens)
-    val currentTime = fileFormat.extractDate(parsedTokens)?.takeFrom(event)?.let { fileFormat.parseLogEventTimeSeconds(it) }
+    val dateToken = fileFormat.extractDate(parsedTokens)
+    val currentTime = dateToken?.takeFrom(event)?.let { fileFormat.parseLogEventTimeSeconds(it) }
 
     val columnValues = parsedTokens.filter { !it.isSeparator }.map { it.takeFrom(event) }
     val numColumns = columnValues.size
@@ -196,7 +198,12 @@ open class LogHighlightingIterator(startOffset: Int,
 
     var valueIndex = 0
     val timeIndex = fileFormat.getTimeFieldIndex()
-    parsedTokens.filter{ !it.isSeparator }.forEachIndexed { captureGroup, token ->
+    parsedTokens.forEachIndexed { captureGroup, token ->
+      if (token.isSeparator) {
+        highlightSeparator(token, offset, lineForeground, lineBackground, bold, italic)
+        return@forEachIndexed
+      }
+
       val value = token.takeFrom(event)
       var valueForeground = lineForeground
       var valueBackground = lineBackground
@@ -259,6 +266,8 @@ open class LogHighlightingIterator(startOffset: Int,
         )
       )
 
+      matchedPieces.addIfNotNull(calculateDateTokenForHighlighting(token, dateToken, valueForeground, offset))
+
       eventPieces.addAll(
         // cut lines to remove overlapping regions
         solveNestedLines(matchedPieces.mapIndexed { index, piece ->
@@ -282,7 +291,7 @@ open class LogHighlightingIterator(startOffset: Int,
 
     tryHighlightStacktrace(event, offset)
   }
-  
+
   protected open fun acceptHighlighter(logHighlightingPattern: LogHighlightingPattern,
                                        fileFormat: LogFileFormat,
                                        captureGroup: Int): Boolean {
@@ -303,6 +312,29 @@ open class LogHighlightingIterator(startOffset: Int,
         service.enqueueHeavyFiltering(myEditor, eventOffset, event)
       }
     }
+  }
+
+  private fun highlightSeparator(
+    separator: LogToken, offset: Int, valueForeground: Color, valueBackground: Color, valueBold: Boolean, valueItalic: Boolean
+  ) {
+    eventPieces.add(EventPiece(
+      separator.startOffset + offset,
+      separator.endOffset + offset,
+      TextAttributes(valueForeground, valueBackground, null, null, getFont(valueBold, valueItalic)),
+      false
+    ))
+  }
+
+  private fun calculateDateTokenForHighlighting(token: LogToken, dateToken: LogToken?, valueForeground: Color, offset: Int): EventPiece? {
+    if (token == dateToken && valueForeground != myColors.defaultForeground) {
+      return EventPiece(
+        token.startOffset + offset,
+        token.endOffset + offset,
+        TextAttributes(DATE_COLOR, null, null, null, getFont(false, false)),
+        false
+      )
+    }
+    return null
   }
 
   private fun getFont(bold: Boolean, italic: Boolean): Int {
