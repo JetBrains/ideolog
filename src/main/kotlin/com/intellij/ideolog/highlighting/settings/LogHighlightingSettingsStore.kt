@@ -289,6 +289,16 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         newState.patterns.addAll(ExternalPatternsStore.highlightingPatterns)
       }
 
+      newState.patterns.removeIf { highlightingPattern -> highlightingPattern.uuid in listOf(
+        "ceb277ea-e937-431f-93c7-fef9aab016c5",
+        "a1f4e368-1ab5-4920-b0cc-6701063bd08e",
+        "2dc05512-9066-4439-83b3-fada1287e486",
+        "9d83979c-74f1-41cc-b342-7f471e225c1e",
+        "f29fc557-7be9-4289-bea3-f4cfb235f23b",
+        "1dcadf54-8ba8-431d-9e58-76a10ce12241",
+        "18a36367-bd09-4163-8e6d-e2410e6ffd08"
+      ).map(UUID::fromString) }
+
       return@setOf newState
     }
 
