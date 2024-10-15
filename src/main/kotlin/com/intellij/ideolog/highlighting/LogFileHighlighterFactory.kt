@@ -16,6 +16,7 @@ import com.intellij.openapi.fileTypes.EditorHighlighterProvider
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.tree.IElementType
 
@@ -24,6 +25,8 @@ val LOG_TOKEN_SEPARATOR = IElementType("LOG_TOKEN_SEPARATOR", LogLanguage)
 internal val highlightingUserKey = Key.create<Int>("JetLog.HighlightColumn")
 internal val highlightingSetUserKey = Key.create<HashSet<String>>("JetLog.HighlightSet")
 val highlightTimeKey = Key.create<Boolean>("JetLog.HighlightTime")
+
+const val CUSTOM_DEFAULT_LOG_HIGHLIGHTER_SIZE_CONSTRAINT = FileUtilRt.MEGABYTE / 2
 
 class LogTokenElementType(column: Int) : IElementType("LOG_TOKEN_VALUE_$column", LogLanguage, false)
 class LogFileEditorHighlighterProvider : EditorHighlighterProvider {
@@ -72,7 +75,9 @@ open class LogEditorHighlighter(
     DEFAULT_LOG_EDITOR_HIGHLIGHTER_PROVIDER_EP_NAME.extensionList.map { provider ->
       provider.getEditorHighlighter(editor.project, null, virtualFile, myColors)
     }.firstOrNull()?.let { highlighter ->
-      defaultLogEditorHighlighter = highlighter
+      if (virtualFile != null && virtualFile.length <= CUSTOM_DEFAULT_LOG_HIGHLIGHTER_SIZE_CONSTRAINT) {
+        defaultLogEditorHighlighter = highlighter
+      }
     }
   }
 
