@@ -185,8 +185,8 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
 }
 
 private fun LogFileFormat.isEnabled(): Boolean {
-  return LogHighlightingSettingsStore.getInstance().myState.parsingPatterns
-    .firstOrNull { pattern -> pattern.uuid == this.myRegexLogParser?.uuid }?.enabled == true
+  return myRegexLogParser == null || LogHighlightingSettingsStore.getInstance().myState.parsingPatterns
+    .firstOrNull { pattern -> pattern.uuid == this.myRegexLogParser.uuid }?.enabled == true
 }
 
 fun Editor.getSelectedText(): CharSequence? {
