@@ -1,5 +1,7 @@
 package com.intellij.ideolog.intentions
 
+import com.intellij.ideolog.file.LogFileEditor
+import com.intellij.ideolog.file.LogFileEditorProvider
 import com.intellij.ideolog.highlighting.LogEvent
 import com.intellij.ideolog.highlighting.settings.DefaultSettingsStoreItems
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
@@ -7,7 +9,8 @@ import com.intellij.ideolog.highlighting.settings.LogParsingPattern
 import com.intellij.ideolog.lex.LogFileFormat
 import com.intellij.ideolog.lex.RegexLogParser
 import com.intellij.ideolog.util.ideologContext
-import com.intellij.mock.MockDocument
+import com.intellij.openapi.editor.Document
+import com.intellij.openapi.util.Disposer
 import com.intellij.testFramework.RunsInEdt
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import java.text.SimpleDateFormat
@@ -16,6 +19,7 @@ import java.util.regex.Pattern
 @RunsInEdt
 internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
   private lateinit var parsingPatternsBackup: List<LogParsingPattern>
+  private lateinit var editor: LogFileEditor
 
   override fun setUp() {
     super.setUp()
@@ -26,6 +30,9 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
     try {
       LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.clear()
       LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.addAll(parsingPatternsBackup)
+      if (::editor.isInitialized) {
+        Disposer.dispose(editor)
+      }
     }
     catch (e: Throwable) {
       addSuppressedException(e)
@@ -75,8 +82,7 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
   }
 
   fun `test should detect IntelliJPattern`() {
-    val document = MockDocument()
-    document.replaceText(
+    val document = configureLogFile(
       "2023-05-02 23:09:06,970 [      2]   INFO - #c.i.i.StartupUtil - ------------------------------------------------------ IDE STARTED ------------------------------------------------------\n" +
         "2023-05-02 23:09:07,029 [     61]   INFO - #c.i.i.p.PluginManager - Using broken plugins file from IDE distribution\n" +
         "2023-05-02 23:09:07,074 [    106]   INFO - #c.i.i.StartupUtil - JNA library (64-bit) loaded in 64 ms\n" +
@@ -101,30 +107,26 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
         "2023-05-02 23:09:07,417 [    449]   INFO - #c.i.i.p.PluginManager - Module intellij.space.gateway is not enabled because dependency com.jetbrains.gateway is not available\n" +
         "Module intellij.space.php is not enabled because dependency com.jetbrains.php is not available\n" +
         "Module kotlin-ultimate.javascript.nodeJs is not enabled because dependency NodeJS is not available\n" +
-        "Module kotlin-ultimate.javascript.debugger is not enabled because dependency JavaScriptDebugger is not available\n",
-      0
+        "Module kotlin-ultimate.javascript.debugger is not enabled because dependency JavaScriptDebugger is not available\n"
     )
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.IntelliJIDEA.uuid, format.myRegexLogParser?.uuid)
   }
 
   fun `test should detect Pipe-separated pattern`() {
-    val document = MockDocument()
-    document.replaceText(
+    val document = configureLogFile(
       "03:17:00.000|INFO|Log started|This is info message\n" +
         "03:17:00.000|INFO|Log started|This is multiline\n" +
         "info\n" +
         "message\n" +
-        "03:17:00.000|ERROR|Some error type|This is error message\n",
-      0
+        "03:17:00.000|ERROR|Some error type|This is error message\n"
     )
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.PipeSeparated.uuid, format.myRegexLogParser?.uuid)
   }
 
   fun `test should detect TeamCity pattern`() {
-    val document = MockDocument()
-    document.replaceText(
+    val document = configureLogFile(
       "[23:54:03]i: TeamCity server version is 9.1.5 (build 37377)\n" +
         "[23:54:03]W: bt4 (2m:17s)\n" +
         "[23:54:03] : projectId:project55 projectExternalId:StackExchangeNetwork_NewYork buildTypeId:bt4 buildTypeExternalId:StackExchangeNetwork_NewYork_SENetworkDev\n" +
@@ -137,16 +139,14 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
         "[23:54:04]i:\t [Collecting changes in 2 VCS roots] Detecting changes in VCS root 'Gitlab - Stack Exchange Network' (used in 'Release', 'SENetwork - Dev' and 36 other configurations)\n" +
         "[23:54:04]i:\t [Collecting changes in 2 VCS roots] Will collect changes for 'Gitlab - Stack Exchange Network' starting from revision 52173e6ad55dd55da435aaf7dd3343894afb3f1a\n" +
         "[23:54:04]i:\t [Collecting changes in 2 VCS roots] Detecting changes in VCS root 'Gitlab - TeamCity Build Configs' (used in 'ADTools - Dev', 'ADTools - Dev' and 257 other configurations)\n" +
-        "[23:54:04]i:\t [Collecting changes in 2 VCS roots] Will collect changes for 'Gitlab - TeamCity Build Configs' starting from revision 35ddc3e78bcae9b7bbb71638dad519abd7d12249",
-      0
+        "[23:54:04]i:\t [Collecting changes in 2 VCS roots] Will collect changes for 'Gitlab - TeamCity Build Configs' starting from revision 35ddc3e78bcae9b7bbb71638dad519abd7d12249"
     )
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
   }
 
   fun `test should detect Laravel format`() {
-    val document = MockDocument()
-    document.replaceText(
+    val document = configureLogFile(
       "[2023-12-05 09:15:23] local.ERROR: Uncaught Exception: Division by zero {\"exception\":\"[object] (ErrorException(code: 0): Division by zero at /path/to/laravel/project/app/Http/Controllers/SomeController.php:55)\n" +
         "[stacktrace]\n" +
         "#0 /path/to/laravel/project/app/Http/Controllers/SomeController.php(55): divisionByZeroFunction()\n" +
@@ -169,30 +169,26 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
         "#1 [internal function]: App\\\\Http\\\\Controllers\\\\Auth\\\\LoginController->login()\n" +
         "#2 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): call_user_func_array()\n" +
         "#3 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/R\n" +
-        "\n",
-      0
+        "\n"
     )
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.LaravelLog.uuid, format.myRegexLogParser?.uuid)
   }
 
   fun `test should detect Logcat format`() {
-    val document = MockDocument()
-    document.replaceText(
+    val document = configureLogFile(
       "01-01 10:00:01.123  1234  5678 D MyAppTag: Starting app\n" +
         "01-01 10:00:02.456  1234  5678 I MyAppTag: Initializing user interface\n" +
         "01-01 10:00:03.789  1234  5678 W MyAppTag: Network connection is slow\n" +
         "01-01 10:00:04.012  1234  5678 E MyAppTag: Failed to load user data\n" +
-        "01-01 10:00:05.345  1234  5678 I MyAppTag: App ready",
-      0
+        "01-01 10:00:05.345  1234  5678 I MyAppTag: App ready"
     )
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.Logcat.uuid, format.myRegexLogParser?.uuid)
   }
 
   fun `test should detect Loguru format`() {
-    val document = MockDocument()
-    document.replaceText(
+    val document = configureLogFile(
       "2023-07-08 16:30:13.780 | SUCCESS | __main__:login:64 - \n" +
         "    User authentication successful\n" +
         "    Session token generated\n" +
@@ -212,32 +208,27 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
         "    Expected JSON, received XML\n" +
         "2023-07-08 16:52:44.439 | INFO    | __main__:sbs_api_info:121 - \n" +
         "    API information retrieved successfully\n" +
-        "    Endpoint: /api/v1/info\n",
-      0
+        "    Endpoint: /api/v1/info\n"
     )
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.Loguru.uuid, format.myRegexLogParser?.uuid)
   }
 
   fun `test should detect Symfony format`() {
-    val document = MockDocument()
-    document.replaceText(
+    val document = configureLogFile(
       "[2023-06-05T09:57:38.056800+00:00] php.DEBUG: Warning: filemtime(): stat failed for /app/config/routes/framework.yaml {\"exception\":\"[object] (Symfony\\\\Component\\\\ErrorHandler\\\\Error\\\\SilencedErrorContext {...})\"} []\n" +
         "[2023-06-05T09:57:38.057300+00:00] request.ERROR: Uncaught PHP Exception Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException: \"No route found for \"GET https://example.com/nonexistent\" [] []\n" +
         "[2023-06-05T09:57:38.101820+00:00] request.ERROR: Uncaught PHP Exception Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException: \"No route found for \"GET https://example.com/failedroute\" [] []\n" +
         "[2023-06-05T09:57:38.130130+00:00] request.CRITICAL: Uncaught PHP Exception Twig\\\\Error\\\\RuntimeError: \"An exception has been thrown during the rendering of a template (\\\"Failed to fetch user profile data\\\").\" at /path/to/template/file.twig line 15 [] []\n" +
-        "[2023-06-05T09:57:39.355650+00:00] deprecation.INFO: User Deprecated: The \"url\" connection parameter is deprecated. Please use Doctrine\\\\DBAL\\\\Tools\\\\DsnParser to parse a DSN string instead. {\"exception\":\"[object] (ErrorException(code: 0): User Deprecated: The \\\"url\\\" connection parameter is deprecated at /path/to/deprecated/code:123)\"} []\n",
-      0
+        "[2023-06-05T09:57:39.355650+00:00] deprecation.INFO: User Deprecated: The \"url\" connection parameter is deprecated. Please use Doctrine\\\\DBAL\\\\Tools\\\\DsnParser to parse a DSN string instead. {\"exception\":\"[object] (ErrorException(code: 0): User Deprecated: The \\\"url\\\" connection parameter is deprecated at /path/to/deprecated/code:123)\"} []\n"
     )
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.Symfony.uuid, format.myRegexLogParser?.uuid)
   }
 
   fun `test should not detect TeamCity format`() {
-    val document = MockDocument()
-    document.replaceText(
-      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}",
-      0
+    val document = configureLogFile(
+      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}"
     )
     LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.removeIf { parsingPattern ->
       parsingPattern.uuid != DefaultSettingsStoreItems.LaravelLog.uuid
@@ -247,10 +238,8 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
   }
 
   fun `test remove format without restarting`() {
-    val document = MockDocument()
-    document.replaceText(
-      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}",
-      0
+    val document = configureLogFile(
+      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}"
     )
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
@@ -260,10 +249,8 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
   }
 
   fun `test disable format without restarting`() {
-    val document = MockDocument()
-    document.replaceText(
-      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}",
-      0
+    val document = configureLogFile(
+      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}"
     )
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
@@ -273,30 +260,38 @@ internal class DefaultSettingsStoreItemsTests: BasePlatformTestCase() {
   }
 
   fun `test enable format without restarting`() {
-    val document = MockDocument()
-    document.replaceText(
-      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}",
-      0
+    val document = configureLogFile(
+      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}"
     )
     LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.forEach { it.enabled = false }
     val unknownFormat = document.ideologContext.detectLogFileFormat()
     assertNull(unknownFormat.myRegexLogParser)
     LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.first { it.uuid == DefaultSettingsStoreItems.TeamCityBuildLog.uuid }.enabled = true
+    mockSaveSettings()
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
   }
 
   fun `test add format without restarting`() {
-    val document = MockDocument()
-    document.replaceText(
-      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}",
-      0
+    val document = configureLogFile(
+      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}"
     )
     LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.clear()
     val unknownFormat = document.ideologContext.detectLogFileFormat()
     assertNull(unknownFormat.myRegexLogParser)
     LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.add(DefaultSettingsStoreItems.TeamCityBuildLog)
+    mockSaveSettings()
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
+  }
+
+  private fun configureLogFile(text: String): Document {
+    val file = myFixture.configureByText("file.log", text)
+    editor = LogFileEditorProvider().createEditor(project, file.virtualFile) as LogFileEditor
+    return file.fileDocument
+  }
+
+  private fun mockSaveSettings() {
+    LogHighlightingSettingsStore.getInstance().loadState(LogHighlightingSettingsStore.getInstance().state)
   }
 }
