@@ -56,18 +56,13 @@ open class LogEditorHighlighter(
   )
 
   override fun createIterator(startOffset: Int): HighlighterIterator {
-    if (myEditor == null || !ApplicationManager.getApplication().isDispatchThread)
-      return defaultLogEditorHighlighter.apply { setText(myText) }.createIterator(startOffset)
-    val logFileFormat = detectLogFileFormat(myEditor as Editor)
-    if (logFileFormat.myRegexLogParser == null) {
-      return defaultLogEditorHighlighter.apply { setText(myText) }.createIterator(startOffset)
-    }
-
-    return LogHighlightingIterator(startOffset, myEditor as Editor, { myText }, { myColors })
+    val defaultHighlighterIterator = doDefaultHighlighterAction { createIterator(startOffset) }
+    return defaultHighlighterIterator ?: LogHighlightingIterator(startOffset, myEditor as Editor, { myText }, { myColors })
   }
 
   override fun setText(text: CharSequence) {
     myText = text
+    doDefaultHighlighterAction { setText(text) }
   }
 
   override fun setEditor(editor: HighlighterClient) {
@@ -86,7 +81,18 @@ open class LogEditorHighlighter(
   }
 
   override fun documentChanged(event: DocumentEvent) {
-    myText = event.document.charsSequence
+    setText(event.document.charsSequence)
     myEditor?.repaint(0, myText.length)
+  }
+
+  private fun <T> doDefaultHighlighterAction(action: EditorHighlighter.() -> T): T? {
+    if (myEditor == null || !ApplicationManager.getApplication().isDispatchThread) {
+      return defaultLogEditorHighlighter.action()
+    }
+    val logFileFormat = detectLogFileFormat(myEditor as Editor)
+    if (logFileFormat.myRegexLogParser == null) {
+      return defaultLogEditorHighlighter.action()
+    }
+    return null
   }
 }
