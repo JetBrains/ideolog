@@ -41,6 +41,11 @@ class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorPro
     editor.isViewer = isReadOnly
   }
 
+  override fun dispose() {
+    editor.document.ideologContext.clear()
+    super.dispose()
+  }
+
   private fun resetIdeologStoredData() {
     editor.putUserData(LogHeavyFilterService.markupHighlightedExceptionsKey, null) // don't reset the hyperlink support, that one is safe
     editor.document.ideologContext.clear()
