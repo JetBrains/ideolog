@@ -23,13 +23,14 @@ private object LogFileFormatValues {
 }
 
 object IdeologUsagesCollector : CounterUsagesCollector() {
-  private val GROUP = EventLogGroup("ideolog", 1)
+  private val GROUP = EventLogGroup("ideolog", 2)
 
   private val LOG_FILE_FORMAT_FIELD = EventFields.String("log_file_format", LogFileFormatValues.allowedValues)
 
   private val LOG_FILE_OPENED_IN_TERMINAL = GROUP.registerEvent("log.file.in.terminal.opened")
   private val DETECTED_LOG_FILE_FORMAT = GROUP.registerVarargEvent("log.file.format.detected",
                                                                    LOG_FILE_FORMAT_FIELD)
+  private val EXPLAIN_WITH_AI_ACTION_BUTTON_CLICKED = GROUP.registerEvent("ai.action.button.clicked")
 
   fun logOpenLogFileInTerminal(project: Project) {
     LOG_FILE_OPENED_IN_TERMINAL.log(project)
@@ -44,6 +45,10 @@ object IdeologUsagesCollector : CounterUsagesCollector() {
     DETECTED_LOG_FILE_FORMAT.log(
       LOG_FILE_FORMAT_FIELD.with(logFileFormatAllowedValue.value)
     )
+  }
+
+  fun logExplainWithAiActionButtonClicked(project: Project) {
+    EXPLAIN_WITH_AI_ACTION_BUTTON_CLICKED.log(project)
   }
 
   override fun getGroup(): EventLogGroup = GROUP
