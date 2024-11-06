@@ -408,64 +408,42 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   data class State(
     @XCollection(style = XCollection.Style.v2)
     @Tag("highlightingPatterns")
-    val patterns: ArrayList<LogHighlightingPattern>,
+    val patterns: ArrayList<LogHighlightingPattern> = arrayListOf(
+      DefaultSettingsStoreItems.Error,
+      DefaultSettingsStoreItems.Warning,
+      DefaultSettingsStoreItems.Info
+    ),
     @XCollection(style = XCollection.Style.v2)
     @Tag("hiddenSubstrings")
-    val hidden: ArrayList<String>,
+    val hidden: ArrayList<String> = arrayListOf(),
     @XCollection(style = XCollection.Style.v2)
     @Tag("parsingPatterns")
-    val parsingPatterns: ArrayList<LogParsingPattern>,
+    val parsingPatterns: ArrayList<LogParsingPattern> = arrayListOf(
+      DefaultSettingsStoreItems.PipeSeparated,
+      DefaultSettingsStoreItems.IntelliJIDEA,
+      DefaultSettingsStoreItems.TeamCityBuildLog,
+      DefaultSettingsStoreItems.LaravelLog,
+      DefaultSettingsStoreItems.Loguru,
+      DefaultSettingsStoreItems.Logcat,
+      DefaultSettingsStoreItems.Symfony,
+    ),
     @Tag("settingsVersion")
-    var version: String,
+    var version: String = CURRENT_SETTINGS_VERSION,
     @Tag("lastAddedDefaultFormat")
-    var lastAddedDefaultFormat: String,
+    var lastAddedDefaultFormat: String = DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it },
     @Tag("errorStripeModel")
-    var errorStripeMode: String,
+    var errorStripeMode: String = "heatmap",
     @Tag("readonlySizeThreshold")
-    var readonlySizeThreshold: String,
+    var readonlySizeThreshold: String = "16",
     @Tag("highlight_links")
-    var highlightLinks: Boolean,
+    var highlightLinks: Boolean = true,
     @XCollection(style = XCollection.Style.v2)
     @Tag("externalParsingPatterns")
-    var externalParsingPatterns: ArrayList<LogParsingPattern>,
+    var externalParsingPatterns: ArrayList<LogParsingPattern> = arrayListOf(),
     @XCollection(style = XCollection.Style.v2)
     @Tag("externalHighlightingPatterns")
-    var externalHighlightingPatterns: ArrayList<LogHighlightingPattern>,
+    var externalHighlightingPatterns: ArrayList<LogHighlightingPattern> = arrayListOf(),
   ) : Cloneable {
-    @Suppress("unused")
-    constructor() : this(
-      arrayListOf(
-        DefaultSettingsStoreItems.Error,
-        DefaultSettingsStoreItems.Warning,
-        DefaultSettingsStoreItems.Info
-      ),
-      arrayListOf(),
-      arrayListOf(
-        DefaultSettingsStoreItems.PipeSeparated,
-        DefaultSettingsStoreItems.IntelliJIDEA,
-        DefaultSettingsStoreItems.TeamCityBuildLog,
-        DefaultSettingsStoreItems.LaravelLog,
-        DefaultSettingsStoreItems.Loguru,
-        DefaultSettingsStoreItems.Logcat,
-        DefaultSettingsStoreItems.Symfony,
-      ),
-      CURRENT_SETTINGS_VERSION,
-      DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it },
-      "heatmap",
-      "16",
-      true,
-      arrayListOf(),
-      arrayListOf(),
-    )
-
-    @Suppress("unused")
-    constructor(
-      patterns: ArrayList<LogHighlightingPattern>,
-      hidden: ArrayList<String>,
-      parsingPatterns: ArrayList<LogParsingPattern>,
-    ) : this(patterns, hidden, parsingPatterns, "-1", "-1", "heatmap", "16", true,
-             arrayListOf(), arrayListOf())
-
     public override fun clone(): State {
       val result = State(ArrayList(), ArrayList(), ArrayList(), version, lastAddedDefaultFormat, errorStripeMode, readonlySizeThreshold,
                          highlightLinks, arrayListOf(), arrayListOf())

@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.configurationStore.serialize
 import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.highlighting.settings.recommendations.RecommenderEngine
 import com.intellij.ideolog.util.application
@@ -23,6 +24,7 @@ import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
 import com.intellij.util.xmlb.XmlSerializer
 import net.miginfocom.swing.MigLayout
+import org.jdom.Element
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import java.awt.event.ComponentAdapter
@@ -176,10 +178,6 @@ class LogHighlightingConfigurable : BaseConfigurable() {
       }
     }
 
-    var formatsTableRange: IntRange? = null
-    var patternsTableRange: IntRange? = null
-    var filtersTableRange: IntRange? = null
-
     val theLabel = JLabel(IdeologBundle.message("select.shift.click.for.many.items.to.export.them")).apply {
       foreground = UIUtil.getLabelDisabledForeground()
       border = JBUI.Borders.emptyLeft(10)
@@ -214,23 +212,14 @@ class LogHighlightingConfigurable : BaseConfigurable() {
           this
         )
 
-        val patterns = patternsTableRange?.map { patternTableModel.getValueAt(it,2) as LogHighlightingPattern }
-          ?: emptyList()
-        val formats = formatsTableRange?.map { formatsTableModel.getValueAt(it,-1) as LogParsingPattern }
-          ?: emptyList()
-
-        val store = LogHighlightingSettingsStore.State().apply {
-          this.version = LogHighlightingSettingsStore.CURRENT_SETTINGS_VERSION
-          this.patterns.addAll(patterns)
-          this.parsingPatterns.addAll(formats)
-        }
-
-        val serialized = XmlSerializer.serialize(store)
+        val serialized = serializePatternsAndFormats(patternsTable, formatsTable)
 
         val fileWrapper = saver.save(VfsUtil.getUserHomeDir(), "ideologExported.xml")
 
-        application.runWriteAction {
-          fileWrapper?.getVirtualFile(true)?.setBinaryContent(serialized.toByteArray())
+        if (serialized != null) {
+          application.runWriteAction {
+            fileWrapper?.getVirtualFile(true)?.setBinaryContent(serialized.toByteArray())
+          }
         }
       }
     }
@@ -256,35 +245,18 @@ class LogHighlightingConfigurable : BaseConfigurable() {
       }
     }
 
-    fun removeSelectionFromTable(table: JTable, range: IntRange) {
-      table.selectionModel.removeSelectionInterval(range.first, range.last)
-    }
-
     resetBtn.addActionListener {
-      formatsTableRange?.let { it1 -> removeSelectionFromTable(formatsTable, it1) }
-      patternsTableRange?.let { it1 -> removeSelectionFromTable(patternsTable, it1) }
-      filtersTableRange?.let { it1 -> removeSelectionFromTable(filtersTable, it1) }
-
-      formatsTableRange = null
-      patternsTableRange = null
-      filtersTableRange = null
+      formatsTable.selectionModel.apply { removeSelectionInterval(minSelectionIndex, maxSelectionIndex) }
+      patternsTable.selectionModel.apply { removeSelectionInterval(minSelectionIndex, maxSelectionIndex) }
+      filtersTable.selectionModel.apply { removeSelectionInterval(minSelectionIndex, maxSelectionIndex) }
 
       exportBtn.isVisible = false
     }
 
-    fun tableRangeWatcher(table: JTable, setter: (IntRange?) -> Unit) {
-      table.selectionModel.addListSelectionListener { e ->
-        val lsm = e.source as ListSelectionModel
-        val minIndex = lsm.minSelectionIndex
-        val maxIndex = lsm.maxSelectionIndex
-
-        if (minIndex == -1) {
-          setter(null)
-          exportBtn.isVisible = false
-        }
-        else {
-          setter(minIndex..maxIndex)
-          exportBtn.isVisible = true
+    fun tableExportButtonWatcher(vararg tables: JTable) {
+      for (table in tables) {
+        table.selectionModel.addListSelectionListener { _ ->
+          exportBtn.isVisible = tables.any { it.selectionModel.minSelectionIndex != -1 }
         }
       }
     }
@@ -293,9 +265,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
       reset()
     }
 
-    tableRangeWatcher(formatsTable) { formatsTableRange = it }
-    tableRangeWatcher(patternsTable) { patternsTableRange = it }
-    tableRangeWatcher(filtersTable) { filtersTableRange = it }
+    tableExportButtonWatcher(formatsTable, patternsTable, filtersTable)
 
     return FormBuilder().run {
       addComponent(heatmapCheckbox)
@@ -337,5 +307,22 @@ class LogHighlightingConfigurable : BaseConfigurable() {
   }
 
   override fun getDisplayName(): String = IdeologBundle.message("configurable.name.log.highlighting.ideolog")
+
+  fun serializePatternsAndFormats(patternsTable: JBTable, formatsTable: JBTable): Element? {
+    val patterns = patternsTable.selectedRows.toList().map {
+      patternTableModel.getValueAt(it, 2) as LogHighlightingPattern
+    }
+    val formats = formatsTable.selectedRows.toList().map {
+      formatsTableModel.getValueAt(it, -1) as LogParsingPattern
+    }
+
+    val store = LogHighlightingSettingsStore.State(patterns = arrayListOf(), parsingPatterns = arrayListOf()).apply {
+      this.version = LogHighlightingSettingsStore.CURRENT_SETTINGS_VERSION
+      this.patterns.addAll(patterns)
+      this.parsingPatterns.addAll(formats)
+    }
+
+    return serialize(store)
+  }
 }
 
