@@ -1,0 +1,8 @@
+<State>
+  <highlightingPatterns>
+    <LogHighlightingPattern enabled="true" pattern="^\s*err\s*$" captureGroup="-1" action="HIGHLIGHT_LINE" fg="-39836" bold="true" italic="false" stripe="true" uuid="de2d3bb2-78c9-4beb-835e-d483c35c07b6" />
+  </highlightingPatterns>
+  <hiddenSubstrings />
+  <parsingPatterns />
+  <settingsVersion>9</settingsVersion>
+</State>

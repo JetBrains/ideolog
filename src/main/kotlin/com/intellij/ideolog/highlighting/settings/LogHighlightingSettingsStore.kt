@@ -379,17 +379,17 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     }
   }
 
-  /**
-   * @return true if has items that were not added
-   */
-  fun mergeAnotherState(newState: State): Boolean {
-    val newParsingPatterns = newState.parsingPatterns.filter { it1 -> myState.parsingPatterns.find { it.uuid == it1.uuid } == null }
-    val hasUnimportedItems = newParsingPatterns.size < newState.parsingPatterns.size
+  fun mergeAnotherState(newState: State) {
+    val newParsingPatterns = newState.parsingPatterns.filter { newParsingPattern ->
+      myState.parsingPatterns.find { parsingPattern -> parsingPattern.uuid == newParsingPattern.uuid } == null
+    }
     myState.parsingPatterns.addAll(newParsingPatterns)
+    val newHighlightingPatterns = newState.patterns.filter { newHighlightingPattern ->
+      myState.patterns.find { highlightingPattern -> highlightingPattern.uuid == newHighlightingPattern.uuid } == null
+    }
+    myState.patterns.addAll(newHighlightingPatterns)
 
     fireListeners()
-
-    return hasUnimportedItems
   }
 
   override fun equals(other: Any?): Boolean {

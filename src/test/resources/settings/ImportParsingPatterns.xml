@@ -1,0 +1,9 @@
+<State>
+  <highlightingPatterns />
+  <hiddenSubstrings />
+  <parsingPatterns>
+    <LogParsingPattern enabled="true" name="TestLogFormat" pattern="^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} [+-]?\d{2}:\d{2}) \[([A-Z]+)\] (.*)$" timePattern="yyyy-MM-dd HH:mm:ss.SSS XXX" linePattern="^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}" timeId="0" severityId="1" categoryId="-1" fullmatch="false" uuid="496412b0-aed0-4b48-a539-30522f90d3ce" />
+    <LogParsingPattern enabled="true" name="TestLogFormat2" pattern="^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} [+-]?\d{2}:\d{2}) \[([A-Z]+)\] (.*)$" timePattern="yyyy-MM-dd HH:mm:ss.SSS XXX" linePattern="^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}" timeId="0" severityId="1" categoryId="-1" fullmatch="false" uuid="396412b0-aed0-4b48-a539-30522f90d3ce" />
+  </parsingPatterns>
+  <settingsVersion>9</settingsVersion>
+</State>
