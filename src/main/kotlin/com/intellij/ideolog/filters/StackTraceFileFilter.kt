@@ -88,7 +88,7 @@ open class StackTraceFileFilter(
       val lineNumber = documentLineString
         ?.filter { it.isDigit() }
         ?.takeIf { it.isNotEmpty() }
-        ?.toInt()
+        ?.toIntOrNull()
         ?.let { it - 1 } ?: 0
 
       LinedFileHyperlinkInfo(project, filePath, lineNumber)
