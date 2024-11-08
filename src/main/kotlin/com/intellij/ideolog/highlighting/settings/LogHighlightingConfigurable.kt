@@ -2,7 +2,6 @@ package com.intellij.ideolog.highlighting.settings
 
 import com.intellij.configurationStore.serialize
 import com.intellij.ideolog.IdeologBundle
-import com.intellij.ideolog.highlighting.settings.recommendations.RecommenderEngine
 import com.intellij.ideolog.util.application
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.fileChooser.FileChooserFactory
@@ -158,12 +157,12 @@ class LogHighlightingConfigurable : BaseConfigurable() {
         }
       }.createPanel()
 
-      val recsPanel = JPanel(MigLayout("novisualpadding, insets 0")).apply {
+      val formatsWikiPanel = JPanel(MigLayout("novisualpadding, insets 0")).apply {
         border = JBUI.Borders.emptyTop(7)
-        add(RecommenderEngine().getComponent())
+        add(CustomLogFormatsWikiHyperlinkLabel())
       }
       add(panel, BorderLayout.CENTER)
-      add(recsPanel, BorderLayout.SOUTH)
+      add(formatsWikiPanel, BorderLayout.SOUTH)
     }
 
     val topPanel = OnePixelSplitter(false, "Ideolog.Settings.TopProportion", 0.5f).apply {
