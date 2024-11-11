@@ -266,7 +266,7 @@ open class LogHighlightingIterator(startOffset: Int,
         )
       )
 
-      matchedPieces.addIfNotNull(calculateDateTokenForHighlighting(token, dateToken, valueForeground, offset))
+      matchedPieces.addIfNotNull(calculateDateTokenForHighlighting(token, dateToken, valueForeground, valueBackground, offset))
 
       eventPieces.addAll(
         // cut lines to remove overlapping regions
@@ -325,12 +325,16 @@ open class LogHighlightingIterator(startOffset: Int,
     ))
   }
 
-  private fun calculateDateTokenForHighlighting(token: LogToken, dateToken: LogToken?, valueForeground: Color, offset: Int): EventPiece? {
+  private fun calculateDateTokenForHighlighting(token: LogToken,
+                                                dateToken: LogToken?,
+                                                valueForeground: Color,
+                                                valueBackground: Color,
+                                                offset: Int): EventPiece? {
     if (token == dateToken && valueForeground != myColors.defaultForeground) {
       return EventPiece(
         token.startOffset + offset,
         token.endOffset + offset,
-        TextAttributes(DATE_COLOR, null, null, null, getFont(false, false)),
+        TextAttributes(DATE_COLOR, valueBackground, null, null, getFont(false, false)),
         false
       )
     }
