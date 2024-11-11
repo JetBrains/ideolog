@@ -1,0 +1,8 @@
+<State>
+  <highlightingPatterns />
+  <hiddenSubstrings />
+  <parsingPatterns>
+    <LogParsingPattern enabled="true" name="Log4net" pattern="^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\s(\w+)\s{2}\[(.*?)\]\s-\s(.*)$" timePattern="yyyy-MM-dd HH:mm:ss,SSS" linePattern="^\d" timeId="0" severityId="1" categoryId="2" fullmatch="false" uuid="936fc789-bf72-4c0b-a53a-a723292afd47" />
+  </parsingPatterns>
+  <settingsVersion>9</settingsVersion>
+</State>
