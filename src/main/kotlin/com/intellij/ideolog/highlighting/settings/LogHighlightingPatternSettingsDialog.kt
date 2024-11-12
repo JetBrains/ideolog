@@ -1,12 +1,13 @@
 package com.intellij.ideolog.highlighting.settings
 
-import com.intellij.ide.BrowserUtil
 import com.intellij.ideolog.IdeologBundle
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.ColorPanel
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBIntSpinner
+import com.intellij.util.ui.components.BorderLayoutPanel
 import java.awt.Component
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
@@ -34,12 +35,6 @@ class LogHighlightingPatternSettingsDialog(
     init()
   }
 
-  override fun getHelpId() = ""
-
-  override fun doHelpAction() {
-    BrowserUtil.browse("https://github.com/JetBrains/ideolog/wiki/Highlighting-Patterns")
-  }
-
   override fun createCenterPanel(): JComponent {
     val panel = JPanel(GridBagLayout())
     val constraints = GridBagConstraints().apply {
@@ -49,6 +44,16 @@ class LogHighlightingPatternSettingsDialog(
       anchor = GridBagConstraints.SOUTHEAST
     }
 
+    val wikiCustomHighlightingPatterns = BorderLayoutPanel().apply {
+      add(HyperlinkLabel().apply {
+        setHyperlinkText(IdeologBundle.message("link.wiki.custom.highlighting.pattern"))
+        setHyperlinkTarget("https://github.com/JetBrains/ideolog/wiki/Highlighting-Patterns")
+      })
+    }
+    panel.add(wikiCustomHighlightingPatterns, constraints.apply { gridwidth = 2 })
+
+    constraints.gridwidth = 1
+    constraints.gridy = 1
     panel.add(JLabel(IdeologBundle.message("label.pattern")), constraints)
 
     val patternText = EditorTextField(item.pattern)
@@ -56,7 +61,7 @@ class LogHighlightingPatternSettingsDialog(
     constraints.gridx = 1
     panel.add(patternText, constraints)
 
-    constraints.gridy = 1
+    constraints.gridy = 2
     val actionSelection = ComboBox(arrayOf(LogHighlightingAction.HIGHLIGHT_MATCH, LogHighlightingAction.HIGHLIGHT_FIELD, LogHighlightingAction.HIGHLIGHT_LINE))
     actionSelection.renderer = object : DefaultListCellRenderer() {
       override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
@@ -71,7 +76,7 @@ class LogHighlightingPatternSettingsDialog(
     panel.add(JLabel(IdeologBundle.message("label.action")), constraints)
 
     constraints.gridx = 0
-    constraints.gridy = 2
+    constraints.gridy = 3
     panel.add(JLabel(IdeologBundle.message("label.format")), constraints)
     constraints.gridx = 1
 
@@ -111,7 +116,7 @@ class LogHighlightingPatternSettingsDialog(
     myFormatCombo = formatSelection
 
     constraints.gridx = 0
-    constraints.gridy = 3
+    constraints.gridy = 4
     panel.add(JLabel(IdeologBundle.message("capture.group")), constraints)
     val groupSpinner = JBIntSpinner(item.captureGroup + 1, 0, 100)
     myCaptureGroupId = groupSpinner
@@ -143,20 +148,20 @@ class LogHighlightingPatternSettingsDialog(
     myItalicCheck = italicCheck
 
     constraints.gridx = 0
-    constraints.gridy = 4
+    constraints.gridy = 5
     panel.add(boldCheck, constraints)
 
     constraints.gridx = 1
     panel.add(italicCheck, constraints)
 
     constraints.gridx = 0
-    constraints.gridy = 5
+    constraints.gridy = 6
     panel.add(fgCheck, constraints)
 
     constraints.gridx = 1
     panel.add(fgColor, constraints)
 
-    constraints.gridy = 6
+    constraints.gridy = 7
     panel.add(bgColor, constraints)
 
     constraints.gridx = 0

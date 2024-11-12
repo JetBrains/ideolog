@@ -1,6 +1,5 @@
 package com.intellij.ideolog.highlighting.settings
 
-import com.intellij.ide.BrowserUtil
 import com.intellij.ideolog.IdeologBundle
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -43,6 +42,14 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
 
   override fun createCenterPanel(): JComponent {
     val panel = JPanel(MigLayout("fill, wrap 2", "[right][fill]"))
+
+    val wikiCustomLogFormats = BorderLayoutPanel().apply {
+      add(HyperlinkLabel().apply {
+        setHyperlinkText(IdeologBundle.message("link.wiki.custom.log.format"))
+        setHyperlinkTarget("https://github.com/JetBrains/ideolog/wiki/Custom-Log-Formats")
+      })
+    }
+    panel.add(wikiCustomLogFormats, "span 2, left")
 
     panel.add(JLabel(IdeologBundle.message("settings.dialog.label.name")))
     val nameText = EditorTextField(item.name)
@@ -120,12 +127,6 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
     catch (t: Throwable) { "" }
 
     return parsedFormat.ifBlank { "-" }
-  }
-
-  override fun getHelpId() = ""
-
-  override fun doHelpAction() {
-    BrowserUtil.browse("https://github.com/JetBrains/ideolog/wiki/Custom-Log-Formats")
   }
 
   override fun doOKAction() {
