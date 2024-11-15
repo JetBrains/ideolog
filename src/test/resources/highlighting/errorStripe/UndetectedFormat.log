@@ -1,0 +1,12 @@
+[??] production.WARNING: Vite manifest not found
+[??] custom.INFO: Successfully imported customer 123456
+[??] production.WARNING: Vite manifest not found
+[??] production.ERROR: No application encryption key has been specified.
+#0 something
+at somewhere
+[??] custom.INFO: Successfully imported customer 123456
+[??] custom.INFO: Successfully imported customer 123456
+[??] production.WARNING: Vite manifest not found
+[??] production.ERROR: No application encryption key has been specified.
+#0 something
+at somewhere

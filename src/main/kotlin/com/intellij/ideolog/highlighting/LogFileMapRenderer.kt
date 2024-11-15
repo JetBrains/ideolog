@@ -105,7 +105,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
     }
   }
 
-  private fun getBucketForOffset(offsStart: Int) = (offsStart.toDouble() / (myLogFileEditor.editor.document.textLength + 1) * numBuckets).toInt()
+  private fun getBucketForOffset(offsStart: Int) = (offsStart.toDouble() / (myLogFileEditor.editor.document.textLength) * (numBuckets - 1)).toInt()
 
   private var myIsPendingEventMap = true
   private var myIsRunningEventMap = false
@@ -135,7 +135,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
           var offs = 0
           val isRenderingTimeHighlighting = myIsRenderingTimeHighlighting
           val customPatterns = LogHighlightingSettingsStore.getInstance().myState.patterns
-            .filter { it.enabled && it.showOnStripe && fileFormat.validateFormatUUID(it.uuid) }
+            .filter { it.enabled && it.showOnStripe && fileFormat.validateFormatUUID(it.formatId) }
             .map { Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it }
             .toTypedArray()
           val customHighlightings = myLogFileEditor.editor.getUserData(highlightingSetUserKey) ?: emptySet()
@@ -169,14 +169,14 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
             val logEvent = LogEvent.fromEditor(myLogFileEditor.editor, offs)
             if (logEvent.rawText.isEmpty()) // At EOF
               break
-            offs += logEvent.rawText.length
+            offs += logEvent.rawText.length + 1
 
             // Attrs of this entry
             val timestamp = if (isRenderingTimeHighlighting) (logEvent.date.let { fileFormat.parseLogEventTimeSeconds(it) }
               ?: timestampPrev) else 0
             val timeDelta = if ((timestamp != null) && (timestampPrev != null)) timestamp - timestampPrev else 0
             timestampPrev = timestamp
-            var colorCustomHighlighter: Color? = customPatterns.firstOrNull { it.first.matcher(logEvent.rawText).find() }?.second?.let {
+            var colorCustomHighlighter: Color? = customPatterns.firstOrNull { it.first.matcher(logEvent.rawLevel).find() }?.second?.let {
               it.foregroundColor ?: it.backgroundColor
             }
             @Suppress("LoopToCallChain")
@@ -188,7 +188,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
               }
 
             // Roll to affected buckets
-            val nBucketEnd = getBucketForOffset(logEvent.startOffset + logEvent.rawText.length - 1)
+            val nBucketEnd = getBucketForOffset(logEvent.startOffset + logEvent.rawText.length)
             (nBucketCur..nBucketEnd).forEach {
                 // Apply attrs to bucket
               nCurBucketMaxTimeDelta = max(nCurBucketMaxTimeDelta, timeDelta)
