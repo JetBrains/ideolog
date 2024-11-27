@@ -1,0 +1,22 @@
+### auto-generated section `build intellij.ideolog.tests` start
+load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_jvm//:jvm.bzl", "jvm_test")
+
+jvm_test(
+  name = "ideolog-tests_test",
+  srcs = glob(["kotlin/**/*.kt", "kotlin/**/*.java"], allow_empty = True),
+  deps = [
+    "@community//platform/editor-ui-api:editor",
+    "@community//platform/lang-impl",
+    "@community//platform/core-ui",
+    "@community//platform/util/jdom",
+    "@lib//:miglayout-swing",
+    "@community//RegExpSupport:regexp",
+    "@community//RegExpSupport:regexp_test_lib",
+    "@community//platform/testFramework",
+    "@community//platform/testFramework:testFramework_test_lib",
+    "//plugins/ideolog",
+  ],
+  runtime_deps = ["//plugins/ideolog/textmate"]
+)
+### auto-generated section `build intellij.ideolog.tests` end

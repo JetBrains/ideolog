@@ -1,7 +1,5 @@
 ### auto-generated section `build intellij.ideolog.textmate` start
-load("@rules_jvm//:jvm.bzl", "jvm_resources")
-load("@rules_jvm//:rules.bzl", "jvm_library")
-load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_test")
+load("@rules_jvm//:jvm.bzl", "jvm_library", "jvm_resources", "jvm_test")
 
 jvm_resources(
   name = "textmate_resources",
@@ -13,9 +11,7 @@ jvm_library(
   name = "textmate",
   module_name = "intellij.ideolog.textmate",
   visibility = ["//visibility:public"],
-  srcs = glob(["src/main/kotlin/**/*.kt", "src/main/kotlin/**/*.java"], allow_empty = True, exclude = ["**/module-info.java"]),
-  javac_opts = "@rules_jvm//:j17",
-  kotlinc_opts = "@rules_jvm//:k17",
+  srcs = glob(["src/main/kotlin/**/*.kt", "src/main/kotlin/**/*.java"], allow_empty = True),
   deps = [
     "@lib//:kotlin-stdlib",
     "@community//platform/core-api:core",
@@ -26,12 +22,10 @@ jvm_library(
   runtime_deps = [":textmate_resources"]
 )
 
-kt_jvm_test(
-  name = "textmate_test",
+jvm_library(
+  name = "textmate_test_lib",
   visibility = ["//visibility:public"],
-  srcs = glob(["tests/**/*.kt", "tests/**/*.java"], allow_empty = True, exclude = ["**/module-info.java"]),
-  javac_opts = "@rules_jvm//:j17",
-  kotlinc_opts = "@rules_jvm//:k17",
+  srcs = glob(["tests/**/*.kt", "tests/**/*.java"], allow_empty = True),
   associates = [":textmate"],
   deps = [
     "@lib//:kotlin-stdlib",
@@ -39,9 +33,15 @@ kt_jvm_test(
     "@community//platform/editor-ui-api:editor",
     "//plugins/ideolog",
     "@community//plugins/textmate",
+    "@community//plugins/textmate:textmate_test_lib",
     "@community//platform/testFramework",
-    "@community//platform/testFramework:testFramework_test",
+    "@community//platform/testFramework:testFramework_test_lib",
   ],
   runtime_deps = [":textmate_resources"]
+)
+
+jvm_test(
+  name = "textmate_test",
+  runtime_deps = [":textmate_test_lib"]
 )
 ### auto-generated section `build intellij.ideolog.textmate` end
