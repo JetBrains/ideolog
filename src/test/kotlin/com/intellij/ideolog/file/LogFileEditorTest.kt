@@ -10,7 +10,7 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
 @TestDataPath("/highlighting")
 class LogFileEditorTest : BasePlatformTestCase() {
-  override fun getTestDataPath(): String = "src/test/resources/file"
+  override fun getTestDataPath(): String = "resources/file"
 
   fun testLogFile() {
     val logFile = myFixture.addFileToProject("LogFile.log", "")

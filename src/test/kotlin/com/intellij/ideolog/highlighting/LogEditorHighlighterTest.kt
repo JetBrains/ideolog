@@ -4,9 +4,9 @@ import com.intellij.psi.PsiFile
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
-@TestDataPath("\$CONTENT_ROOT/src/test/resources/highlighting")
+@TestDataPath("\$CONTENT_ROOT/resources/highlighting")
 class LogEditorHighlighterTest: BasePlatformTestCase() {
-  override fun getTestDataPath(): String = "src/test/resources/highlighting"
+  override fun getTestDataPath(): String = "resources/highlighting"
 
   fun testDetectHighlighterForLogFile() {
     myFixture.configureByText("LogFile.log", "")

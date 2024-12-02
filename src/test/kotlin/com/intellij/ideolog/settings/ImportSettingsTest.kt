@@ -11,7 +11,7 @@ import java.nio.file.Path
 import java.util.UUID
 import kotlin.io.path.Path
 
-@TestDataPath("\$CONTENT_ROOT/src/test/resources/settings")
+@TestDataPath("\$CONTENT_ROOT/resources/settings")
 class ImportSettingsTest : BasePlatformTestCase() {
   private lateinit var parsingPatternsBackup: List<LogParsingPattern>
   private lateinit var highlightingPatternsBackup: List<LogHighlightingPattern>
@@ -37,7 +37,7 @@ class ImportSettingsTest : BasePlatformTestCase() {
     }
   }
 
-  override fun getTestDataPath(): String = "src/test/resources/settings"
+  override fun getTestDataPath(): String = "resources/settings"
 
   fun testImportParsingPattern() {
     val file = JDOMUtil.load(settingsFilePath)

@@ -17,7 +17,7 @@ import com.intellij.util.ui.UIUtil
 import java.awt.Color
 import kotlin.math.abs
 
-@TestDataPath("\$CONTENT_ROOT/src/test/resources/highlighting/errorStripe")
+@TestDataPath("\$CONTENT_ROOT/resources/highlighting/errorStripe")
 class ErrorStripeTest : BasePlatformTestCase() {
   private lateinit var editor: LogFileEditor
   private lateinit var highlightingPatternsBackup: List<LogHighlightingPattern>
@@ -43,7 +43,7 @@ class ErrorStripeTest : BasePlatformTestCase() {
     }
   }
 
-  override fun getTestDataPath(): String = "src/test/resources/highlighting/errorStripe"
+  override fun getTestDataPath(): String = "resources/highlighting/errorStripe"
 
   fun testUndetectedFormat() {
     val markupModel = createMarkupModel()
