@@ -25,7 +25,9 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
 
   companion object {
     fun getInstance(project: Project): LogHeavyFilterService {
-      return project.getService(LogHeavyFilterService::class.java)
+      val serviceClass = DynamicLogFilterServiceClassProvider.EP_NAME.extensionList.firstOrNull()?.getFilterServiceClass()
+                         ?: LogHeavyFilterService::class.java
+      return project.getService(serviceClass)
     }
 
     val markupHighlightedExceptionsKey = Key.create<HashSet<Int>>("Log.ParsedExceptions")
