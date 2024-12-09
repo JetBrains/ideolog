@@ -1,12 +1,14 @@
 package com.intellij.ideolog.highlighting
 
 import com.intellij.psi.PsiFile
-import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.testFramework.fixtures.IdeaTestExecutionPolicy
+import java.nio.file.Path
+import kotlin.io.path.pathString
 
-@TestDataPath("\$CONTENT_ROOT/resources/highlighting")
 class LogEditorHighlighterTest: BasePlatformTestCase() {
-  override fun getTestDataPath(): String = "resources/highlighting"
+  override fun getTestDataPath(): String =
+    Path.of(IdeaTestExecutionPolicy.getHomePathWithPolicy(), "plugins/ideolog/src/test/resources/highlighting").pathString
 
   fun testDetectHighlighterForLogFile() {
     myFixture.configureByText("LogFile.log", "")

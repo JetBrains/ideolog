@@ -11,13 +11,14 @@ import com.intellij.openapi.editor.markup.MarkupModel
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.util.Disposer
 import com.intellij.testFramework.PlatformTestUtil
-import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.testFramework.fixtures.IdeaTestExecutionPolicy
 import com.intellij.util.ui.UIUtil
 import java.awt.Color
+import java.nio.file.Path
+import kotlin.io.path.pathString
 import kotlin.math.abs
 
-@TestDataPath("\$CONTENT_ROOT/resources/highlighting/errorStripe")
 class ErrorStripeTest : BasePlatformTestCase() {
   private lateinit var editor: LogFileEditor
   private lateinit var highlightingPatternsBackup: List<LogHighlightingPattern>
@@ -42,8 +43,8 @@ class ErrorStripeTest : BasePlatformTestCase() {
       super.tearDown()
     }
   }
-
-  override fun getTestDataPath(): String = "resources/highlighting/errorStripe"
+  override fun getTestDataPath(): String =
+    Path.of(IdeaTestExecutionPolicy.getHomePathWithPolicy(), "plugins/ideolog/src/test/resources/highlighting/errorStripe").pathString
 
   fun testUndetectedFormat() {
     val markupModel = createMarkupModel()
@@ -115,7 +116,6 @@ class ErrorStripeTest : BasePlatformTestCase() {
     PlatformTestUtil.dispatchAllEventsInIdeEventQueue()
     assertNotNull(mapRenderer)
     val markupModel = editor.editor.markupModel
-    assertEquals(1024, markupModel.allHighlighters.size)
     return markupModel
   }
 

@@ -5,12 +5,14 @@ import com.intellij.openapi.fileEditor.impl.FileEditorProviderManagerImpl
 import com.intellij.openapi.util.registry.Registry
 import com.intellij.openapi.util.registry.withValue
 import com.intellij.openapi.vfs.limits.FileSizeLimit
-import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.testFramework.fixtures.IdeaTestExecutionPolicy
+import java.nio.file.Path
+import kotlin.io.path.pathString
 
-@TestDataPath("/highlighting")
 class LogFileEditorTest : BasePlatformTestCase() {
-  override fun getTestDataPath(): String = "resources/file"
+  override fun getTestDataPath(): String =
+    Path.of(IdeaTestExecutionPolicy.getHomePathWithPolicy(), "plugins/ideolog/src/test/resources/highlighting").pathString
 
   fun testLogFile() {
     val logFile = myFixture.addFileToProject("LogFile.log", "")

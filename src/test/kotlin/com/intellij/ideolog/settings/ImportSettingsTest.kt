@@ -4,14 +4,14 @@ import com.intellij.ideolog.highlighting.settings.LogHighlightingPattern
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.highlighting.settings.LogParsingPattern
 import com.intellij.openapi.util.JDOMUtil
-import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.testFramework.fixtures.IdeaTestExecutionPolicy
 import com.intellij.util.xmlb.XmlSerializer
 import java.nio.file.Path
 import java.util.UUID
 import kotlin.io.path.Path
+import kotlin.io.path.pathString
 
-@TestDataPath("\$CONTENT_ROOT/resources/settings")
 class ImportSettingsTest : BasePlatformTestCase() {
   private lateinit var parsingPatternsBackup: List<LogParsingPattern>
   private lateinit var highlightingPatternsBackup: List<LogHighlightingPattern>
@@ -37,7 +37,8 @@ class ImportSettingsTest : BasePlatformTestCase() {
     }
   }
 
-  override fun getTestDataPath(): String = "resources/settings"
+  override fun getTestDataPath(): String =
+    Path.of(IdeaTestExecutionPolicy.getHomePathWithPolicy(), "plugins/ideolog/src/test/resources/settings").pathString
 
   fun testImportParsingPattern() {
     val file = JDOMUtil.load(settingsFilePath)
