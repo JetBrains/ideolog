@@ -116,6 +116,7 @@ class ErrorStripeTest : BasePlatformTestCase() {
     PlatformTestUtil.dispatchAllEventsInIdeEventQueue()
     assertNotNull(mapRenderer)
     val markupModel = editor.editor.markupModel
+    assertEquals(1024, markupModel.allHighlighters.size)
     return markupModel
   }
 
