@@ -4,7 +4,7 @@ import com.intellij.codeInsight.editorLineStripeHint.EditorLineStripeHintCompone
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.util.Disposer
 
-data class LogInlay(
+internal data class LogInlay(
   private val endOfLinePanel: EditorLineStripeHintComponent,
 ) : Disposable {
   init {

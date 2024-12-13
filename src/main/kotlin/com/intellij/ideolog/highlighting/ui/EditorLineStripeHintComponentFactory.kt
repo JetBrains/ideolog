@@ -10,7 +10,7 @@ interface EditorLineStripeHintComponentBuilderProvider {
   companion object {
     @JvmField
     val EP_NAME: ExtensionPointName<EditorLineStripeHintComponentBuilderProvider> =
-      ExtensionPointName.create("com.intellij.ideolog.editorLineStripeHintComponentBuilderProvider")
+      ExtensionPointName("com.intellij.ideolog.editorLineStripeHintComponentBuilderProvider")
   }
 
   fun getBuilder(project: Project): EditorLineStripeHintComponentBuilder
