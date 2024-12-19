@@ -38,6 +38,7 @@ class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorPro
         }
       })
     }
+    editor.settings.additionalColumnsCount = 0
     editor.isViewer = isReadOnly
   }
 
