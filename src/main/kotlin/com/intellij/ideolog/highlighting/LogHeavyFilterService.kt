@@ -34,6 +34,10 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
     internal val markupHyperlinkSupportKey = Key.create<EditorHyperlinkSupport>("Log.ExceptionsHyperlinks")
   }
 
+  private val myFilters: List<Filter> = ConsoleFilterProvider.FILTER_PROVIDERS.extensions
+    .flatMap { it.getDefaultFilters(project).asIterable() }
+    .sortedBy { if (it is StackTraceFileFilter) -1 else 1 } // basically, we want StackTraceFileFilter to be first
+  private val myCompositeFilter = CompositeFilter(project, myFilters)
   private val myAlarm = Alarm(Alarm.ThreadToUse.POOLED_THREAD, this)
 
   open fun enqueueHeavyFiltering(editor: Editor, eventOffset: Int, event: CharSequence) {
@@ -97,16 +101,10 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
     }, 0)
   }
 
-  private fun createFilterByEditor(
+  protected open fun createFilterByEditor(
     editor: Editor,
     project: Project,
-  ): CompositeFilter {
-    val filters: List<Filter> = ConsoleFilterProvider.FILTER_PROVIDERS.extensionList
-      .flatMap { it.getDefaultFilters(project).asIterable() }
-      .sortedBy { if (it is EditorFilter) -2 else if (it is StackTraceFileFilter) -1 else 1 }
-
-    return CompositeFilter(project, filters.onEach { if (it is EditorFilter) it.setEditor(editor) })
-  }
+  ): CompositeFilter = myCompositeFilter
 
   private fun createInlays(inlayProvider: InlayProvider, editor: Editor, offset: Int) {
     EditorLineStripeHintComponentBuilderProvider.EP_NAME.extensionList.forEach { provider ->
