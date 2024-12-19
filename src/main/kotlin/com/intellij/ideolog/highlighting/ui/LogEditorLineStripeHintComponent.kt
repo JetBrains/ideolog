@@ -27,8 +27,6 @@ class LogEditorLineStripeHintComponent(
     }
   }
 
-  override val stripeVisibleWidthRatio: Double = 0.15
-
   override fun getLineStripeY(): Int = editor.visualPositionToXY(editor.offsetToVisualPosition(offset - 1)).y
 
   override fun getLineEndOffset(): Int = editor.document.getLineEndOffset(editor.offsetToVisualPosition(offset).line)
