@@ -14,7 +14,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.util.Alarm
 
-open class LogHeavyFilterService(private val project: Project): Disposable {
+open class LogHeavyFilterService(project: Project): Disposable {
 
   companion object {
     fun getInstance(project: Project): LogHeavyFilterService {
@@ -35,7 +35,7 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
 
   open fun enqueueHeavyFiltering(editor: Editor, eventOffset: Int, event: CharSequence) {
     if (editor.isDisposed) return
-    val compositeFilter = createFilterByEditor(editor, project)
+    val compositeFilter = myCompositeFilter
 
     val markupModel = editor.markupModel
 
@@ -90,17 +90,6 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
           }
         }
     }, 0)
-  }
-
-  private fun createFilterByEditor(
-    editor: Editor,
-    project: Project,
-  ): CompositeFilter {
-    val filters: List<Filter> = ConsoleFilterProvider.FILTER_PROVIDERS.extensionList
-      .flatMap { it.getDefaultFilters(project).asIterable() }
-      .sortedBy { if (it is EditorFilter) -2 else if (it is StackTraceFileFilter) -1 else 1 }
-
-    return CompositeFilter(project, filters.onEach { if (it is EditorFilter) it.setEditor(editor) })
   }
 
   override fun dispose() {}
