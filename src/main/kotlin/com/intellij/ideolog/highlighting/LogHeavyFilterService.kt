@@ -42,7 +42,7 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
 
   open fun enqueueHeavyFiltering(editor: Editor, eventOffset: Int, event: CharSequence) {
     if (editor.isDisposed) return
-    val compositeFilter = createFilterByEditor(editor, project)
+    val compositeFilter = myCompositeFilter
 
     val markupModel = editor.markupModel
 
@@ -100,11 +100,6 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
         }
     }, 0)
   }
-
-  protected open fun createFilterByEditor(
-    editor: Editor,
-    project: Project,
-  ): CompositeFilter = myCompositeFilter
 
   private fun createInlays(inlayProvider: InlayProvider, editor: Editor, offset: Int) {
     EditorLineStripeHintComponentBuilderProvider.EP_NAME.extensionList.forEach { provider ->
