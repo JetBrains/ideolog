@@ -123,7 +123,7 @@ object DefaultSettingsStoreItems {
     null,
     bold = true,
     italic = false,
-    showOnStripe = true,
+    showOnStripe = false,
     uuid = UUID.fromString("de2d3bb2-78c9-4beb-835e-d483c35c07b6")
   )
   val Warning = LogHighlightingPattern(
@@ -162,7 +162,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     fun getInstance() = getService<LogHighlightingSettingsStore>()
     val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
-    const val CURRENT_SETTINGS_VERSION = "9"
+    const val CURRENT_SETTINGS_VERSION = "10"
 
     val cleanState = State()
 
@@ -274,7 +274,17 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
 
         newState.version = "9"
         return@lambda newState
-      }
+      },
+      "9" to lambda@{ oldState ->
+        val newState = oldState.clone()
+
+        newState.patterns.find { it.uuid == DefaultSettingsStoreItems.Error.uuid }?.pattern = DefaultSettingsStoreItems.Error.pattern
+
+        newState.errorStripeMode = "normal"
+
+        newState.version = "10"
+        return@lambda newState
+      },
     )
     val externalSettingsUpgraders = setOf<(State) -> State> { oldState ->
       val newState = oldState.clone()
@@ -436,7 +446,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     @Tag("lastAddedDefaultFormat")
     var lastAddedDefaultFormat: String = DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it },
     @Tag("errorStripeModel")
-    var errorStripeMode: String = "heatmap",
+    var errorStripeMode: String = "normal",
     @Tag("readonlySizeThreshold")
     var readonlySizeThreshold: String = "16",
     @Tag("highlight_links")
