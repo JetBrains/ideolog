@@ -26,9 +26,9 @@ import com.intellij.psi.search.UsageSearchContext
 import com.intellij.util.Processor
 import com.intellij.util.indexing.FileBasedIndex
 
-const val logDelimiters = "\\p{P}|\\s"
+internal const val logDelimiters = "\\p{P}|\\s"
 
-class FileMatch(private val evt: LogEvent) {
+private class FileMatch(private val evt: LogEvent) {
   var levelPresent = 0
   var categoryPresent = 0
   var messageTrigramCount = 0
