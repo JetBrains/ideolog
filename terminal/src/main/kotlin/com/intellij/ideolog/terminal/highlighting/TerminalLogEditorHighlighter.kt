@@ -9,7 +9,7 @@ import com.intellij.openapi.editor.highlighter.HighlighterIterator
 import com.intellij.openapi.editor.markup.TextAttributes
 import java.util.*
 
-class TerminalLogEditorHighlighter(
+internal class TerminalLogEditorHighlighter(
   private val highlightingInfos: TreeSet<TerminalCommandBlockHighlighter.HighlightingInfo>,
   colors: EditorColorsScheme
 ) : LogEditorHighlighter(colors) {
