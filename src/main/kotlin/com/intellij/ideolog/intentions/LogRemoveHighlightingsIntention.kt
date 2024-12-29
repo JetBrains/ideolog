@@ -11,7 +11,7 @@ import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 
-class LogRemoveHighlightingsIntention : IntentionAction {
+private class LogRemoveHighlightingsIntention : IntentionAction {
   override fun getText() = IdeologBundle.message("intention.name.remove.all.highlightings")
 
   override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
