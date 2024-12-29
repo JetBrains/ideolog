@@ -1,5 +1,16 @@
 ### auto-generated section `build intellij.ideolog` start
+load("@community//build:compiler-options.bzl", "create_kotlinc_options")
 load("@rules_jvm//:jvm.bzl", "jvm_library", "jvm_resources")
+
+create_kotlinc_options(
+  name = "custom",
+  jvm_target = 17,
+  opt_in = [
+    "kotlin.ExperimentalStdlibApi",
+    "kotlinx.coroutines.InternalCoroutinesApi",
+    "kotlinx.serialization.ExperimentalSerializationApi",
+  ]
+)
 
 jvm_resources(
   name = "ideolog_resources",
@@ -12,14 +23,22 @@ jvm_library(
   module_name = "intellij.ideolog",
   visibility = ["//visibility:public"],
   srcs = glob(["src/main/kotlin/**/*.kt", "src/main/kotlin/**/*.java"], allow_empty = True),
+  kotlinc_opts = ":custom",
   deps = [
     "@community//platform/editor-ui-api:editor",
     "@community//platform/lang-impl",
     "@community//platform/core-ui",
+    "@community//platform/platform-impl/codeinsight-inline:ide-codeinsight-inline",
     "@community//platform/util/jdom",
     "@lib//:miglayout-swing",
     "@community//RegExpSupport:regexp",
     "@community//platform/statistics",
+    "@community//platform/platform-impl:ide-impl",
+    "@community//platform/editor-ui-ex:editor-ex",
+    "@community//platform/indexing-impl",
+    "@lib//:kotlin-stdlib",
+    "@lib//:kotlinx-serialization-json",
+    "@lib//:kotlinx-serialization-core",
   ],
   runtime_deps = [":ideolog_resources"]
 )
