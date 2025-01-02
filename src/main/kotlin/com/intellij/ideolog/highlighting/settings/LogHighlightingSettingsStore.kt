@@ -11,6 +11,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.JBColor
 import com.intellij.util.PlatformUtils
+import com.intellij.util.concurrency.annotations.RequiresEdt
 import com.intellij.util.xmlb.Converter
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.util.xmlb.annotations.Attribute
@@ -342,18 +343,16 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   var myState = cleanState.clone()
   private val myListeners = HashSet<LogHighlightingSettingsListener>()
 
+  @RequiresEdt
   fun addSettingsListener(disposable: Disposable, listener: LogHighlightingSettingsListener) {
-    application.assertIsDispatchThread()
-
     myListeners.add(listener)
     Disposer.register(disposable) {
       myListeners.remove(listener)
     }
   }
 
+  @RequiresEdt
   private fun fireListeners() {
-    application.assertIsDispatchThread()
-
     myListeners.forEach { it() }
   }
 
