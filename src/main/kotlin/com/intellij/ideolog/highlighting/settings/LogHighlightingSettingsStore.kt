@@ -14,6 +14,7 @@ import com.intellij.util.PlatformUtils
 import com.intellij.util.xmlb.Converter
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.util.xmlb.annotations.Attribute
+import com.intellij.util.xmlb.annotations.Property
 import com.intellij.util.xmlb.annotations.Tag
 import com.intellij.util.xmlb.annotations.Transient
 import com.intellij.util.xmlb.annotations.XCollection
@@ -162,7 +163,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     fun getInstance() = getService<LogHighlightingSettingsStore>()
     val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
-    const val CURRENT_SETTINGS_VERSION = "10"
+    const val CURRENT_SETTINGS_VERSION = "11"
 
     val cleanState = State()
 
@@ -283,6 +284,14 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         newState.errorStripeMode = "normal"
 
         newState.version = "10"
+        return@lambda newState
+      },
+      "10" to lambda@{ oldState ->
+        val newState = oldState.clone()
+
+        newState.patterns.find { it.uuid == DefaultSettingsStoreItems.Error.uuid }?.showOnStripe = DefaultSettingsStoreItems.Error.showOnStripe
+
+        newState.version = "11"
         return@lambda newState
       },
     )
@@ -430,6 +439,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     @Tag("parsingPatterns")
     val parsingPatterns: ArrayList<LogParsingPattern>,
     @Tag("settingsVersion")
+    @Property(alwaysWrite = true)
     var version: String,
     @Tag("lastAddedDefaultFormat")
     var lastAddedDefaultFormat: String,
