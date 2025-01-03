@@ -164,41 +164,41 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     fun getInstance() = getService<LogHighlightingSettingsStore>()
     val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
-    const val CURRENT_SETTINGS_VERSION = "11"
+    const val CURRENT_SETTINGS_VERSION = 11
 
     val cleanState = State()
 
-    val settingsUpgraders = mapOf<String, (State) -> State>(
-      "-1" to { cleanState.clone() },
-      "0" to lambda@{ oldState ->
+    val settingsUpgraders = mapOf<Int, (State) -> State>(
+      -1 to { cleanState.clone() },
+      0 to lambda@{ oldState ->
         val newState = oldState.clone()
-        newState.version = "1"
+        newState.version = 1
         newState.parsingPatterns.addAll(cleanState.parsingPatterns)
         return@lambda newState
       },
-      "1" to lambda@{ oldState ->
+      1 to lambda@{ oldState ->
         val newState = oldState.clone()
         newState.errorStripeMode = "heatmap"
         newState.lastAddedDefaultFormat = "3"
-        newState.version = "2"
+        newState.version = 2
         return@lambda newState
       },
-      "2" to lambda@{ oldState ->
+      2 to lambda@{ oldState ->
         val newState = oldState.clone()
-        newState.version = "3"
+        newState.version = 3
 
         newState.readonlySizeThreshold = "16"
         return@lambda newState
       },
-      "3" to lambda@{ oldState ->
+      3 to lambda@{ oldState ->
         val newState = oldState.clone()
         if (newState.patterns.size >= 3 && newState.patterns[1].pattern == "^\\s*w(arning)?\\s*\$") {
           newState.patterns[1] = newState.patterns[1].copy(pattern = "^\\s*w(arn(ing)?)?\\s*\$")
         }
-        newState.version = "4"
+        newState.version = 4
         return@lambda newState
       },
-      "4" to lambda@{ oldState ->
+      4 to lambda@{ oldState ->
         val newState = oldState.clone()
 
         newState.parsingPatterns.forEach {
@@ -238,20 +238,20 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         newState.lastAddedDefaultFormat =
           DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it }
 
-        newState.version = "5"
+        newState.version = 5
 
         return@lambda newState
       },
-      "5" to lambda@{ oldState ->
+      5 to lambda@{ oldState ->
         val newState = oldState.clone()
 
         newState.lastAddedDefaultFormat =
           DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it }
 
-        newState.version = "6"
+        newState.version = 6
         return@lambda newState
       },
-      "6" to lambda@{ oldState ->
+      6 to lambda@{ oldState ->
         val newState = oldState.clone()
 
         newState.parsingPatterns.removeIf { it.uuid == UUID.fromString("db0779ce-9fd3-11ec-b909-0242ac120002") }
@@ -260,39 +260,39 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
 
         newState.patterns.find { it.uuid == DefaultSettingsStoreItems.Error.uuid }?.pattern = DefaultSettingsStoreItems.Error.pattern
 
-        newState.version = "7"
+        newState.version = 7
         return@lambda newState
       },
-      "7" to lambda@{ oldState ->
+      7 to lambda@{ oldState ->
         val newState = oldState.clone()
 
-        newState.version = "8"
+        newState.version = 8
         return@lambda newState
       },
-      "8" to lambda@{ oldState ->
+      8 to lambda@{ oldState ->
         val newState = oldState.clone()
 
         newState.parsingPatterns.find { it.uuid == DefaultSettingsStoreItems.LaravelLog.uuid }?.pattern = DefaultSettingsStoreItems.LaravelLog.pattern
 
-        newState.version = "9"
+        newState.version = 9
         return@lambda newState
       },
-      "9" to lambda@{ oldState ->
+      9 to lambda@{ oldState ->
         val newState = oldState.clone()
 
         newState.patterns.find { it.uuid == DefaultSettingsStoreItems.Error.uuid }?.pattern = DefaultSettingsStoreItems.Error.pattern
 
         newState.errorStripeMode = "normal"
 
-        newState.version = "10"
+        newState.version = 10
         return@lambda newState
       },
-      "10" to lambda@{ oldState ->
+      10 to lambda@{ oldState ->
         val newState = oldState.clone()
 
         newState.patterns.find { it.uuid == DefaultSettingsStoreItems.Error.uuid }?.showOnStripe = DefaultSettingsStoreItems.Error.showOnStripe
 
-        newState.version = "11"
+        newState.version = 11
         return@lambda newState
       },
     )
@@ -439,7 +439,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     val parsingPatterns: ArrayList<LogParsingPattern>,
     @Tag("settingsVersion")
     @Property(alwaysWrite = true)
-    var version: String,
+    var version: Int,
     @Tag("lastAddedDefaultFormat")
     var lastAddedDefaultFormat: String,
     @Tag("errorStripeModel")
@@ -472,7 +472,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         DefaultSettingsStoreItems.Logcat,
         DefaultSettingsStoreItems.Symfony,
       ),
-      CURRENT_SETTINGS_VERSION,
+      1,
       DefaultSettingsStoreItems.ParsingPatternsUUIDs.map { it.toString() }.joinToString(",") { it },
       "normal",
       "16",
@@ -486,7 +486,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       patterns: ArrayList<LogHighlightingPattern>,
       hidden: ArrayList<String>,
       parsingPatterns: ArrayList<LogParsingPattern>,
-    ) : this(patterns, hidden, parsingPatterns, "-1", "-1", "normal", "16", true,
+    ) : this(patterns, hidden, parsingPatterns, -1, "-1", "normal", "16", true,
              arrayListOf(), arrayListOf())
 
     public override fun clone(): State {
