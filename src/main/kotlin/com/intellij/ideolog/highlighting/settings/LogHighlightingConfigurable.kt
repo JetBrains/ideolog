@@ -40,7 +40,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
 
   private val disposable = Disposer.newDisposable()
 
-  override fun getHelpTopic(): Nothing? = null
+  override fun getHelpTopic(): String = IdeologBundle.message("help.link.settings.ideolog")
 
   override fun createComponent(): JComponent? {
     val heatmapCheckbox = JCheckBox(
