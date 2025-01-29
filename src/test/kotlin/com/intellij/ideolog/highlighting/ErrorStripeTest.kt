@@ -22,16 +22,25 @@ import kotlin.math.abs
 class ErrorStripeTest : BasePlatformTestCase() {
   private lateinit var editor: LogFileEditor
   private lateinit var highlightingPatternsBackup: List<LogHighlightingPattern>
+  private lateinit var errorStripeModeBackup: String
 
   override fun setUp() {
     super.setUp()
     highlightingPatternsBackup = LogHighlightingSettingsStore.getInstance().myState.patterns.map { it.copy() }
+    errorStripeModeBackup = LogHighlightingSettingsStore.getInstance().myState.errorStripeMode
+    LogHighlightingSettingsStore.getInstance().myState.patterns.forEach { highlightingPattern ->
+      if (highlightingPattern.uuid == DefaultSettingsStoreItems.Error.uuid) {
+        highlightingPattern.showOnStripe = true
+      }
+    }
+    LogHighlightingSettingsStore.getInstance().myState.errorStripeMode = "heatmap"
   }
 
   override fun tearDown() {
     try {
       LogHighlightingSettingsStore.getInstance().myState.patterns.clear()
       LogHighlightingSettingsStore.getInstance().myState.patterns.addAll(highlightingPatternsBackup)
+      LogHighlightingSettingsStore.getInstance().myState.errorStripeMode = errorStripeModeBackup
       if (::editor.isInitialized) {
         Disposer.dispose(editor)
       }
