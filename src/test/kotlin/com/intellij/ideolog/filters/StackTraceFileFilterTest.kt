@@ -2,13 +2,10 @@ package com.intellij.ideolog.filters
 
 import com.intellij.execution.filters.Filter
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.testFramework.RunsInEdt
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import junit.framework.TestCase
 import org.junit.rules.TemporaryFolder
 
-@RunsInEdt
-internal class StackTraceFileFilterTests : BasePlatformTestCase() {
+class StackTraceFileFilterTest : BasePlatformTestCase() {
 
   private lateinit var filter: StackTraceFileFilter
   private val tmpFolder: TemporaryFolder = TemporaryFolder()
@@ -20,18 +17,25 @@ internal class StackTraceFileFilterTests : BasePlatformTestCase() {
   }
 
   override fun tearDown() {
-    super.tearDown()
-    tmpFolder.delete()
+    try {
+      tmpFolder.delete()
+    }
+    catch (e: Throwable) {
+      addSuppressedException(e)
+    }
+    finally {
+      super.tearDown()
+    }
   }
 
-  fun `test no file hyperlink`() {
+  fun testNoFileHyperlink() {
     assertNoFileHyperlink("")
     assertNoFileHyperlink("No file hyperlink")
     assertNoFileHyperlink("""/Users\me/Application.php""")
     assertNoFileHyperlink("""C:\Users\me/Application.php""")
   }
 
-  fun `test single file hyperlink`() {
+  fun testSingleFileHyperlink() {
     assertFileHyperlink("hi /Application.php(35)", 3, 23, "/Application.php", 35, false)
     assertFileHyperlink("/Application.php:35", 0, 19, "/Application.php", 35, false)
     assertFileHyperlink("/Users/me/Application.php(35)", 0, 29, "/Users/me/Application.php", 35, false)
@@ -40,7 +44,7 @@ internal class StackTraceFileFilterTests : BasePlatformTestCase() {
     assertFileHyperlink("""C:\Users\me\Application.php:34""", 0, 30, """C:\Users\me\Application.php""", 34, false)
   }
 
-  fun `test multiple logs file hyperlinks`() {
+  fun testMultipleLogsFileHyperlinks() {
     assertFileHyperlinks(
       applyFilter("{ #stacktrace: /Users/me/Application.php(35) /Users/me/Kernel.php:42 }"),
       listOf(
@@ -50,13 +54,13 @@ internal class StackTraceFileFilterTests : BasePlatformTestCase() {
     )
   }
 
-  fun `test apply Filter to existing file path on linux or mac`() {
+  fun testApplyFilterToExistingFilePathOnLinuxOrMac() {
     val existingFile = tmpFolder.newFile("Application.php")
     val filePathLength = existingFile.absolutePath.length
     assertFileHyperlink("#0 ${existingFile.absolutePath}(2)", 3, 6 + filePathLength, existingFile.absolutePath, 2, true)
   }
 
-  fun `test apply Filter to multiple existing files path on linux or mac`() {
+  fun testApplyFilterToMultipleExistingFilePathsOnLinuxOrMac() {
     val firstExistingFile = tmpFolder.newFile("Application.php")
     val firstFilePathLength = firstExistingFile.absolutePath.length
     val secondExistingFile = tmpFolder.newFile("Kernel.php")
@@ -106,7 +110,7 @@ internal class StackTraceFileFilterTests : BasePlatformTestCase() {
       assertInstanceOf(actualItem.hyperlinkInfo, StackTraceFileFilter.LinedFileHyperlinkInfo::class.java)
       assertFileLink(expectedFileLinkInfo, actualItem.hyperlinkInfo as StackTraceFileFilter.LinedFileHyperlinkInfo)
     } else {
-      TestCase.assertNull(actualItem.hyperlinkInfo)
+      assertNull(actualItem.hyperlinkInfo)
     }
   }
 
