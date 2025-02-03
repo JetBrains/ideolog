@@ -4,7 +4,6 @@ import com.intellij.ideolog.highlighting.CUSTOM_DEFAULT_LOG_HIGHLIGHTER_SIZE_CON
 import com.intellij.ideolog.highlighting.LogEditorHighlighter
 import com.intellij.openapi.editor.ex.util.LexerEditorHighlighter
 import com.intellij.psi.PsiFile
-import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.testFramework.fixtures.IdeaTestExecutionPolicy
 import java.nio.file.Path

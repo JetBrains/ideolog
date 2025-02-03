@@ -1,6 +1,5 @@
 package com.intellij.ideolog.highlighting.settings
 
-import com.intellij.ideolog.util.application
 import com.intellij.ideolog.util.getService
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.PersistentStateComponent
