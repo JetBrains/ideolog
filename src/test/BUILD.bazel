@@ -6,7 +6,7 @@ jvm_test(
   name = "ideolog-tests_test",
   srcs = glob(["kotlin/**/*.kt", "kotlin/**/*.java"], allow_empty = True),
   deps = [
-    "@community//platform/editor-ui-api:editor",
+    "@community//platform/editor-ui-api:editor-ui",
     "@community//platform/lang-impl",
     "@community//platform/core-ui",
     "@community//platform/util/jdom",
