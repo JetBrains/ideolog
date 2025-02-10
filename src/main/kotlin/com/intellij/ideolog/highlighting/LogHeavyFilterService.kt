@@ -4,20 +4,13 @@ import com.intellij.execution.filters.CompositeFilter
 import com.intellij.execution.filters.ConsoleFilterProvider
 import com.intellij.execution.filters.Filter
 import com.intellij.execution.impl.EditorHyperlinkSupport
-import com.intellij.execution.impl.InlayProvider
 import com.intellij.ideolog.filters.StackTraceFileFilter
-import com.intellij.ideolog.highlighting.ui.EditorLineStripeHintComponentBuilderProvider
-import com.intellij.ideolog.highlighting.ui.LogInlay
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.event.EditorFactoryEvent
-import com.intellij.openapi.editor.event.EditorFactoryListener
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.Key
 import com.intellij.util.Alarm
 
@@ -42,7 +35,6 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
 
   open fun enqueueHeavyFiltering(editor: Editor, eventOffset: Int, event: CharSequence) {
     if (editor.isDisposed) return
-    val compositeFilter = myCompositeFilter
 
     val markupModel = editor.markupModel
 
@@ -70,9 +62,7 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
           val highlightStartOffset = it.highlightStartOffset + extraOffset
           val highlightEndOffset = it.highlightEndOffset + extraOffset
           if (highlightEndOffset > editor.document.textLength) return@forEach
-          if (it is InlayProvider)
-            createInlays(it, editor, highlightStartOffset)
-          else if (hyperlinkInfo != null)
+          if (hyperlinkInfo != null)
             hyperlinkSupport.createHyperlink(highlightStartOffset, highlightEndOffset, it.highlightAttributes, hyperlinkInfo)
           else
             markupModel.addRangeHighlighter(highlightStartOffset, highlightEndOffset, it.highlighterLayer, it.highlightAttributes,
@@ -88,32 +78,17 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
     var offset = 0
     lines.forEach { line ->
       offset += line.length
-      consumeResult(compositeFilter.applyFilter(line, eventOffset + offset), false)
+      consumeResult(myCompositeFilter.applyFilter(line, eventOffset + offset), false)
       offset += 1
     }
     myAlarm.addRequest({
-      if(compositeFilter.shouldRunHeavy())
+      if(myCompositeFilter.shouldRunHeavy())
         lines.forEachIndexed { index, _ ->
-          compositeFilter.applyHeavyFilter(subDoc, 0, index) {
+          myCompositeFilter.applyHeavyFilter(subDoc, 0, index) {
             consumeResult(it, true)
           }
         }
     }, 0)
-  }
-
-  private fun createInlays(inlayProvider: InlayProvider, editor: Editor, offset: Int) {
-    EditorLineStripeHintComponentBuilderProvider.EP_NAME.extensionList.forEach { provider ->
-      val inlayLineComponent = provider.getBuilder(project).build(inlayProvider, editor, offset)
-      val inlay = LogInlay(inlayLineComponent)
-      val editorReleaseListener = object : EditorFactoryListener {
-        override fun editorReleased(event: EditorFactoryEvent) {
-          if (event.editor == editor) {
-            Disposer.dispose(inlay)
-          }
-        }
-      }
-      EditorFactory.getInstance().addEditorFactoryListener(editorReleaseListener, this)
-    }
   }
 
   override fun dispose() {}
