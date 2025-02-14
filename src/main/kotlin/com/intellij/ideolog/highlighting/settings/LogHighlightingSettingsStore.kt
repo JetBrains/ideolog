@@ -1,5 +1,7 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.ideolog.file.LogFileSizeLimit
+import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.util.getService
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.PersistentStateComponent
@@ -8,6 +10,7 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.ui.JBColor
 import com.intellij.util.PlatformUtils
 import com.intellij.util.concurrency.annotations.RequiresEdt
@@ -72,7 +75,7 @@ object DefaultSettingsStoreItems {
     0,
     1,
     -1,
-    true,
+    false,
     UUID.fromString("9a75fe1c-24f0-4e5d-8359-ce4dbb9c4c33")
   )
   val Logcat = LogParsingPattern(
@@ -108,7 +111,7 @@ object DefaultSettingsStoreItems {
     0,
     2,
     1,
-    true,
+    false,
     UUID.fromString("c1c8800e-b27c-4433-8d4a-3ec5a28f72a9")
   )
   private val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog, LaravelLog, Logcat, Loguru, Symfony)
@@ -163,7 +166,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     fun getInstance() = getService<LogHighlightingSettingsStore>()
     val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
-    const val CURRENT_SETTINGS_VERSION = 11
+    const val CURRENT_SETTINGS_VERSION = 12
 
     val cleanState = State()
 
@@ -292,6 +295,16 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         newState.patterns.find { it.uuid == DefaultSettingsStoreItems.Error.uuid }?.showOnStripe = DefaultSettingsStoreItems.Error.showOnStripe
 
         newState.version = 11
+        return@lambda newState
+      },
+      11 to lambda@{ oldState ->
+        val newState = oldState.clone()
+
+        newState.readonlySizeThreshold = (20 * FileUtilRt.MEGABYTE).toString()
+        newState.parsingPatterns.find { it.uuid == DefaultSettingsStoreItems.LaravelLog.uuid }?.regexMatchFullEvent = false
+        newState.parsingPatterns.find { it.uuid == DefaultSettingsStoreItems.Symfony.uuid }?.regexMatchFullEvent = false
+
+        newState.version = 12
         return@lambda newState
       },
     )
@@ -456,7 +469,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     @Tag("errorStripeModel")
     var errorStripeMode: String = "normal",
     @Tag("readonlySizeThreshold")
-    var readonlySizeThreshold: String = "16",
+    var readonlySizeThreshold: String = "20480",
     @Tag("highlight_links")
     var highlightLinks: Boolean = true,
     @XCollection(style = XCollection.Style.v2)
