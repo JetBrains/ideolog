@@ -28,6 +28,7 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
   }
 
   private val myFilters: List<Filter> = ConsoleFilterProvider.FILTER_PROVIDERS.extensions
+    .filterNot { provider -> provider::class.qualifiedName?.startsWith("com.intellij.ml.llm") == true }
     .flatMap { it.getDefaultFilters(project).asIterable() }
     .sortedBy { if (it is StackTraceFileFilter) -1 else 1 } // basically, we want StackTraceFileFilter to be first
   private val myCompositeFilter = CompositeFilter(project, myFilters)
