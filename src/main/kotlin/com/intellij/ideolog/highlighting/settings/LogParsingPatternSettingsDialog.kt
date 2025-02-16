@@ -33,7 +33,6 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
   private var myTimeColumnId: JBIntSpinner? = null
   private var mySeverityColumnId: JBIntSpinner? = null
   private var myCategoryColumnId: JBIntSpinner? = null
-  private var myOnlyFirstLineRegexCheckbox: JCheckBox? = null
 
   init {
     init()
@@ -113,10 +112,6 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
     myCategoryColumnId = categorySpinner
     panel.add(categorySpinner)
 
-    val firstLineRegexCheckbox = JCheckBox(IdeologBundle.message("apply.message.pattern.to.all.message.lines"), item.regexMatchFullEvent)
-    myOnlyFirstLineRegexCheckbox = firstLineRegexCheckbox
-    panel.add(firstLineRegexCheckbox, "span 2, left")
-
     return panel
   }
 
@@ -138,8 +133,6 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
     myTimeColumnId?.let { item.timeColumnId = it.number - 1 }
     mySeverityColumnId?.let { item.severityColumnId = it.number - 1 }
     myCategoryColumnId?.let { item.categoryColumnId = it.number - 1 }
-
-    myOnlyFirstLineRegexCheckbox?.let { item.regexMatchFullEvent = it.isSelected }
 
     if (DefaultSettingsStoreItems.ParsingPatternsUUIDs.contains(item.uuid)) {
       item.uuid = UUID.randomUUID()

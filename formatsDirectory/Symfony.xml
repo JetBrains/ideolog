@@ -1,6 +1,6 @@
 <State>
   <highlightingPatterns />
   <hiddenSubstrings />
-  <LogParsingPattern enabled="true" name="Symfony" pattern="^\[([\d\-T:\+\.)]+)\]\s(\w+)\.([A-Z]+):\s(.*)$" timePattern="yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX" linePattern="^\[" timeId="0" severityId="2" categoryId="1" fullmatch="true" uuid="c1c8800e-b27c-4433-8d4a-3ec5a28f72a9" />
+  <LogParsingPattern enabled="true" name="Symfony" pattern="^\[([\d\-T:\+\.)]+)\]\s(\w+)\.([A-Z]+):\s(.*)$" timePattern="yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX" linePattern="^\[" timeId="0" severityId="2" categoryId="1" fullmatch="false" uuid="c1c8800e-b27c-4433-8d4a-3ec5a28f72a9" />
   <settingsVersion>7</settingsVersion>
 </State>

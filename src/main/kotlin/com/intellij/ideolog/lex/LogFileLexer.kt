@@ -74,7 +74,7 @@ class LogFileLexer(private val tokenCache: MutableList<IElementType>, private va
     fun lexRegex(event: CharSequence, output: MutableList<LogToken>, onlyValues: Boolean, parser: RegexLogParser) {
       val endOfLineIndex = event.indexOf('\n')
       val eventIsMultiline = endOfLineIndex != -1
-      val dataToMatch = if (parser.otherParsingSettings.regexMatchFullEvent || !eventIsMultiline) event else event.subSequence(0, endOfLineIndex)
+      val dataToMatch = if (!eventIsMultiline) event else event.subSequence(0, endOfLineIndex)
 
       val matcher = parser.regex.matcher(dataToMatch)
       if (!matcher.find() || matcher.groupCount() == 0) {
@@ -102,7 +102,7 @@ class LogFileLexer(private val tokenCache: MutableList<IElementType>, private va
         lastGroupEnd = end
       }
 
-      if (eventIsMultiline && !parser.otherParsingSettings.regexMatchFullEvent) {
+      if (eventIsMultiline) {
         val lastToken = output.removeAt(output.lastIndex)
         output.add(LogToken(lastToken.startOffset, event.length, false))
       } else if(lastGroupEnd < matcher.end() && !onlyValues) {
