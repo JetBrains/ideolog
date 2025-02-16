@@ -9,6 +9,7 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.registry.Registry
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.limits.FileSizeLimit
 
 private const val PROVIDER_ID = "LargeLogFileEditorProvider"
 
@@ -16,7 +17,9 @@ class LargeLogFileEditorProvider : FileEditorProvider, DumbAware {
   private val largeFileEditorProvider = LargeFileEditorProvider()
 
   override fun accept(project: Project, file: VirtualFile): Boolean {
-    return largeFileEditorProvider.accept(project, file) && Registry.`is`("ideolog.large.file.editor.enabled")
+    return Registry.`is`("ideolog.large.file.editor.enabled") &&
+           largeFileEditorProvider.accept(project, file) &&
+           file.length > FileSizeLimit.getContentLoadLimit("log")
   }
 
   override fun createEditor(project: Project, file: VirtualFile): FileEditor {

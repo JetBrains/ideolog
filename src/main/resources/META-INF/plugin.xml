@@ -49,6 +49,7 @@
     <editorHighlighterProvider filetype="LargeLog" implementationClass="com.intellij.ideolog.largeFile.highlighting.LargeLogFileEditorHighlighterProvider"/>
     <fileType name="LargeLog" implementationClass="com.intellij.ideolog.largeFile.fileType.LargeLogFileType" fieldName="INSTANCE"/>
     <ideolog.ideologContextDetector implementation="com.intellij.ideolog.largeFile.IdeologLargeFileContextDetector"/>
+    <fileEditor.fileSizeChecker implementation="com.intellij.ideolog.file.LogFileSizeLimit" order="first"/>
 
     <intentionAction>
       <className>com.intellij.ideolog.intentions.LogHighlightColumnIntention</className>
