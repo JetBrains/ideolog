@@ -59,13 +59,6 @@ class LogHighlightingConfigurable : BaseConfigurable() {
       }
     }
 
-    val logSizeSpinner = JBIntSpinner(
-      myLogHighlightingState.readonlySizeThreshold.toInt(), 0, 1024*1024).apply {
-      addChangeListener {
-        myLogHighlightingState.readonlySizeThreshold = this.value.toString()
-      }
-    }
-
     val patternsTable = JBTable(patternTableModel).apply {
       preferredScrollableViewportSize = JBUI.size(10)
       getColumn(getColumnName(0)).maxWidth = JBUI.Fonts.label().size * 15
@@ -269,7 +262,6 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     return FormBuilder().run {
       addComponent(heatmapCheckbox)
       addComponent(linksCheckbox)
-      addLabeledComponent(IdeologBundle.message("label.allow.editing.small.log.files"), logSizeSpinner)
       addComponent(JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
         add(importBtn)
         add(exportBtn)

@@ -12,34 +12,23 @@ import com.intellij.openapi.fileEditor.impl.text.PsiAwareTextEditorImpl
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 
 class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorProvider) : PsiAwareTextEditorImpl(project, file, provider) {
-  private val isReadOnly: Boolean
-
   init {
     LogFileMapRenderer.getOrCreateLogFileMapRenderer(this)
-    val sizeThreshold = LogHighlightingSettingsStore.getInstance().myState.readonlySizeThreshold.toInt()
-    isReadOnly = file.length > sizeThreshold * 1024
     LogHighlightingSettingsStore.getInstance().addSettingsListener(this) {
       resetIdeologStoredData()
     }
     (editor.markupModel as? EditorMarkupModel)?.setTrafficLightIconVisible(false)
-    if (isReadOnly) {
-      editor.settings.isUseSoftWraps = false
-      editor.putUserData(Key.create("forced.soft.wraps"), false)
-    } else {
-      editor.document.addDocumentListener(object : DocumentListener {
-        override fun documentChanged(event: DocumentEvent) {
-          if (event.oldLength != 0 || event.newLength - event.oldLength > 1 || event.offset != event.document.textLength - event.newLength) {
-              resetIdeologStoredData()
-          }
+    editor.document.addDocumentListener(object : DocumentListener {
+      override fun documentChanged(event: DocumentEvent) {
+        if (event.oldLength != 0 || event.newLength - event.oldLength > 1 || event.offset != event.document.textLength - event.newLength) {
+          resetIdeologStoredData()
         }
-      })
-    }
+      }
+    })
     editor.settings.additionalColumnsCount = 0
-    editor.isViewer = isReadOnly
   }
 
   override fun dispose() {
@@ -60,7 +49,5 @@ class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorPro
     if(state !is TextEditorState)
       return
     super.setState(state)
-    if (isReadOnly)
-      editor.settings.isUseSoftWraps = false
   }
 }
