@@ -19,7 +19,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
-import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel

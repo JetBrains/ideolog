@@ -12,7 +12,6 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.JDOMUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.ui.IdeBorderFactory
-import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.OnePixelSplitter
 import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.table.JBTable
