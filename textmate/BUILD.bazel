@@ -7,6 +7,12 @@ jvm_resources(
   strip_prefix = "resources"
 )
 
+jvm_resources(
+  name = "textmate_test_resources",
+  files = glob(["testResources/**/*"]),
+  strip_prefix = "testResources"
+)
+
 jvm_library(
   name = "textmate",
   module_name = "intellij.ideolog.textmate",
@@ -39,7 +45,10 @@ jvm_library(
     "@community//platform/testFramework",
     "@community//platform/testFramework:testFramework_test_lib",
   ],
-  runtime_deps = [":textmate_resources"]
+  runtime_deps = [
+    ":textmate_resources",
+    ":textmate_test_resources",
+  ]
 )
 
 jvm_test(

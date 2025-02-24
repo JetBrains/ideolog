@@ -1,6 +1,12 @@
 ### auto-generated section `build intellij.ideolog.tests` start
 load("@rules_java//java:defs.bzl", "java_library")
-load("@rules_jvm//:jvm.bzl", "jvm_test")
+load("@rules_jvm//:jvm.bzl", "jvm_resources", "jvm_test")
+
+jvm_resources(
+  name = "ideolog-tests_test_resources",
+  files = glob(["resources/**/*"]),
+  strip_prefix = "resources"
+)
 
 jvm_test(
   name = "ideolog-tests_test",
@@ -18,6 +24,9 @@ jvm_test(
     "@community//platform/testFramework:testFramework_test_lib",
     "//plugins/ideolog",
   ],
-  runtime_deps = ["//plugins/ideolog/textmate"]
+  runtime_deps = [
+    ":ideolog-tests_test_resources",
+    "//plugins/ideolog/textmate",
+  ]
 )
 ### auto-generated section `build intellij.ideolog.tests` end
