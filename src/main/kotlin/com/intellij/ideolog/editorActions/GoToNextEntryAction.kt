@@ -11,7 +11,7 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor
 
 class GoToNextEntryAction : AnAction() {
   override fun getActionUpdateThread(): ActionUpdateThread {
-    return ActionUpdateThread.EDT
+    return ActionUpdateThread.BGT
   }
 
   override fun update(e: AnActionEvent) {
