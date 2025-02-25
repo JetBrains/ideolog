@@ -9,7 +9,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 
 class JumpToSourceAction : AnAction() {
   override fun getActionUpdateThread(): ActionUpdateThread {
-    return ActionUpdateThread.EDT
+    return ActionUpdateThread.BGT
   }
 
   override fun update(e: AnActionEvent) {
