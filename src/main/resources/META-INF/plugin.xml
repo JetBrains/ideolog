@@ -129,9 +129,9 @@
       <categoryKey>intention.category.log</categoryKey>
     </intentionAction>
 
-    <registryKey key="ideolog.terminal.enabled" defaultValue="false"
+    <registryKey key="ideolog.terminal.enabled" defaultValue="true"
                  description="Enable ideolog highlighting inside the terminal for log files"/>
-    <registryKey key="ideolog.large.file.editor.enabled" defaultValue="false"
+    <registryKey key="ideolog.large.file.editor.enabled" defaultValue="true"
                  description="Enable ideolog highlighting inside the large file editor for log files"/>
     <statistics.counterUsagesCollector implementationClass="com.intellij.ideolog.statistics.IdeologUsagesCollector"/>
   </extensions>
