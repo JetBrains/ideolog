@@ -23,7 +23,7 @@ private object LogFileFormatValues {
 }
 
 object IdeologUsagesCollector : CounterUsagesCollector() {
-  private val GROUP = EventLogGroup("ideolog", 2)
+  private val GROUP = EventLogGroup("ideolog", 3)
 
   private val LOG_FILE_FORMAT_FIELD = EventFields.String("log_file_format", LogFileFormatValues.allowedValues)
 
