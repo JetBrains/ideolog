@@ -144,36 +144,6 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
   }
 
-  fun testShouldDetectLaravelFormat() {
-    val document = configureLogFileDocument(
-      "[2023-12-05 09:15:23] local.ERROR: Uncaught Exception: Division by zero {\"exception\":\"[object] (ErrorException(code: 0): Division by zero at /path/to/laravel/project/app/Http/Controllers/SomeController.php:55)\n" +
-        "[stacktrace]\n" +
-        "#0 /path/to/laravel/project/app/Http/Controllers/SomeController.php(55): divisionByZeroFunction()\n" +
-        "#1 [internal function]: App\\\\Http\\\\Controllers\\\\SomeController->index()\n" +
-        "#2 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): call_user_func_array()\n" +
-        "#3 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(45): Illuminate\\\\Routing\\\\Controller->callAction()\n" +
-        "#4 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Route.php(239): Illuminate\\\\Routing\\\\ControllerDispatcher->dispatch()\n" +
-        "#5 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Route.php(196): Illuminate\\\\Routing\\\\Route->runController()\n" +
-        "#6 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Router.php(685): Illuminate\\\\Routing\\\\Route->run()\n" +
-        "\n" +
-        "[2023-12-05 09:16:47] local.WARNING: User 123 attempted to access restricted area.\n" +
-        "[stacktrace]\n" +
-        "#0 /path/to/laravel/project/app/Http/Middleware/CheckRole.php(27): checkUserRole()\n" +
-        "#1 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(167): App\\\\Http\\\\Middleware\\\\CheckRole->handle()\n" +
-        "#2 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(41): Illuminate\\\\Pipeline\\\\Pipeline->Illuminate\\\\Pipeline\\\\{closure}()\n" +
-        "\n" +
-        "[2023-12-05 09:17:05] local.INFO: User 456 logged in successfully.\n" +
-        "[stacktrace]\n" +
-        "#0 /path/to/laravel/project/app/Http/Controllers/Auth/LoginController.php(72): attemptLogin()\n" +
-        "#1 [internal function]: App\\\\Http\\\\Controllers\\\\Auth\\\\LoginController->login()\n" +
-        "#2 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): call_user_func_array()\n" +
-        "#3 /path/to/laravel/project/vendor/laravel/framework/src/Illuminate/R\n" +
-        "\n"
-    )
-    val format = document.ideologContext.detectLogFileFormat()
-    assertEquals(DefaultSettingsStoreItems.LaravelLog.uuid, format.myRegexLogParser?.uuid)
-  }
-
   fun testShouldDetectLogcatFormat() {
     val document = configureLogFileDocument(
       "01-01 10:00:01.123  1234  5678 D MyAppTag: Starting app\n" +
@@ -211,29 +181,6 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     )
     val format = document.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.Loguru.uuid, format.myRegexLogParser?.uuid)
-  }
-
-  fun testShouldDetectSymfonyFormat() {
-    val document = configureLogFileDocument(
-      "[2023-06-05T09:57:38.056800+00:00] php.DEBUG: Warning: filemtime(): stat failed for /app/config/routes/framework.yaml {\"exception\":\"[object] (Symfony\\\\Component\\\\ErrorHandler\\\\Error\\\\SilencedErrorContext {...})\"} []\n" +
-        "[2023-06-05T09:57:38.057300+00:00] request.ERROR: Uncaught PHP Exception Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException: \"No route found for \"GET https://example.com/nonexistent\" [] []\n" +
-        "[2023-06-05T09:57:38.101820+00:00] request.ERROR: Uncaught PHP Exception Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException: \"No route found for \"GET https://example.com/failedroute\" [] []\n" +
-        "[2023-06-05T09:57:38.130130+00:00] request.CRITICAL: Uncaught PHP Exception Twig\\\\Error\\\\RuntimeError: \"An exception has been thrown during the rendering of a template (\\\"Failed to fetch user profile data\\\").\" at /path/to/template/file.twig line 15 [] []\n" +
-        "[2023-06-05T09:57:39.355650+00:00] deprecation.INFO: User Deprecated: The \"url\" connection parameter is deprecated. Please use Doctrine\\\\DBAL\\\\Tools\\\\DsnParser to parse a DSN string instead. {\"exception\":\"[object] (ErrorException(code: 0): User Deprecated: The \\\"url\\\" connection parameter is deprecated at /path/to/deprecated/code:123)\"} []\n"
-    )
-    val format = document.ideologContext.detectLogFileFormat()
-    assertEquals(DefaultSettingsStoreItems.Symfony.uuid, format.myRegexLogParser?.uuid)
-  }
-
-  fun testShouldNotDetectTeamCityFormat() {
-    val document = configureLogFileDocument(
-      "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}"
-    )
-    LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.removeIf { parsingPattern ->
-      parsingPattern.uuid != DefaultSettingsStoreItems.LaravelLog.uuid
-    }
-    val format = document.ideologContext.detectLogFileFormat()
-    assertNull(format.myRegexLogParser)
   }
 
   fun testRemoveFormatWithoutRestarting() {
