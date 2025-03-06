@@ -1,6 +1,2 @@
-[2022-07-11 10:00:47] production.WARNING: Vite manifest not found
-[2018-08-02 03:02:42] custom.INFO: Successfully imported customer 123456
-[2022-07-11 10:00:47] production.WARNING: Vite manifest not found
-[2018-08-02 03:02:42] custom.INFO: Successfully imported customer 123456
-[2018-08-02 03:02:42] custom.INFO: Successfully imported customer 123456
-[2022-07-11 10:00:47] production.WARNING: Vite manifest not found
+2023-05-02 23:09:06,970 [      2]   INFO - #c.i.i.StartupUtil - ------------------------------------------------------ IDE STARTED ------------------------------------------------------
+2023-05-02 23:09:06,970 [      2]   INFO - #c.i.i.StartupUtil - ------------------------------------------------------ IDE STARTED ------------------------------------------------------
