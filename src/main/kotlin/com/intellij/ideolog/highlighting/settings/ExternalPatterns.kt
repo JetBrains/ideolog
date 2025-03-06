@@ -11,6 +11,6 @@ interface ExternalPatterns {
 }
 
 object ExternalPatternsStore {
-  val parsingPatterns = EXTERNAL_PATTERNS.flatMap { it.parsingPatterns }
-  val highlightingPatterns = EXTERNAL_PATTERNS.flatMap { it.highlightingPatterns }
+  val parsingPatterns: List<LogParsingPattern> = EXTERNAL_PATTERNS.flatMap { it.parsingPatterns }
+  val highlightingPatterns: List<LogHighlightingPattern> = EXTERNAL_PATTERNS.flatMap { it.highlightingPatterns }
 }

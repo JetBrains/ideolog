@@ -66,18 +66,6 @@ object DefaultSettingsStoreItems {
     false,
     UUID.fromString("e9fa2755-8390-42f5-a41e-a909c58c8cf9")
   )
-  val LaravelLog = LogParsingPattern(
-    true,
-    "Laravel",
-    "^\\[([\\d\\-: ]*)] (?!:)[\\s\\S]*?\\.(.*?(?=:)): ([\\s\\S]*?(?=(^\\[[\\d\\-: ]*])|\\Z))$",
-    "yyyy-MM-dd HH:mm:ss",
-    "^\\[\\d",
-    0,
-    1,
-    -1,
-    false,
-    UUID.fromString("9a75fe1c-24f0-4e5d-8359-ce4dbb9c4c33")
-  )
   val Logcat = LogParsingPattern(
     true,
     "Logcat",
@@ -102,19 +90,7 @@ object DefaultSettingsStoreItems {
     false,
     UUID.fromString("19dd1738-1dc7-4df6-b437-18e0800b7782")
   )
-  val Symfony = LogParsingPattern(
-    true,
-    "Symfony",
-    "^\\[([\\d\\-T:\\+\\.)]+)\\]\\s(\\w+)\\.([A-Z]+):\\s(.*)\$",
-    "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX",
-    "^\\[",
-    0,
-    2,
-    1,
-    false,
-    UUID.fromString("c1c8800e-b27c-4433-8d4a-3ec5a28f72a9")
-  )
-  private val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog, LaravelLog, Logcat, Loguru, Symfony)
+  private val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog, Logcat, Loguru)
   val ParsingPatternsUUIDs = ParsingPatterns.map { it.uuid }
 
   val Error = LogHighlightingPattern(
@@ -166,7 +142,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     fun getInstance() = getService<LogHighlightingSettingsStore>()
     val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
-    const val CURRENT_SETTINGS_VERSION = 12
+    const val CURRENT_SETTINGS_VERSION = 13
 
     val cleanState = State()
 
@@ -211,14 +187,10 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
               it.uuid = DefaultSettingsStoreItems.IntelliJIDEA.uuid
             DefaultSettingsStoreItems.PipeSeparated.name ->
               it.uuid = DefaultSettingsStoreItems.PipeSeparated.uuid
-            DefaultSettingsStoreItems.LaravelLog.name ->
-              it.uuid = DefaultSettingsStoreItems.LaravelLog.uuid
             DefaultSettingsStoreItems.Logcat.name ->
               it.uuid = DefaultSettingsStoreItems.Logcat.uuid
             DefaultSettingsStoreItems.Loguru.name ->
               it.uuid = DefaultSettingsStoreItems.Loguru.uuid
-            DefaultSettingsStoreItems.Symfony.name ->
-              it.uuid = DefaultSettingsStoreItems.Symfony.uuid
             else ->
               it.uuid = UUID.randomUUID()
           }
@@ -274,8 +246,6 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       8 to lambda@{ oldState ->
         val newState = oldState.clone()
 
-        newState.parsingPatterns.find { it.uuid == DefaultSettingsStoreItems.LaravelLog.uuid }?.pattern = DefaultSettingsStoreItems.LaravelLog.pattern
-
         newState.version = 9
         return@lambda newState
       },
@@ -301,17 +271,26 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         val newState = oldState.clone()
 
         newState.readonlySizeThreshold = (20 * FileUtilRt.MEGABYTE).toString()
-        newState.parsingPatterns.find { it.uuid == DefaultSettingsStoreItems.LaravelLog.uuid }?.regexMatchFullEvent = false
-        newState.parsingPatterns.find { it.uuid == DefaultSettingsStoreItems.Symfony.uuid }?.regexMatchFullEvent = false
 
         newState.version = 12
+        return@lambda newState
+      },
+      12 to lambda@{ oldState ->
+        val newState = oldState.clone()
+
+        newState.parsingPatterns.removeIf { highlightingPattern -> highlightingPattern.uuid in listOf(
+          "9a75fe1c-24f0-4e5d-8359-ce4dbb9c4c33",
+          "c1c8800e-b27c-4433-8d4a-3ec5a28f72a9"
+        ).map(UUID::fromString) }
+
+        newState.version = 13
         return@lambda newState
       },
     )
     val externalSettingsUpgraders = setOf<(State) -> State> { oldState ->
       val newState = oldState.clone()
 
-      if (PlatformUtils.isPhpStorm() && !isExternalParamsUpToDate(newState)) {
+      if (!isExternalParamsUpToDate(newState)) {
         newState.externalParsingPatterns = arrayListOf(*ExternalPatternsStore.parsingPatterns.toTypedArray())
         newState.externalHighlightingPatterns = arrayListOf(*ExternalPatternsStore.highlightingPatterns.toTypedArray())
         newState.parsingPatterns.forEach { parsingPattern -> parsingPattern.enabled = false }
@@ -332,7 +311,10 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         "9d83979c-74f1-41cc-b342-7f471e225c1e",
         "f29fc557-7be9-4289-bea3-f4cfb235f23b",
         "1dcadf54-8ba8-431d-9e58-76a10ce12241",
-        "18a36367-bd09-4163-8e6d-e2410e6ffd08"
+        "18a36367-bd09-4163-8e6d-e2410e6ffd08",
+        "acab2e5f-b0b7-4d16-8a88-617c818abfb6",
+        "a72b5cbd-5420-47af-91ca-ef8339d2bb82",
+        "b4d82f98-2420-47ae-a8d2-a383e7082b85",
       ).map(UUID::fromString) }
 
       return@setOf newState
@@ -456,10 +438,8 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
       DefaultSettingsStoreItems.PipeSeparated,
       DefaultSettingsStoreItems.IntelliJIDEA,
       DefaultSettingsStoreItems.TeamCityBuildLog,
-      DefaultSettingsStoreItems.LaravelLog,
       DefaultSettingsStoreItems.Loguru,
       DefaultSettingsStoreItems.Logcat,
-      DefaultSettingsStoreItems.Symfony,
     ),
     @Tag("settingsVersion")
     @Property(alwaysWrite = true)
