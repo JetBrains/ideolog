@@ -5,6 +5,8 @@ import com.intellij.ideolog.highlighting.LogTokenElementType
 import com.intellij.lexer.LexerBase
 import com.intellij.psi.tree.IElementType
 
+private const val MAX_PARSING_LENGTH = 10000
+
 class LogFileLexer(private val tokenCache: MutableList<IElementType>, private var findEventStart: Boolean, var fileType: LogFileFormat) : LexerBase() {
   private var myBuffer: CharSequence = ""
   private var myBufferEnd: Int = -1
@@ -72,7 +74,7 @@ class LogFileLexer(private val tokenCache: MutableList<IElementType>, private va
 
   companion object {
     fun lexRegex(event: CharSequence, output: MutableList<LogToken>, onlyValues: Boolean, parser: RegexLogParser) {
-      val endOfLineIndex = event.indexOf('\n')
+      val endOfLineIndex = if (event.length > MAX_PARSING_LENGTH) MAX_PARSING_LENGTH else event.indexOf('\n')
       val eventIsMultiline = endOfLineIndex != -1
       val dataToMatch = if (!eventIsMultiline) event else event.subSequence(0, endOfLineIndex)
 
