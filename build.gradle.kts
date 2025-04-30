@@ -1,55 +1,74 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-buildscript {
-  val kotlinVersion = "1.9.22"
-
-  repositories {
-    mavenCentral()
-  }
-
-  dependencies {
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-  }
-}
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
-  id("org.jetbrains.intellij") version "1.17.2"
-}
-
-apply(plugin = "kotlin")
-
-repositories {
-  mavenCentral()
-  maven("https://www.jetbrains.com/intellij-repository/snapshots")
+  id("java")
+  id("idea")
+  id("org.jetbrains.kotlin.jvm") version "2.1.20"
+  id("org.jetbrains.kotlin.plugin.serialization") version "2.1.20"
+  id("org.jetbrains.intellij.platform") version "2.5.0"
 }
 
 group = "ideolog"
-val buildNumber: String by rootProject.extra
-version = buildNumber
+version = "2025.1"
 
-intellij {
-  version.set("2023.3")
-  pluginName.set("ideolog")
-  tasks {
-    withType<org.jetbrains.intellij.tasks.PatchPluginXmlTask> {
-      updateSinceUntilBuild.set(true)
-      sinceBuild.set("222.3345")
-      untilBuild.set("")
+repositories {
+  mavenCentral()
+  intellijPlatform {
+    defaultRepositories()
+  }
+}
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_21
+  targetCompatibility = JavaVersion.VERSION_21
+}
+
+kotlin {
+  compilerOptions {
+    allWarningsAsErrors = true
+    jvmTarget = JvmTarget.JVM_21
+  }
+}
+
+dependencies {
+  intellijPlatform {
+    create("IU", "2025.1", useInstaller = true)
+
+    bundledPlugin("org.jetbrains.kotlin")
+    bundledPlugin("com.intellij.java")
+
+    pluginVerifier()
+    testFramework(TestFrameworkType.Platform)
+  }
+
+  testImplementation("junit:junit:4.13.2")
+
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.8.1")
+}
+
+intellijPlatform {
+  pluginConfiguration {
+    name = "ideolog"
+    ideaVersion {
+      sinceBuild = "251"
+      untilBuild = "251.*"
     }
+  }
+  tasks {
     runIde {
-      systemProperty("idea.is.internal", "true")
+      systemProperties["idea.is.internal"] = "true"
     }
   }
 }
 
 tasks {
-  withType<KotlinCompile> {
-    kotlinOptions.allWarningsAsErrors = true
-    kotlinOptions.jvmTarget = "17"
-  }
-
   wrapper {
     gradleVersion = "8.1.1"
+  }
+
+  buildSearchableOptions {
+    enabled = false
+    runtimeDirectory
   }
 }
