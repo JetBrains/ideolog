@@ -37,8 +37,13 @@ class ImportSettingsTest : BasePlatformTestCase() {
     }
   }
 
-  override fun getTestDataPath(): String =
-    Path.of(IdeaTestExecutionPolicy.getHomePathWithPolicy(), "plugins/ideolog/src/test/resources/settings").pathString
+  override fun getTestDataPath(): String {
+    val platformTestDataPath = Path.of(IdeaTestExecutionPolicy.getHomePathWithPolicy(), "plugins/ideolog/src/test/resources/settings")
+    if (platformTestDataPath.toFile().exists()) {
+      return platformTestDataPath.pathString
+    }
+    return "src/test/resources/settings"
+  }
 
   fun testImportParsingPattern() {
     val file = JDOMUtil.load(settingsFilePath)

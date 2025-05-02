@@ -52,8 +52,14 @@ class ErrorStripeTest : BasePlatformTestCase() {
       super.tearDown()
     }
   }
-  override fun getTestDataPath(): String =
-    Path.of(IdeaTestExecutionPolicy.getHomePathWithPolicy(), "plugins/ideolog/src/test/resources/highlighting/errorStripe").pathString
+
+  override fun getTestDataPath(): String {
+    val platformTestDataPath = Path.of(IdeaTestExecutionPolicy.getHomePathWithPolicy(), "plugins/ideolog/src/test/resources/highlighting/errorStripe")
+    if (platformTestDataPath.toFile().exists()) {
+      return platformTestDataPath.pathString
+    }
+    return "src/test/resources/highlighting/errorStripe"
+  }
 
   fun testUndetectedFormat() {
     val markupModel = createMarkupModel()

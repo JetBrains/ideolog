@@ -7,8 +7,13 @@ import java.nio.file.Path
 import kotlin.io.path.pathString
 
 class LogEditorHighlighterTest: BasePlatformTestCase() {
-  override fun getTestDataPath(): String =
-    Path.of(IdeaTestExecutionPolicy.getHomePathWithPolicy(), "plugins/ideolog/src/test/resources/highlighting").pathString
+  override fun getTestDataPath(): String {
+    val platformTestDataPath = Path.of(IdeaTestExecutionPolicy.getHomePathWithPolicy(), "plugins/ideolog/src/test/resources/highlighting")
+    if (platformTestDataPath.toFile().exists()) {
+      return platformTestDataPath.pathString
+    }
+    return "src/test/resources/highlighting"
+  }
 
   fun testDetectHighlighterForLogFile() {
     myFixture.configureByText("LogFile.log", "")
