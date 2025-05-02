@@ -4,7 +4,7 @@ import com.intellij.execution.filters.CompositeFilter
 import com.intellij.execution.filters.ConsoleFilterProvider
 import com.intellij.execution.filters.Filter
 import com.intellij.execution.impl.EditorHyperlinkSupport
-import com.intellij.ideolog.filters.StackTraceFileFilter
+import com.intellij.ideolog.filters.PrioritizedFilter
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
@@ -28,10 +28,10 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
   }
 
   private val myFilters: List<Filter> by lazy {
-    ConsoleFilterProvider.FILTER_PROVIDERS.extensions
+    ConsoleFilterProvider.FILTER_PROVIDERS.extensionList
       .filterNot { provider -> provider::class.qualifiedName?.startsWith("com.intellij.ml.llm") == true }
       .flatMap { it.getDefaultFilters(project).asIterable() }
-      .sortedBy { if (it is StackTraceFileFilter) -1 else 1 } // basically, we want StackTraceFileFilter to be first
+      .sortedBy { if (it is PrioritizedFilter) -1 else 1 }
   }
   private val myCompositeFilter: CompositeFilter by lazy {
     CompositeFilter(project, myFilters)

@@ -39,7 +39,6 @@
     <editorHighlighterProvider filetype="Log" implementationClass="com.intellij.ideolog.highlighting.LogFileEditorHighlighterProvider" />
     <extendWordSelectionHandler implementation="com.intellij.ideolog.editorActions.ExtendsSelection"/>
     <fileEditorProvider implementation="com.intellij.ideolog.file.LogFileEditorProvider" />
-    <consoleFilterProvider implementation="com.intellij.ideolog.filters.StackTraceFileFilterProvider"/>
     <lang.parserDefinition language="LOG" implementationClass="com.intellij.ideolog.psi.LogFileParserDefinition"/>
     <fileType name="Log" language="LOG" implementationClass="com.intellij.ideolog.fileType.LogFileType" extensions="log" fieldName="INSTANCE"/>
     <editorNotificationProvider implementation="com.intellij.ideolog.file.LogLargeFileNotificationProvider"/>
