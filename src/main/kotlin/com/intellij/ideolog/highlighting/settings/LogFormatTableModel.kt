@@ -61,7 +61,7 @@ class LogFormatTableModel(private var state: LogHighlightingSettingsStore.State)
   }
 
   fun addNewFormat(name: String): Pair<Int, LogParsingPattern> {
-    val pattern = LogParsingPattern(false, name, "", "", "", -1, -1, -1, false, UUID.randomUUID())
+    val pattern = LogParsingPattern(false, name, "", "", "", -1, -1, -1, UUID.randomUUID())
     state.parsingPatterns.add(pattern)
     val index = state.parsingPatterns.size - 1
     fireTableRowsInserted(index, index)

@@ -38,7 +38,6 @@ object DefaultSettingsStoreItems {
     0,
     1,
     2,
-    false,
     UUID.fromString("b5772998-bf1e-4d9d-ab41-da0b86451163")
   )
   val IntelliJIDEA: LogParsingPattern = LogParsingPattern(
@@ -50,7 +49,6 @@ object DefaultSettingsStoreItems {
     0,
     2,
     3,
-    false,
     UUID.fromString("8a0e8992-94cb-4f4c-8be2-42b03609626b")
   )
   val TeamCityBuildLog: LogParsingPattern = LogParsingPattern(
@@ -62,7 +60,6 @@ object DefaultSettingsStoreItems {
     0,
     1,
     2,
-    false,
     UUID.fromString("e9fa2755-8390-42f5-a41e-a909c58c8cf9")
   )
   val Logcat: LogParsingPattern = LogParsingPattern(
@@ -74,7 +71,6 @@ object DefaultSettingsStoreItems {
     0,
     1,
     2,
-    false,
     UUID.fromString("b8fcb4d4-b1b8-4681-90f1-42f7c02aaf67")
   )
   val Loguru: LogParsingPattern = LogParsingPattern(
@@ -86,7 +82,6 @@ object DefaultSettingsStoreItems {
     0,
     1,
     2,
-    false,
     UUID.fromString("19dd1738-1dc7-4df6-b437-18e0800b7782")
   )
   private val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog, Logcat, Loguru)
@@ -495,14 +490,13 @@ data class LogParsingPattern(@Attribute("enabled") var enabled: Boolean,
                              @Attribute("timeId") var timeColumnId: Int,
                              @Attribute("severityId") var severityColumnId: Int,
                              @Attribute("categoryId") var categoryColumnId: Int,
-                             @Attribute("fullmatch") var regexMatchFullEvent: Boolean,
                              @Attribute("uuid", converter = UUIDConverter::class) var uuid: UUID): Cloneable {
 
   @Suppress("unused")
-  constructor(): this(true, "", "", "", "", -1, -1, -1, false, UUID.randomUUID())
+  constructor(): this(true, "", "", "", "", -1, -1, -1, UUID.randomUUID())
 
   public override fun clone(): LogParsingPattern {
-    return LogParsingPattern(enabled, name, pattern, timePattern, lineStartPattern, timeColumnId, severityColumnId, categoryColumnId, regexMatchFullEvent, uuid)
+    return LogParsingPattern(enabled, name, pattern, timePattern, lineStartPattern, timeColumnId, severityColumnId, categoryColumnId, uuid)
   }
 }
 
