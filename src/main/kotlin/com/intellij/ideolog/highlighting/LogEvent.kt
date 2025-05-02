@@ -9,7 +9,7 @@ import java.util.*
 import kotlin.collections.HashSet
 
 class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFileFormat) {
-  val endOffset = startOffset + rawText.length
+  val endOffset: Int = startOffset + rawText.length
 
   val date: String
   val rawLevel: String

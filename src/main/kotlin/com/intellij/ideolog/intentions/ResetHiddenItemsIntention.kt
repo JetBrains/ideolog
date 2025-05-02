@@ -10,9 +10,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 
 class ResetHiddenItemsIntention : IntentionAction {
-  override fun getText() = IdeologBundle.message("intention.name.restore.all.hidden.lines")
+  override fun getText(): String = IdeologBundle.message("intention.name.restore.all.hidden.lines")
 
-  override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
+  override fun getFamilyName(): String = IdeologBundle.message("intention.family.name.logs")
 
   override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
     if (file?.fileType != LogFileType)
@@ -40,5 +40,5 @@ class ResetHiddenItemsIntention : IntentionAction {
     FoldingCalculatorTask.restartFoldingCalculator(project, editor, file)
   }
 
-  override fun startInWriteAction() = false
+  override fun startInWriteAction(): Boolean = false
 }

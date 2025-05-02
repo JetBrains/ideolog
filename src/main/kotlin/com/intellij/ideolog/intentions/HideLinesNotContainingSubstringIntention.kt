@@ -5,6 +5,6 @@ import com.intellij.ideolog.intentions.base.HideLinesIntention
 
 class HideLinesNotContainingSubstringIntention : HideLinesIntention({ it.whitelistedSubstrings }) {
 
-  override fun getText() = IdeologBundle.message("intention.name.show.only.lines.containing", shortSelection)
+  override fun getText(): String = IdeologBundle.message("intention.name.show.only.lines.containing", shortSelection)
 
 }

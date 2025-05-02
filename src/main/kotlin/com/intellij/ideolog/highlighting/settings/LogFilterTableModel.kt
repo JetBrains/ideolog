@@ -21,11 +21,11 @@ class LogFilterTableModel(private var state: LogHighlightingSettingsStore.State)
     }
   }
 
-  override fun getColumnCount() = 1
+  override fun getColumnCount(): Int = 1
 
-  override fun getValueAt(rowIndex: Int, columnIndex: Int) = state.hidden[rowIndex]
+  override fun getValueAt(rowIndex: Int, columnIndex: Int): String = state.hidden[rowIndex]
 
-  override fun isCellEditable(rowIndex: Int, columnIndex: Int) = true
+  override fun isCellEditable(rowIndex: Int, columnIndex: Int): Boolean = true
 
   override fun setValueAt(aValue: Any?, rowIndex: Int, columnIndex: Int) {
     state.hidden[rowIndex] = aValue as String
@@ -35,7 +35,7 @@ class LogFilterTableModel(private var state: LogHighlightingSettingsStore.State)
     return IdeologBundle.message("column.filter")
   }
 
-  override fun getColumnClass(columnIndex: Int) = java.lang.String::class.java
+  override fun getColumnClass(columnIndex: Int): Class<String> = String::class.java
 
   fun updateStore(store: LogHighlightingSettingsStore.State) {
     state = store

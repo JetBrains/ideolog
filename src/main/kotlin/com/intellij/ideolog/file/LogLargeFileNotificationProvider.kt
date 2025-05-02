@@ -8,10 +8,8 @@ import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.isTooLarge
-import com.intellij.openapi.vfs.limits.FileSizeLimit
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotificationProvider
 import java.util.*
@@ -50,11 +48,7 @@ class LogLargeFileNotificationProvider : EditorNotificationProvider {
         }
       }
 
-      return@Function panel.text(String.format(
-        IdeologBundle.message("label.file.content.truncated.please.increase.limits"),
-        StringUtil.formatFileSize(file.length),
-        StringUtil.formatFileSize(FileSizeLimit.getPreviewLimit(file.extension).toLong())
-      ))
+      return@Function panel.text(IdeologBundle.message("label.file.content.truncated.please.increase.limits"))
     }
   }
 }

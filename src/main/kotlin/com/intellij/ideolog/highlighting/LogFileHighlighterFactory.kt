@@ -20,13 +20,13 @@ import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.tree.IElementType
 
-val LOG_TOKEN_SEPARATOR = IElementType("LOG_TOKEN_SEPARATOR", LogLanguage)
+val LOG_TOKEN_SEPARATOR: IElementType = IElementType("LOG_TOKEN_SEPARATOR", LogLanguage)
 
 internal val highlightingUserKey = Key.create<Int>("JetLog.HighlightColumn")
 internal val highlightingSetUserKey = Key.create<HashSet<String>>("JetLog.HighlightSet")
-val highlightTimeKey = Key.create<Boolean>("JetLog.HighlightTime")
+val highlightTimeKey: Key<Boolean> = Key.create("JetLog.HighlightTime")
 
-const val CUSTOM_DEFAULT_LOG_HIGHLIGHTER_SIZE_CONSTRAINT = FileUtilRt.MEGABYTE / 2
+const val CUSTOM_DEFAULT_LOG_HIGHLIGHTER_SIZE_CONSTRAINT: Int = FileUtilRt.MEGABYTE / 2
 
 class LogTokenElementType(column: Int) : IElementType("LOG_TOKEN_VALUE_$column", LogLanguage, false)
 class LogFileEditorHighlighterProvider : EditorHighlighterProvider {

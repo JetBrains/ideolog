@@ -118,7 +118,7 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
     val parsedFormat = try {
       SimpleDateFormat(format).format(Date(629518620000))
     }
-    catch (t: Throwable) { "" }
+    catch (_: Throwable) { "" }
 
     return parsedFormat.ifBlank { "-" }
   }

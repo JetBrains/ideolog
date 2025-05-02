@@ -11,7 +11,8 @@ import com.intellij.psi.PsiFile
 
 abstract class LogThisIntentionBase : IntentionAction {
     private var lastText: String = ""
-    protected val fieldText get() = lastText
+    protected val fieldText: String
+      get() = lastText
     abstract override fun getText(): String
 
     override fun getFamilyName(): String {

@@ -15,7 +15,7 @@ class LogHighlightColumnIntention : IntentionAction {
     return IdeologBundle.message("intention.name.highlight.this.column")
   }
 
-  override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
+  override fun getFamilyName(): String = IdeologBundle.message("intention.family.name.logs")
 
   override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
     if (file?.fileType != LogFileType)
@@ -35,5 +35,5 @@ class LogHighlightColumnIntention : IntentionAction {
     (editor as EditorEx).repaint(0, editor.document.textLength)
   }
 
-  override fun startInWriteAction() = false
+  override fun startInWriteAction(): Boolean = false
 }

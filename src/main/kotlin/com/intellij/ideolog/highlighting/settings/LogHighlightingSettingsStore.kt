@@ -1,5 +1,6 @@
 package com.intellij.ideolog.highlighting.settings
 
+import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.util.getService
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.PersistentStateComponent
@@ -10,7 +11,6 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.ui.JBColor
-import com.intellij.util.PlatformUtils
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import com.intellij.util.xmlb.Converter
 import com.intellij.util.xmlb.XmlSerializerUtil
@@ -24,11 +24,12 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.intellij.lang.annotations.Language
+import org.jetbrains.annotations.Nls
 import java.awt.Color
 import java.util.*
 
 object DefaultSettingsStoreItems {
-  val PipeSeparated = LogParsingPattern(
+  val PipeSeparated: LogParsingPattern = LogParsingPattern(
     true,
     "Pipe-separated",
     "^(?s)([^|]*)\\|([^|]*)\\|([^|]*)\\|(.*)$",
@@ -40,7 +41,7 @@ object DefaultSettingsStoreItems {
     false,
     UUID.fromString("b5772998-bf1e-4d9d-ab41-da0b86451163")
   )
-  val IntelliJIDEA = LogParsingPattern(
+  val IntelliJIDEA: LogParsingPattern = LogParsingPattern(
     true,
     "IntelliJ IDEA",
     "^([^\\[]+)(\\[[\\s\\d]+])\\s*(\\w*)\\s*-\\s*(\\S*)\\s*-(.+)$",
@@ -52,7 +53,7 @@ object DefaultSettingsStoreItems {
     false,
     UUID.fromString("8a0e8992-94cb-4f4c-8be2-42b03609626b")
   )
-  val TeamCityBuildLog = LogParsingPattern(
+  val TeamCityBuildLog: LogParsingPattern = LogParsingPattern(
     true,
     "TeamCity build log",
     "^\\[([^]]+)](.):\\s*(\\[[^]]+])?(.*)$",
@@ -64,7 +65,7 @@ object DefaultSettingsStoreItems {
     false,
     UUID.fromString("e9fa2755-8390-42f5-a41e-a909c58c8cf9")
   )
-  val Logcat = LogParsingPattern(
+  val Logcat: LogParsingPattern = LogParsingPattern(
     true,
     "Logcat",
     "^(.+)(?:\\s+\\d*\\s+\\d*\\s+)(V|D|I|W|E)\\s([^:]+):(.*)\$",
@@ -76,7 +77,7 @@ object DefaultSettingsStoreItems {
     false,
     UUID.fromString("b8fcb4d4-b1b8-4681-90f1-42f7c02aaf67")
   )
-  val Loguru = LogParsingPattern(
+  val Loguru: LogParsingPattern = LogParsingPattern(
     true,
     "Loguru",
     "^(\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\s)\\|(\\s[A-Z]*\\s*)\\|(\\s.+:.+:\\d+\\s-\\s.*)\$",
@@ -89,9 +90,9 @@ object DefaultSettingsStoreItems {
     UUID.fromString("19dd1738-1dc7-4df6-b437-18e0800b7782")
   )
   private val ParsingPatterns = listOf(PipeSeparated, IntelliJIDEA, TeamCityBuildLog, Logcat, Loguru)
-  val ParsingPatternsUUIDs = ParsingPatterns.map { it.uuid }
+  internal val ParsingPatternsUUIDs = ParsingPatterns.map { it.uuid }
 
-  val Error = LogHighlightingPattern(
+  val Error: LogHighlightingPattern = LogHighlightingPattern(
     true,
     "^\\s*(e(rror)?|severe)\\s*$",
     null,
@@ -104,7 +105,7 @@ object DefaultSettingsStoreItems {
     showOnStripe = false,
     uuid = UUID.fromString("de2d3bb2-78c9-4beb-835e-d483c35c07b6")
   )
-  val Warning = LogHighlightingPattern(
+  val Warning: LogHighlightingPattern = LogHighlightingPattern(
     true,
     "^\\s*w(arn(ing)?)?\\s*$",
     null,
@@ -117,7 +118,7 @@ object DefaultSettingsStoreItems {
     showOnStripe = false,
     uuid = UUID.fromString("11ff1574-2118-4722-905a-61bec89b079e")
   )
-  val Info = LogHighlightingPattern(
+  val Info: LogHighlightingPattern = LogHighlightingPattern(
     true,
     "^\\s*i(nfo)?\\s*$",
     null,
@@ -131,20 +132,20 @@ object DefaultSettingsStoreItems {
     uuid = UUID.fromString("5e882ebc-2179-488b-8e1a-2fe488636f36")
   )
   private val HighlightingPatterns = listOf(Error, Warning, Info)
-  val HighlightingPatternsUUIDs = HighlightingPatterns.map { it.uuid }
+  internal val HighlightingPatternsUUIDs = HighlightingPatterns.map { it.uuid }
 }
 
 @State(name = "LogHighlightingSettings", storages = [Storage(value = "log_highlighting.xml", roamingType = RoamingType.DEFAULT)])
 class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSettingsStore.State>, Cloneable {
   companion object {
-    fun getInstance() = getService<LogHighlightingSettingsStore>()
-    val logger = Logger.getInstance("LogHighlightingSettingsStore")
+    fun getInstance(): LogHighlightingSettingsStore = getService<LogHighlightingSettingsStore>()
+    private val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
-    const val CURRENT_SETTINGS_VERSION = 13
+    const val CURRENT_SETTINGS_VERSION: Int = 13
 
-    val cleanState = State()
+    private val cleanState = State()
 
-    val settingsUpgraders = mapOf<Int, (State) -> State>(
+    private val settingsUpgraders = mapOf<Int, (State) -> State>(
       -1 to { cleanState.clone() },
       0 to lambda@{ oldState ->
         val newState = oldState.clone()
@@ -285,7 +286,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         return@lambda newState
       },
     )
-    val externalSettingsUpgraders = setOf<(State) -> State> { oldState ->
+    private val externalSettingsUpgraders = setOf<(State) -> State> { oldState ->
       val newState = oldState.clone()
 
       if (!isExternalParamsUpToDate(newState)) {
@@ -332,7 +333,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     }
   }
 
-  var myState = cleanState.clone()
+  var myState: LogHighlightingSettingsStore.State = cleanState.clone()
   private val myListeners = HashSet<LogHighlightingSettingsListener>()
 
   @RequiresEdt
@@ -381,7 +382,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     val lastAddedDefaultFormatOld = try {
       myState.lastAddedDefaultFormat.toInt()
     }
-    catch (t: NumberFormatException) {
+    catch (_: NumberFormatException) {
       return
     }
     if (lastAddedDefaultFormatOld < cleanState.parsingPatterns.size) {
@@ -481,7 +482,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
 }
 
 class UUIDConverter : Converter<UUID>() {
-  override fun toString(value: UUID) = value.toString()
+  override fun toString(value: UUID): String = value.toString()
   override fun fromString(value: String): UUID? = UUID.fromString(value)
 }
 
@@ -552,11 +553,11 @@ enum class LogHighlightingAction {
   HIGHLIGHT_LINE,
   HIDE;
 
-  fun printableName() = when (this) {
-    HIGHLIGHT_MATCH -> "Highlight match"
-    HIGHLIGHT_FIELD -> "Highlight field"
-    HIGHLIGHT_LINE -> "Highlight line"
-    HIDE -> "Hide"
+  fun printableName(): @Nls String = when (this) {
+    HIGHLIGHT_MATCH -> IdeologBundle.message("highlight.match")
+    HIGHLIGHT_FIELD -> IdeologBundle.message("highlight.field")
+    HIGHLIGHT_LINE -> IdeologBundle.message("highlight.line")
+    HIDE -> IdeologBundle.message("hide")
   }
 }
 

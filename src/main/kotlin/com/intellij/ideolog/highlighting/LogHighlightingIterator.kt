@@ -22,7 +22,7 @@ import java.util.regex.PatternSyntaxException
 import kotlin.math.abs
 import kotlin.math.min
 
-const val timeDifferenceToRed = 15000L
+const val timeDifferenceToRed: Long = 15000
 
 open class LogHighlightingIterator(startOffset: Int,
                                    protected val myEditor: Editor,
@@ -34,7 +34,7 @@ open class LogHighlightingIterator(startOffset: Int,
   private val myColors: EditorColorsScheme
     get() = colorGetter()
 
-  protected val settingsStore = LogHighlightingSettingsStore.getInstance()
+  protected val settingsStore: LogHighlightingSettingsStore = LogHighlightingSettingsStore.getInstance()
   private val myPatterns = settingsStore.myState.patterns.filter { it.enabled }.mapNotNull {
     try {
       Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it
@@ -385,7 +385,7 @@ open class LogHighlightingIterator(startOffset: Int,
 
   private data class EventPiece(val offsetStart: Int, val offsetEnd: Int, val textAttributes: TextAttributes, val isSeparator: Boolean)
   companion object {
-    val myHsbVals = FloatArray(3)
+    val myHsbVals: FloatArray = FloatArray(3)
     fun getLineBackground(columnValue: CharSequence?, defaultBackground: Color): Color? {
       if (columnValue == null) {
         return null
@@ -409,7 +409,7 @@ open class LogHighlightingIterator(startOffset: Int,
 
 
 data class LineSegment(val start: Int, val end: Int, val id: Int): Comparable<LineSegment> {
-  override fun compareTo(other: LineSegment) = compareValuesBy(this, other, { it.start }, { it.end })
+  override fun compareTo(other: LineSegment): Int = compareValuesBy(this, other, { it.start }, { it.end })
 }
 
 data class LineEvent(val x: Int, val l: Int, val id: Int,  val isOpening: Boolean)

@@ -29,7 +29,7 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
   }
 
   private val foldings = ArrayList<Pair<Int, Int>>()
-  val settings = LogHighlightingSettingsStore.getInstance()
+  private val settings = LogHighlightingSettingsStore.getInstance()
   private val context = editor.document.ideologContext
   private val hiddenItems = context.hiddenItems
   private val hiddenSubstrings = context.hiddenSubstrings
@@ -37,10 +37,10 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
   private val whitelistedItems = context.whitelistedItems
   private val hideLinesAbove: Int = context.hideLinesAbove
   private val hideLinesBelow: Int = context.hideLinesBelow
-  val fileType = detectLogFileFormat(editor)
+  private val fileType = detectLogFileFormat(editor)
   private val tokens = ArrayList<LogToken>()
   private var lastAddedFoldingEndOffset = -1
-  var myCancel = false
+  private var myCancel = false
 
   override fun run(indicator: ProgressIndicator) {
     val document = editor.document
@@ -121,7 +121,7 @@ class FoldingCalculatorTask(project: Project, val editor: Editor, fileName: Stri
     }
   }
 
-  override fun shouldStartInBackground() = true
+  override fun shouldStartInBackground(): Boolean = true
 
   private fun isLineVisible(line: CharSequence, lineNumber: Int): Boolean {
     if (lineNumber < hideLinesAbove || lineNumber > hideLinesBelow)

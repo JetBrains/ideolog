@@ -13,13 +13,13 @@ import com.intellij.serviceContainer.NonInjectable
 import org.jdom.Element
 
 class TotallyNotTextEditorProvider: TextEditorProvider(), DumbAware {
-  override fun getEditorTypeId() = "LogFileEditorProvider"
+  override fun getEditorTypeId(): String = "LogFileEditorProvider"
 
   override fun createEditor(project: Project, file: VirtualFile): FileEditor {
     return LogFileEditor(project, file, this)
   }
 
-  override fun accept(project: Project, file: VirtualFile) = isTextFile(file) && file.fileType.name == LogFileType.name
+  override fun accept(project: Project, file: VirtualFile): Boolean = isTextFile(file) && file.fileType.name == LogFileType.name
 
   override fun getPolicy(): FileEditorPolicy {
     return FileEditorPolicy.HIDE_DEFAULT_EDITOR
@@ -30,7 +30,8 @@ class LogFileEditorProvider @NonInjectable internal constructor(private val base
   // used by extension
   @Suppress("unused")
   constructor() : this(TotallyNotTextEditorProvider())
-  override fun writeState(state: FileEditorState, project: Project, targetElement: Element) = base.writeState(state,  project, targetElement)
-  override fun disposeEditor(editor: FileEditor) = base.disposeEditor(editor)
-  override fun readState(sourceElement: Element, project: Project, file: VirtualFile) = base.readState(sourceElement, project, file)
+  override fun writeState(state: FileEditorState, project: Project, targetElement: Element): Unit = base.writeState(state, project, targetElement)
+  override fun acceptRequiresReadAction(): Boolean = base.acceptRequiresReadAction()
+  override fun disposeEditor(editor: FileEditor): Unit = base.disposeEditor(editor)
+  override fun readState(sourceElement: Element, project: Project, file: VirtualFile): FileEditorState = base.readState(sourceElement, project, file)
 }

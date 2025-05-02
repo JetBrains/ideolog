@@ -17,7 +17,7 @@ abstract class HideLinesIntention(private val setAccessor: (IdeologDocumentConte
   val shortSelection: String
     get() = if (lastSelection.length > 25) lastSelection.substring(0, 25) + "..." else lastSelection
 
-  override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
+  override fun getFamilyName(): String = IdeologBundle.message("intention.family.name.logs")
 
   fun getText(editor: Editor): CharSequence? {
     return editor.getSelectedText()
@@ -44,5 +44,5 @@ abstract class HideLinesIntention(private val setAccessor: (IdeologDocumentConte
     FoldingCalculatorTask.restartFoldingCalculator(project, editor, file)
   }
 
-  override fun startInWriteAction() = false
+  override fun startInWriteAction(): Boolean = false
 }

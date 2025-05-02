@@ -9,5 +9,5 @@ object LogFileTokenTypes {
     }
   }
 
-  val LOG_CONTENT = com.intellij.psi.tree.IElementType("LOG_CONTENT", LogLanguage)
+  private val LOG_CONTENT = com.intellij.psi.tree.IElementType("LOG_CONTENT", LogLanguage)
 }

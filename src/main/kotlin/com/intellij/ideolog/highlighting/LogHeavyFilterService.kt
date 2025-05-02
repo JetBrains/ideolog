@@ -23,7 +23,7 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
       return project.getService(serviceClass)
     }
 
-    val markupHighlightedExceptionsKey = Key.create<HashSet<Int>>("Log.ParsedExceptions")
+    val markupHighlightedExceptionsKey: Key<HashSet<Int>> = Key.create<HashSet<Int>>("Log.ParsedExceptions")
     internal val markupHyperlinkSupportKey = Key.create<EditorHyperlinkSupport>("Log.ExceptionsHyperlinks")
   }
 

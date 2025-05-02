@@ -189,8 +189,8 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
 
             // Roll to affected buckets
             val nBucketEnd = getBucketForOffset(logEvent.startOffset + logEvent.rawText.length)
-            (nBucketCur..nBucketEnd).forEach {
-                // Apply attrs to bucket
+            (nBucketCur..nBucketEnd).forEach { _ ->
+              // Apply attrs to bucket
               nCurBucketMaxTimeDelta = max(nCurBucketMaxTimeDelta, timeDelta)
               colorCurCustomHighlighter = colorCurCustomHighlighter ?: colorCustomHighlighter
 
@@ -214,11 +214,11 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
   }
 
   companion object {
-    val LogFileMapRendererKey = Key.create<LogFileMapRenderer>("LogFileMapRenderer")
-    fun getOrCreateLogFileMapRenderer(editor: LogFileEditor) = getLogFileMapRenderer(editor.editor)
-      ?: LogFileMapRenderer(editor).let { editor.editor.putUserData(LogFileMapRendererKey, it) }
+    val LogFileMapRendererKey: Key<LogFileMapRenderer> = Key.create("LogFileMapRenderer")
+    fun getOrCreateLogFileMapRenderer(editor: LogFileEditor): LogFileMapRenderer = getLogFileMapRenderer(editor.editor)
+      ?: LogFileMapRenderer(editor).also { editor.editor.putUserData(LogFileMapRendererKey, it) }
 
-    fun getLogFileMapRenderer(editor: Editor) = editor.getUserData(LogFileMapRendererKey)
+    fun getLogFileMapRenderer(editor: Editor): LogFileMapRenderer? = editor.getUserData(LogFileMapRendererKey)
   }
 
   private fun composeBuckets() {

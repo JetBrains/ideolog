@@ -31,9 +31,9 @@ val Document.ideologContext: IdeologDocumentContext
 
 open class IdeologDocumentContext(val document: Document, private val cache: EventCache? = EventCache()) {
   companion object {
-    const val NUMBER_FIRST_LINES = 25
-    const val MIN_FORMAT_MATCHES = 1
-    const val INTERRUPT_AFTER_NS = 500 * 1_000_000
+    private const val NUMBER_FIRST_LINES = 25
+    private const val MIN_FORMAT_MATCHES = 1
+    private const val INTERRUPT_AFTER_NS = 500 * 1_000_000
   }
 
   open val numberFirstLines: Int
@@ -51,10 +51,10 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
 
   private val eventParsingLock = Any()
 
-  val hiddenItems = HashSet<Pair<Int, String>>()
-  val hiddenSubstrings = HashSet<String>()
-  val whitelistedSubstrings = HashSet<String>()
-  val whitelistedItems = HashSet<Pair<Int, String>>()
+  val hiddenItems: HashSet<Pair<Int, String>> = HashSet()
+  val hiddenSubstrings: HashSet<String> = HashSet()
+  val whitelistedSubstrings: HashSet<String> = HashSet()
+  val whitelistedItems: HashSet<Pair<Int, String>> = HashSet()
   var hideLinesAbove: Int = -1
   var hideLinesBelow: Int = Int.MAX_VALUE
 
@@ -134,7 +134,7 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
     }
   }
 
-  protected fun lineCharSequence(line: Int) =
+  protected fun lineCharSequence(line: Int): CharSequence =
     document.immutableCharSequence.subSequence(document.getLineStartOffset(line), document.getLineEndOffset(line))
 
   open fun isLineEventStart(atLine: Int): Boolean {

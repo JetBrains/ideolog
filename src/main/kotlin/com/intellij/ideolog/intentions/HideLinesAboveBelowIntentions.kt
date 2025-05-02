@@ -20,10 +20,7 @@ abstract class HideLinesAboveBelowIntentionBase(val setter: (IdeologDocumentCont
   }
 
   override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
-    if (file?.fileType != LogFileType)
-      return false
-
-    return true
+    return file?.fileType == LogFileType
   }
 
   override fun invoke(project: Project, editor: Editor, file: PsiFile?) {

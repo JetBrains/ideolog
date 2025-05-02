@@ -17,7 +17,7 @@ class ToggleTimeHighlightingIntention : IntentionAction {
     return IdeologBundle.message("intention.name.toggle.time.highlighting")
   }
 
-  override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
+  override fun getFamilyName(): String = IdeologBundle.message("intention.family.name.logs")
 
   override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
     if (file?.fileType != LogFileType)
@@ -40,5 +40,5 @@ class ToggleTimeHighlightingIntention : IntentionAction {
     LogFileMapRenderer.getLogFileMapRenderer(editor)?.setIsRenderingTimeHighlighting(newValue)
   }
 
-  override fun startInWriteAction() = false
+  override fun startInWriteAction(): Boolean = false
 }

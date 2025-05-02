@@ -9,7 +9,7 @@ import com.intellij.openapi.editor.Document
 
 class IdeologTerminalDocumentContext(document: Document) : IdeologDocumentContext(document, cache = null) {
   companion object {
-    const val NUMBER_FIRST_LINES = 100
+    private const val NUMBER_FIRST_LINES = 100
   }
 
   private val formatByOffsetMap = hashMapOf<Int, LogFileFormat>()

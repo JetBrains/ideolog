@@ -1,5 +1,7 @@
 package com.intellij.ideolog.largeFile
 
+import com.intellij.codeHighlighting.BackgroundEditorHighlighter
+import com.intellij.ide.structureView.StructureViewBuilder
 import com.intellij.ideolog.IdeologBundle
 import com.intellij.ideolog.file.update
 import com.intellij.ideolog.highlighting.LogHeavyFilterService
@@ -7,12 +9,18 @@ import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.largeFile.fileType.LargeLogFileType
 import com.intellij.ideolog.util.ideologContext
 import com.intellij.largeFilesEditor.editor.LargeFileEditor
+import com.intellij.openapi.actionSystem.ActionGroup
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory
+import com.intellij.openapi.fileEditor.FileEditorLocation
+import com.intellij.openapi.fileEditor.FileEditorState
+import com.intellij.openapi.fileEditor.FileEditorStateLevel
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.vfs.VirtualFile
+import org.jetbrains.annotations.Unmodifiable
 
 class LargeLogFileEditor(private val delegate: LargeFileEditor) : LargeFileEditor by delegate {
-  override fun getName() = IdeologBundle.message("large.log")
+  override fun getName(): String = IdeologBundle.message("large.log")
 
   init {
     editor.settings.isUseSoftWraps = false
@@ -36,4 +44,22 @@ class LargeLogFileEditor(private val delegate: LargeFileEditor) : LargeFileEdito
 
     update(file, project)
   }
+
+  override fun getState(level: FileEditorStateLevel): FileEditorState = delegate.getState(level)
+
+  override fun setState(state: FileEditorState, exactState: Boolean): Unit = delegate.setState(state, exactState)
+
+  override fun selectNotify(): Unit = delegate.selectNotify()
+
+  override fun deselectNotify(): Unit = delegate.deselectNotify()
+
+  override fun getBackgroundHighlighter(): BackgroundEditorHighlighter? = delegate.backgroundHighlighter
+
+  override fun getCurrentLocation(): FileEditorLocation? = delegate.currentLocation
+
+  override fun getStructureViewBuilder(): StructureViewBuilder? = delegate.structureViewBuilder
+
+  override fun getFilesToRefresh(): @Unmodifiable List<VirtualFile> = delegate.getFilesToRefresh()
+
+  override fun getTabActions(): ActionGroup? = delegate.tabActions
 }

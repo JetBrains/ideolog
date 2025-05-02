@@ -19,7 +19,7 @@ private class LogRemoveHighlightingsIntention : IntentionAction {
   override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
     if (file?.fileType != LogFileType)
       return false
-    val hasColumnHighlight = editor.getUserData(highlightingUserKey) ?: -1 >= 0
+    val hasColumnHighlight = (editor.getUserData(highlightingUserKey) ?: -1) >= 0
     val hasWordHighlight = editor.getUserData(highlightingSetUserKey)?.isNotEmpty() ?: false
 
     return hasColumnHighlight || hasWordHighlight

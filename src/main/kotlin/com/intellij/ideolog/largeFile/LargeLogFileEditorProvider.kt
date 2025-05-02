@@ -27,7 +27,7 @@ class LargeLogFileEditorProvider : FileEditorProvider, DumbAware {
     return LargeLogFileEditor(largeFileEditor)
   }
 
-  override fun getEditorTypeId() = PROVIDER_ID
+  override fun getEditorTypeId(): String = PROVIDER_ID
 
-  override fun getPolicy() = FileEditorPolicy.HIDE_OTHER_EDITORS
+  override fun getPolicy(): FileEditorPolicy = FileEditorPolicy.HIDE_OTHER_EDITORS
 }

@@ -66,7 +66,7 @@ class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
     return myRegexLogParser?.let {
       try {
         return@let it.timeFormat.parse(time.toString()).time
-      } catch (e: ParseException) {
+      } catch (_: ParseException) {
         // silently ignore it
       } catch (_: NumberFormatException) {
 
@@ -78,6 +78,6 @@ class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
   }
 }
 
-fun detectLogFileFormat(editor: Editor) = detectIdeologContext(editor).detectLogFileFormat()
+fun detectLogFileFormat(editor: Editor): LogFileFormat = detectIdeologContext(editor).detectLogFileFormat()
 
-fun detectLogFileFormat(editor: Editor, offset: Int) = detectIdeologContext(editor).detectLogFileFormat(offset)
+fun detectLogFileFormat(editor: Editor, offset: Int): LogFileFormat = detectIdeologContext(editor).detectLogFileFormat(offset)

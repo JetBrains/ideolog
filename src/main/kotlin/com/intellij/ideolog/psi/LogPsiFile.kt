@@ -16,10 +16,10 @@ class LogPsiFile(fileViewProvider: FileViewProvider) :
     return IdeologBundle.message("action.navigate.to.source.text")
   }
 
-  override fun getFileType() = LogFileType
+  override fun getFileType(): LogFileType = LogFileType
 
   override fun accept(visitor: PsiElementVisitor) {}
 
-  override fun isWritable() = true
+  override fun isWritable(): Boolean = true
 }
 
