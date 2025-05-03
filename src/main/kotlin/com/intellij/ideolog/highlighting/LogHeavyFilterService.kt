@@ -4,6 +4,7 @@ import com.intellij.execution.filters.CompositeFilter
 import com.intellij.execution.filters.ConsoleFilterProvider
 import com.intellij.execution.filters.Filter
 import com.intellij.execution.impl.EditorHyperlinkSupport
+import com.intellij.ideolog.filters.BlackListFilterClassProvider
 import com.intellij.ideolog.filters.PrioritizedFilter
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
@@ -27,10 +28,15 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
     internal val markupHyperlinkSupportKey = Key.create<EditorHyperlinkSupport>("Log.ExceptionsHyperlinks")
   }
 
+  private val blackListedFilterClasses: Array<Class<out Filter>> by lazy {
+    BlackListFilterClassProvider.BLACK_LIST_FILTER_PROVIDER_EP_NAME.extensionList.flatMap {
+      it.getBlackListFilterClasses(project).asIterable()
+    }.toTypedArray()
+  }
   private val myFilters: List<Filter> by lazy {
     ConsoleFilterProvider.FILTER_PROVIDERS.extensionList
-      .filterNot { provider -> provider::class.qualifiedName?.startsWith("com.intellij.ml.llm") == true }
       .flatMap { it.getDefaultFilters(project).asIterable() }
+      .filterNot { blackListedFilterClasses.contains(it::class.java) }
       .sortedBy { if (it is PrioritizedFilter) -1 else 1 }
   }
   private val myCompositeFilter: CompositeFilter by lazy {

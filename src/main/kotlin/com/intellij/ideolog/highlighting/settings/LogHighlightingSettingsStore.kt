@@ -24,7 +24,6 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.intellij.lang.annotations.Language
-import org.jetbrains.annotations.Nls
 import java.awt.Color
 import java.util.*
 
@@ -547,7 +546,7 @@ enum class LogHighlightingAction {
   HIGHLIGHT_LINE,
   HIDE;
 
-  fun printableName(): @Nls String = when (this) {
+  fun printableName(): String = when (this) {
     HIGHLIGHT_MATCH -> IdeologBundle.message("highlight.match")
     HIGHLIGHT_FIELD -> IdeologBundle.message("highlight.field")
     HIGHLIGHT_LINE -> IdeologBundle.message("highlight.line")

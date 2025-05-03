@@ -140,6 +140,7 @@
     <extensionPoint interface="com.intellij.ideolog.highlighting.settings.ExternalPatterns" dynamic="true" name="externalPatterns"/>
     <extensionPoint interface="com.intellij.ideolog.highlighting.DynamicLogFilterServiceClassProvider" dynamic="true" name="dynamicLogFilterServiceClassProvider"/>
     <extensionPoint interface="com.intellij.ideolog.highlighting.DefaultLogEditorHighlighterProvider" dynamic="true" name="defaultLogEditorHighlighterProvider"/>
+    <extensionPoint interface="com.intellij.ideolog.filters.BlackListFilterClassProvider" dynamic="true" name="blackListFilterClassProvider"/>
   </extensionPoints>
 
   <actions>

@@ -18,6 +18,5 @@
     <orderEntry type="module" module-name="intellij.platform.testFramework" scope="TEST" />
     <orderEntry type="module" module-name="intellij.ideolog" scope="TEST" />
     <orderEntry type="module" module-name="intellij.ideolog.textmate" scope="RUNTIME" />
-    <orderEntry type="module" module-name="intellij.php.ideolog.tests" scope="RUNTIME" />
   </component>
 </module>
