@@ -8,11 +8,6 @@ jvm_resources(
   strip_prefix = "resources"
 )
 
-java_library(
-  name = "ideolog-tests",
-  visibility = ["//visibility:public"]
-)
-
 jvm_library(
   name = "ideolog-tests_test_lib",
   visibility = ["//visibility:public"],
@@ -33,7 +28,6 @@ jvm_library(
   runtime_deps = [
     ":ideolog-tests_test_resources",
     "//plugins/ideolog/textmate",
-    "//phpstorm/ideolog/tests:php-ideolog-tests",
   ]
 )
 
