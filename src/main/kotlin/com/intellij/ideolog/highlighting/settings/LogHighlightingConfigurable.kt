@@ -1,7 +1,9 @@
 package com.intellij.ideolog.highlighting.settings
 
 import com.intellij.configurationStore.serialize
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ideolog.IdeologBundle
+import com.intellij.ideolog.file.LogFileFormatNotificationProvider
 import com.intellij.ideolog.util.application
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.fileChooser.FileChooserFactory
@@ -42,6 +44,8 @@ class LogHighlightingConfigurable : BaseConfigurable() {
   override fun getHelpTopic(): String = IdeologBundle.message("help.link.settings.ideolog")
 
   override fun createComponent(): JComponent? {
+    val propertiesComponent = PropertiesComponent.getInstance()
+
     val heatmapCheckbox = JCheckBox(
       IdeologBundle.message("display.heat.map.on.error.stripe.scrollbar"),
       myLogHighlightingState.errorStripeMode == "heatmap").apply {
@@ -55,6 +59,14 @@ class LogHighlightingConfigurable : BaseConfigurable() {
       myLogHighlightingState.highlightLinks).apply {
       addChangeListener {
         myLogHighlightingState.highlightLinks = this.isSelected
+      }
+    }
+
+    val showFormatNotificationCheckbox = JCheckBox(
+      IdeologBundle.message("show.log.format.notification"),
+      !propertiesComponent.getBoolean(LogFileFormatNotificationProvider.DONT_SHOW_AGAIN_KEY)).apply {
+      addChangeListener {
+        propertiesComponent.setValue(LogFileFormatNotificationProvider.DONT_SHOW_AGAIN_KEY, !this.isSelected)
       }
     }
 
@@ -261,6 +273,7 @@ class LogHighlightingConfigurable : BaseConfigurable() {
     return FormBuilder().run {
       addComponent(heatmapCheckbox)
       addComponent(linksCheckbox)
+      addComponent(showFormatNotificationCheckbox)
       addComponent(JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
         add(importBtn)
         add(exportBtn)

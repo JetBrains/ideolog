@@ -20,7 +20,7 @@ import javax.swing.JComponent
 
 class LogFileFormatNotificationProvider : EditorNotificationProvider, DumbAware {
   companion object {
-    private const val DONT_SHOW_AGAIN_KEY = "log.file.format.editor.notification.disabled"
+    const val DONT_SHOW_AGAIN_KEY: String = "log.file.format.editor.notification.disabled"
   }
 
   override fun collectNotificationData(project: Project, file: VirtualFile): Function<in FileEditor, out JComponent?> {
@@ -29,15 +29,12 @@ class LogFileFormatNotificationProvider : EditorNotificationProvider, DumbAware 
       val editor = (it as TextEditor).editor
 
       val propertiesComponent = PropertiesComponent.getInstance()
-      if (detectLogFileFormat(editor).myRegexLogParser != null || propertiesComponent.getBoolean(DONT_SHOW_AGAIN_KEY) || editor.getUserData(HIDDEN_KEY) != null)
+      val logFormat = detectLogFileFormat(editor)
+
+      if (propertiesComponent.getBoolean(DONT_SHOW_AGAIN_KEY) || editor.getUserData(HIDDEN_KEY) != null)
         return@Function null
 
       val panel = EditorNotificationPanel().apply {
-        createActionLabel(IdeologBundle.message("link.label.configure.log.formats")) {
-          ShowSettingsUtil.getInstance().editConfigurable(project, LogHighlightingConfigurable())
-
-          update(file, project)
-        }
         createActionLabel(IdeologBundle.message("link.label.hide.notification")) {
           editor.putUserData(HIDDEN_KEY, HIDDEN_KEY)
 
@@ -48,9 +45,21 @@ class LogFileFormatNotificationProvider : EditorNotificationProvider, DumbAware 
 
           update(file, project)
         }
+
+        val formatDetected = logFormat.myRegexLogParser != null
+        if (formatDetected) {
+          val formatName = logFormat.myRegexLogParser.otherParsingSettings.name
+          text(IdeologBundle.message("label.log.format.recognized", formatName))
+        } else {
+          createActionLabel(IdeologBundle.message("link.label.configure.log.formats")) {
+            ShowSettingsUtil.getInstance().editConfigurable(project, LogHighlightingConfigurable())
+            update(file, project)
+          }
+          text(IdeologBundle.message("label.log.format.not.recognized"))
+        }
       }
 
-      return@Function panel.text(IdeologBundle.message("label.log.format.not.recognized"))
+      return@Function panel
     }
   }
 }
