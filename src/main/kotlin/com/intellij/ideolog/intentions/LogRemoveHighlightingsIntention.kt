@@ -16,8 +16,8 @@ private class LogRemoveHighlightingsIntention : IntentionAction {
 
   override fun getFamilyName() = IdeologBundle.message("intention.family.name.logs")
 
-  override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
-    if (file?.fileType != LogFileType)
+  override fun isAvailable(project: Project, editor: Editor, psiFile: PsiFile?): Boolean {
+    if (psiFile?.fileType != LogFileType)
       return false
     val hasColumnHighlight = (editor.getUserData(highlightingUserKey) ?: -1) >= 0
     val hasWordHighlight = editor.getUserData(highlightingSetUserKey)?.isNotEmpty() ?: false
@@ -25,7 +25,7 @@ private class LogRemoveHighlightingsIntention : IntentionAction {
     return hasColumnHighlight || hasWordHighlight
   }
 
-  override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
+  override fun invoke(project: Project, editor: Editor, psiFile: PsiFile?) {
     editor.putUserData(highlightingUserKey, null)
     editor.putUserData(highlightingSetUserKey, null)
     (editor as EditorEx).repaint(0, editor.document.textLength)

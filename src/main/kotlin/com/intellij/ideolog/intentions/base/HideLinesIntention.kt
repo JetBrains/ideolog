@@ -23,8 +23,8 @@ abstract class HideLinesIntention(private val setAccessor: (IdeologDocumentConte
     return editor.getSelectedText()
   }
 
-  override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
-    if (file?.fileType != LogFileType)
+  override fun isAvailable(project: Project, editor: Editor, psiFile: PsiFile?): Boolean {
+    if (psiFile?.fileType != LogFileType)
       return false
 
     val text = getText(editor)
@@ -35,13 +35,13 @@ abstract class HideLinesIntention(private val setAccessor: (IdeologDocumentConte
 
   }
 
-  override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
+  override fun invoke(project: Project, editor: Editor, psiFile: PsiFile?) {
     val selection = getText(editor) ?: return
 
     val set = setAccessor(editor.document.ideologContext)
     set.add(selection.toString())
 
-    FoldingCalculatorTask.restartFoldingCalculator(project, editor, file)
+    FoldingCalculatorTask.restartFoldingCalculator(project, editor, psiFile)
   }
 
   override fun startInWriteAction(): Boolean = false

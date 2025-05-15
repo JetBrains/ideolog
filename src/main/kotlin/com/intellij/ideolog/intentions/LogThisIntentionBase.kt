@@ -19,8 +19,8 @@ abstract class LogThisIntentionBase : IntentionAction {
       return IdeologBundle.message("intention.family.name.logs")
     }
 
-    override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
-      if (file?.fileType != LogFileType)
+    override fun isAvailable(project: Project, editor: Editor, psiFile: PsiFile?): Boolean {
+      if (psiFile?.fileType != LogFileType)
         return false
 
       val columnCount = LogParsingUtils.getEventColumnCount(editor)
@@ -37,14 +37,14 @@ abstract class LogThisIntentionBase : IntentionAction {
 
     abstract fun getIntentionItems(editor: Editor): HashSet<Pair<Int, String>>
 
-    override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
+    override fun invoke(project: Project, editor: Editor, psiFile: PsiFile?) {
       val set = getIntentionItems(editor)
       val currentColumn = LogParsingUtils.getColumnByOffset(editor)
       val columnValue = LogParsingUtils.getColumnValueByOffset(editor) ?: "?"
 
       set.add(currentColumn to columnValue.toString())
 
-      FoldingCalculatorTask.restartFoldingCalculator(project, editor, file)
+      FoldingCalculatorTask.restartFoldingCalculator(project, editor, psiFile)
     }
 
     override fun startInWriteAction(): Boolean {

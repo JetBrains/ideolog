@@ -134,12 +134,12 @@ class LogJumpToSourceIntention : IntentionAction {
 
   override fun getFamilyName(): String = IdeologBundle.message("intention.family.name.logs")
 
-  override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
-    return (file?.fileType == LogFileType)
+  override fun isAvailable(project: Project, editor: Editor?, psiFile: PsiFile?): Boolean {
+    return (psiFile?.fileType == LogFileType)
   }
 
 
-  override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
+  override fun invoke(project: Project, editor: Editor, psiFile: PsiFile?) {
     doIt(project, editor)
   }
 

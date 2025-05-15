@@ -19,14 +19,14 @@ abstract class HideLinesAboveBelowIntentionBase(val setter: (IdeologDocumentCont
     return IdeologBundle.message("intention.family.name.logs")
   }
 
-  override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
-    return file?.fileType == LogFileType
+  override fun isAvailable(project: Project, editor: Editor, psiFile: PsiFile?): Boolean {
+    return psiFile?.fileType == LogFileType
   }
 
-  override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
+  override fun invoke(project: Project, editor: Editor, psiFile: PsiFile?) {
     setter(editor.document.ideologContext, editor.caretModel.logicalPosition.line)
 
-    FoldingCalculatorTask.restartFoldingCalculator(project, editor, file)
+    FoldingCalculatorTask.restartFoldingCalculator(project, editor, psiFile)
   }
 
   override fun startInWriteAction(): Boolean {

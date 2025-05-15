@@ -20,10 +20,10 @@ class ShowIdeologSettingsIntention: IntentionAction, HighPriorityAction {
     return IdeologBundle.message("intention.family.name.logs")
   }
 
-  override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
+  override fun isAvailable(project: Project, editor: Editor?, psiFile: PsiFile?): Boolean {
     editor ?: return false
 
-    if (file?.fileType != LogFileType)
+    if (psiFile?.fileType != LogFileType)
       return false
 
     return detectLogFileFormat(editor).myRegexLogParser == null
@@ -33,7 +33,7 @@ class ShowIdeologSettingsIntention: IntentionAction, HighPriorityAction {
     return IdeologBundle.message("intention.name.show.log.highlighting.settings")
   }
 
-  override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
+  override fun invoke(project: Project, editor: Editor?, psiFile: PsiFile?) {
     ShowSettingsUtil.getInstance().editConfigurable(project, LogHighlightingConfigurable())
   }
 }

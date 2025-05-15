@@ -14,8 +14,8 @@ class ResetHiddenItemsIntention : IntentionAction {
 
   override fun getFamilyName(): String = IdeologBundle.message("intention.family.name.logs")
 
-  override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
-    if (file?.fileType != LogFileType)
+  override fun isAvailable(project: Project, editor: Editor, psiFile: PsiFile?): Boolean {
+    if (psiFile?.fileType != LogFileType)
       return false
 
     val context = editor.document.ideologContext
@@ -27,7 +27,7 @@ class ResetHiddenItemsIntention : IntentionAction {
     return hasHiddenItems || hasHiddenSubstrings || hasWhitelistedSubstrings || hasWhitelistedItems || context.hideLinesAbove >= 0 || context.hideLinesBelow < Int.MAX_VALUE
   }
 
-  override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
+  override fun invoke(project: Project, editor: Editor, psiFile: PsiFile?) {
     val context = editor.document.ideologContext
     context.hiddenItems.clear()
     context.hiddenSubstrings.clear()
@@ -37,7 +37,7 @@ class ResetHiddenItemsIntention : IntentionAction {
     context.hideLinesAbove = -1
     context.hideLinesBelow = Int.MAX_VALUE
 
-    FoldingCalculatorTask.restartFoldingCalculator(project, editor, file)
+    FoldingCalculatorTask.restartFoldingCalculator(project, editor, psiFile)
   }
 
   override fun startInWriteAction(): Boolean = false

@@ -17,8 +17,8 @@ class LogHighlightColumnIntention : IntentionAction {
 
   override fun getFamilyName(): String = IdeologBundle.message("intention.family.name.logs")
 
-  override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
-    if (file?.fileType != LogFileType)
+  override fun isAvailable(project: Project, editor: Editor, psiFile: PsiFile?): Boolean {
+    if (psiFile?.fileType != LogFileType)
       return false
 
     val columnCount = LogParsingUtils.getEventColumnCount(editor)
@@ -27,7 +27,7 @@ class LogHighlightColumnIntention : IntentionAction {
     return currentColumn >= 0 && currentColumn != columnCount - 1
   }
 
-  override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
+  override fun invoke(project: Project, editor: Editor?, psiFile: PsiFile?) {
     editor ?: return
     val column = LogParsingUtils.getColumnByOffset(editor)
     val currentKey = editor.getUserData(highlightingUserKey) ?: -1

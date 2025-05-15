@@ -23,8 +23,8 @@ class LogHighlightValueIntention : IntentionAction {
     return editor.getSelectedText()
   }
 
-  override fun isAvailable(project: Project, editor: Editor, file: PsiFile?): Boolean {
-    if (file?.fileType != LogFileType)
+  override fun isAvailable(project: Project, editor: Editor, psiFile: PsiFile?): Boolean {
+    if (psiFile?.fileType != LogFileType)
       return false
 
     val text = getText(editor)
@@ -35,7 +35,7 @@ class LogHighlightValueIntention : IntentionAction {
 
   }
 
-  override fun invoke(project: Project, editor: Editor, file: PsiFile?) {
+  override fun invoke(project: Project, editor: Editor, psiFile: PsiFile?) {
     val selection = getText(editor) ?: return
 
     val set = editor.getUserData(highlightingSetUserKey) ?: HashSet()
