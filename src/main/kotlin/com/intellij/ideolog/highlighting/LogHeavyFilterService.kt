@@ -82,6 +82,7 @@ open class LogHeavyFilterService(private val project: Project, cs: CoroutineScop
       if (editor.isDisposed) return
       ApplicationManager.getApplication().invokeLater { // todo: consider MergingQueue if this generates too many events
         if (editor.isDisposed) return@invokeLater
+        if (markupModel.getUserData(markupHighlightedExceptionsKey) !== set) return@invokeLater
         val extraOffset = if (addOffset) eventOffset else 0
         result.resultItems.forEach {
           val hyperlinkInfo = it.hyperlinkInfo
