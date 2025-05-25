@@ -15,6 +15,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotificationProvider
 import com.intellij.ui.EditorNotifications
+import com.intellij.util.PlatformUtils
 import java.util.function.Function
 import javax.swing.JComponent
 
@@ -34,6 +35,11 @@ class LogFileFormatNotificationProvider : EditorNotificationProvider, DumbAware 
       if (propertiesComponent.getBoolean(DONT_SHOW_AGAIN_KEY) || editor.getUserData(HIDDEN_KEY) != null)
         return@Function null
 
+      val formatDetected = logFormat.myRegexLogParser != null
+      if (formatDetected && PlatformUtils.isPhpStorm()) {
+        return@Function null
+      }
+
       val panel = EditorNotificationPanel().apply {
         createActionLabel(IdeologBundle.message("link.label.hide.notification")) {
           editor.putUserData(HIDDEN_KEY, HIDDEN_KEY)
@@ -46,7 +52,6 @@ class LogFileFormatNotificationProvider : EditorNotificationProvider, DumbAware 
           update(file, project)
         }
 
-        val formatDetected = logFormat.myRegexLogParser != null
         if (formatDetected) {
           val formatName = logFormat.myRegexLogParser.otherParsingSettings.name
           text(IdeologBundle.message("label.log.format.recognized", formatName))
