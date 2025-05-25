@@ -8,9 +8,10 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.project.Project
+import kotlinx.coroutines.CoroutineScope
 
 @Service(Service.Level.PROJECT)
-class LargeLogHeavyFilterService(project: Project) : LogHeavyFilterService(project), Disposable {
+class LargeLogHeavyFilterService(project: Project, cs: CoroutineScope) : LogHeavyFilterService(project, cs), Disposable {
 
   companion object {
     fun getInstance(project: Project): LogHeavyFilterService {

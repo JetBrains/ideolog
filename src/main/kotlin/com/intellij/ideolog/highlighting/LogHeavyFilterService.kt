@@ -13,9 +13,13 @@ import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import com.intellij.util.Alarm
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-open class LogHeavyFilterService(private val project: Project): Disposable {
+open class LogHeavyFilterService(private val project: Project, cs: CoroutineScope): Disposable {
 
   companion object {
     fun getInstance(project: Project): LogHeavyFilterService {
@@ -42,7 +46,18 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
   private val myCompositeFilter: CompositeFilter by lazy {
     CompositeFilter(project, myFilters)
   }
-  private val myAlarm = Alarm(Alarm.ThreadToUse.POOLED_THREAD, this)
+  private val hyperlinksFlow = MutableSharedFlow<() -> Unit>(
+    replay = 1,
+    onBufferOverflow = BufferOverflow.DROP_OLDEST,
+  )
+
+  init {
+    cs.launch {
+      hyperlinksFlow.collectLatest { action ->
+        action()
+      }
+    }
+  }
 
   open fun enqueueHeavyFiltering(editor: Editor, eventOffset: Int, event: CharSequence) {
     if (editor.isDisposed) return
@@ -92,14 +107,14 @@ open class LogHeavyFilterService(private val project: Project): Disposable {
       consumeResult(myCompositeFilter.applyFilter(line, eventOffset + offset), false)
       offset += 1
     }
-    myAlarm.addRequest({
-      if(myCompositeFilter.shouldRunHeavy())
+    hyperlinksFlow.tryEmit {
+      if (myCompositeFilter.shouldRunHeavy())
         lines.forEachIndexed { index, _ ->
           myCompositeFilter.applyHeavyFilter(subDoc, 0, index) {
             consumeResult(it, true)
           }
         }
-    }, 0)
+    }
   }
 
   override fun dispose() {}
