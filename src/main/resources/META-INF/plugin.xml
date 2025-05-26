@@ -144,15 +144,15 @@
   </extensionPoints>
 
   <actions>
-    <action id="Log.JumpToSource" class="com.intellij.ideolog.editorActions.JumpToSourceAction" text="Jump To Source">
+    <action id="Log.JumpToSource" class="com.intellij.ideolog.editorActions.JumpToSourceAction">
       <keyboard-shortcut first-keystroke="F7" keymap="$default"/>
     </action>
 
-    <action id="Log.GoToNextError" class="com.intellij.ideolog.editorActions.GoToNextErrorAction" text="Go To Next Error in Log">
+    <action id="Log.GoToNextError" class="com.intellij.ideolog.editorActions.GoToNextErrorAction">
       <keyboard-shortcut first-keystroke="shift F7" keymap="$default"/>
     </action>
 
-    <action id="Log.GoToPrevEntry" class="com.intellij.ideolog.editorActions.GoToPrevEntryAction" text="Go To Previous Entry in Log"/>
-    <action id="Log.GoToNextEntry" class="com.intellij.ideolog.editorActions.GoToNextEntryAction" text="Go To Next Entry in Log"/>
+    <action id="Log.GoToPrevEntry" class="com.intellij.ideolog.editorActions.GoToPrevEntryAction"/>
+    <action id="Log.GoToNextEntry" class="com.intellij.ideolog.editorActions.GoToNextEntryAction"/>
   </actions>
 </idea-plugin>
