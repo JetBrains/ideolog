@@ -15,23 +15,26 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 
 class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorProvider) : PsiAwareTextEditorImpl(project, file, provider) {
+  private val documentListener = object : DocumentListener {
+    override fun documentChanged(event: DocumentEvent) {
+      if (event.oldLength != 0 || event.newLength - event.oldLength > 1 || event.offset != event.document.textLength - event.newLength) {
+        resetIdeologStoredData()
+      }
+    }
+  }
+
   init {
     LogFileMapRenderer.getOrCreateLogFileMapRenderer(this)
     LogHighlightingSettingsStore.getInstance().addSettingsListener(this) {
       resetIdeologStoredData()
     }
     (editor.markupModel as? EditorMarkupModel)?.setTrafficLightIconVisible(false)
-    editor.document.addDocumentListener(object : DocumentListener {
-      override fun documentChanged(event: DocumentEvent) {
-        if (event.oldLength != 0 || event.newLength - event.oldLength > 1 || event.offset != event.document.textLength - event.newLength) {
-          resetIdeologStoredData()
-        }
-      }
-    })
+    editor.document.addDocumentListener(documentListener)
     editor.settings.additionalColumnsCount = 0
   }
 
   override fun dispose() {
+    editor.document.removeDocumentListener(documentListener)
     editor.document.ideologContext.clear()
     super.dispose()
   }
