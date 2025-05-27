@@ -87,7 +87,7 @@ open class LogEditorHighlighter(
 
   private fun <T> doDefaultHighlighterAction(action: EditorHighlighter.() -> T): T? {
     if (myEditor == null || !ApplicationManager.getApplication().isDispatchThread) {
-      return defaultLogEditorHighlighter.action()
+      return EmptyEditorHighlighter(TextAttributes()).apply { setText(myText) }.action()
     }
     val logFileFormat = detectLogFileFormat(myEditor as Editor)
     if (logFileFormat.myRegexLogParser == null) {
