@@ -41,17 +41,6 @@ class LogFileFormatNotificationProvider : EditorNotificationProvider, DumbAware 
       }
 
       val panel = EditorNotificationPanel().apply {
-        createActionLabel(IdeologBundle.message("link.label.hide.notification")) {
-          editor.putUserData(HIDDEN_KEY, HIDDEN_KEY)
-
-          update(file, project)
-        }
-        createActionLabel(IdeologBundle.message("link.label.don.t.show.again")) {
-          propertiesComponent.setValue(DONT_SHOW_AGAIN_KEY, true)
-
-          update(file, project)
-        }
-
         if (formatDetected) {
           val formatName = logFormat.myRegexLogParser.otherParsingSettings.name
           text(IdeologBundle.message("label.log.format.recognized", formatName))
@@ -61,6 +50,16 @@ class LogFileFormatNotificationProvider : EditorNotificationProvider, DumbAware 
             update(file, project)
           }
           text(IdeologBundle.message("label.log.format.not.recognized"))
+        }
+        createActionLabel(IdeologBundle.message("link.label.hide.notification")) {
+          editor.putUserData(HIDDEN_KEY, HIDDEN_KEY)
+
+          update(file, project)
+        }
+        createActionLabel(IdeologBundle.message("link.label.don.t.show.again")) {
+          propertiesComponent.setValue(DONT_SHOW_AGAIN_KEY, true)
+
+          update(file, project)
         }
       }
 
