@@ -25,6 +25,7 @@ jvm_library(
   kotlinc_opts = ":custom",
   deps = [
     "@community//platform/editor-ui-api:editor-ui",
+    "@community//platform/indexing-api:indexing",
     "@community//platform/lang-impl",
     "@community//platform/core-ui",
     "@community//platform/platform-impl/codeinsight-inline:ide-codeinsight-inline",
