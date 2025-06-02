@@ -21,7 +21,6 @@ import com.intellij.util.xmlb.annotations.Transient
 import com.intellij.util.xmlb.annotations.XCollection
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.intellij.lang.annotations.Language
 import java.awt.Color
@@ -516,23 +515,15 @@ data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean,
   constructor() : this(true, "", null, 0, LogHighlightingAction.HIGHLIGHT_FIELD, null, null, false, false, false, UUID.randomUUID())
 
   var foregroundColor: Color?
-    @Transient get() = fgRgb?.let { logColor -> JBColor(logColor.lightRgb, logColor.darkRgb) }
+    @Transient get() = fgRgb?.toJBColor()
     @Transient set(value) {
-      fgRgb = value?.let { color ->
-        fgRgb?.let { prevLogColor ->
-          if (JBColor.isBright()) prevLogColor.copy(lightRgb = color.rgb) else prevLogColor.copy(darkRgb = color.rgb)
-        }
-      }
+      fgRgb = if (fgRgb == null) LogColor.fromColor(value) else fgRgb?.updateWithColor(value)
     }
 
   var backgroundColor: Color?
-    @Transient get() = bgRgb?.let { logColor -> JBColor(logColor.lightRgb, logColor.darkRgb) }
+    @Transient get() = bgRgb?.toJBColor()
     @Transient set(value) {
-      bgRgb = value?.let { color ->
-        bgRgb?.let { prevLogColor ->
-          if (JBColor.isBright()) prevLogColor.copy(lightRgb = color.rgb) else prevLogColor.copy(darkRgb = color.rgb)
-        }
-      }
+      bgRgb = if (bgRgb == null) LogColor.fromColor(value) else bgRgb?.updateWithColor(value)
     }
 
   public override fun clone(): LogHighlightingPattern {
@@ -561,13 +552,34 @@ enum class LogHighlightingAction {
 data class LogColor(
   val lightRgb: Int,
   val darkRgb: Int,
-)
+) {
+  companion object {
+    fun fromColor(color: Color?): LogColor? {
+      return if (color == null) null else LogColor(color.rgb, color.rgb)
+    }
+  }
+
+  fun toJBColor(): JBColor = JBColor(lightRgb, darkRgb)
+
+  fun updateWithColor(color: Color?): LogColor? {
+    if (color == null) {
+      return null
+    }
+    return if (JBColor.isBright()) {
+      this.copy(lightRgb = color.rgb)
+    }
+    else {
+      this.copy(darkRgb = color.rgb)
+    }
+  }
+}
 
 private class LogColorConverter : Converter<LogColor>() {
   override fun toString(value: LogColor) = Json.encodeToString(value)
   override fun fromString(value: String): LogColor? = try {
     Json.decodeFromString(value)
-  } catch (_: SerializationException) {
+  }
+  catch (_: SerializationException) {
     val rgb = value.toIntOrNull()
     rgb?.let { LogColor(it, it) }
   }
