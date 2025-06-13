@@ -14,6 +14,7 @@ jvm_library(
   srcs = glob(["kotlin/**/*.kt", "kotlin/**/*.java"], allow_empty = True),
   deps = [
     "@community//platform/analysis-api:analysis",
+    "@community//platform/core-api:core",
     "@community//platform/editor-ui-api:editor-ui",
     "@community//platform/lang-impl",
     "@community//platform/core-ui",
