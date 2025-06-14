@@ -31,6 +31,7 @@ jvm_library(
     "@community//platform/lang-impl",
     "@community//platform/core-ui",
     "@community//platform/platform-impl/codeinsight-inline:ide-codeinsight-inline",
+    "@community//platform/projectModel-api:projectModel",
     "@community//platform/util/jdom",
     "@lib//:miglayout-swing",
     "@community//RegExpSupport:regexp",
