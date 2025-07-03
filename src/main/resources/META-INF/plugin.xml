@@ -2,7 +2,6 @@
   <id>com.intellij.ideolog</id>
   <name>Ideolog</name>
   <vendor>JetBrains</vendor>
-  <depends>com.intellij.modules.lang</depends>
   <resource-bundle>messages.IdeologBundle</resource-bundle>
   <description><![CDATA[
     <h1>Interactive viewer for '.log' files.</h1>
@@ -25,6 +24,11 @@
       Issue tracker: <a href="https://github.com/JetBrains/ideolog/issues">https://github.com/JetBrains/ideolog/issues</a>
     </p>
   ]]></description>
+
+  <dependencies>
+    <plugin id="com.intellij.modules.lang"/>
+    <module name="intellij.regexp"/>
+  </dependencies>
 
   <content>
     <module name="intellij.php.ideolog"/>
