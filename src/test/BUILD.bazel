@@ -1,6 +1,5 @@
 ### auto-generated section `build intellij.ideolog.tests` start
-load("@community//build:tests-options.bzl", "jps_test")
-load("@rules_jvm//:jvm.bzl", "jvm_library", "jvm_resources", "jvm_test")
+load("@rules_jvm//:jvm.bzl", "jvm_library", "jvm_resources")
 
 jvm_resources(
   name = "ideolog-tests_test_resources",
@@ -33,9 +32,13 @@ jvm_library(
     "//plugins/ideolog/textmate",
   ]
 )
+### auto-generated section `build intellij.ideolog.tests` end
+
+### auto-generated section `test intellij.ideolog.tests` start
+load("@community//build:tests-options.bzl", "jps_test")
 
 jps_test(
   name = "ideolog-tests_test",
   runtime_deps = [":ideolog-tests_test_lib"]
 )
-### auto-generated section `build intellij.ideolog.tests` end
+### auto-generated section `test intellij.ideolog.tests` end
