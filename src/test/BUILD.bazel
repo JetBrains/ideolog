@@ -9,6 +9,7 @@ jvm_resources(
 
 jvm_library(
   name = "ideolog-tests_test_lib",
+  module_name = "intellij.ideolog.tests",
   visibility = ["//visibility:public"],
   srcs = glob(["kotlin/**/*.kt", "kotlin/**/*.java"], allow_empty = True),
   deps = [
