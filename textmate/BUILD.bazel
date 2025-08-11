@@ -41,7 +41,7 @@ jvm_library(
     "@community//platform/editor-ui-api:editor-ui",
     "//plugins/ideolog",
     "@community//plugins/textmate",
-    "@community//plugins/textmate:textmate_test_lib",
+    "@community//plugins/textmate/plugin",
     "@community//platform/testFramework",
     "@community//platform/testFramework:testFramework_test_lib",
   ],
