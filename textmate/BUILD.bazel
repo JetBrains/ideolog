@@ -42,6 +42,7 @@ jvm_library(
     "//plugins/ideolog",
     "@community//plugins/textmate",
     "@community//plugins/textmate/plugin",
+    "@community//plugins/textmate/backend",
     "@community//platform/testFramework",
     "@community//platform/testFramework:testFramework_test_lib",
   ],
