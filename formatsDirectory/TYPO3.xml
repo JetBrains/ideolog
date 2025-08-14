@@ -1,0 +1,10 @@
+<State>
+  <highlightingPatterns>
+    <LogHighlightingPattern enabled="true" pattern="^\s*emergency\s*$" captureGroup="-1" action="HIGHLIGHT_LINE" fg="-39836" bold="true" italic="false" stripe="true" uuid="8e14a5d0-4947-41b8-9900-93e7883517b6" />
+    <LogHighlightingPattern enabled="true" pattern="^\s*alert\s*$" captureGroup="-1" action="HIGHLIGHT_LINE" fg="-6329600" bold="true" italic="false" stripe="false" uuid="dd3d25a2-0e72-429d-a729-4885f7f15937" />
+  </highlightingPatterns>
+  <parsingPatterns>
+    <LogParsingPattern enabled="true" name="TYPO3" pattern="^(\w{3}, \d{2} \w{3} \d{4} \d{2}:\d{2}:\d{2} \+\d{4}) \[(\w+)] request=&quot;([^&quot;]+)&quot; component=&quot;([^&quot;]+)&quot;: (.+)$" timePattern="EEE, dd MMM yyyy HH:mm:ss Z" linePattern="^\w{3}," timeId="1" severityId="2" categoryId="4" fullmatch="false" uuid="1f39f138-a343-4378-84e5-19ce459ac9f8" />
+  </parsingPatterns>
+  <settingsVersion>13</settingsVersion>
+</State>
