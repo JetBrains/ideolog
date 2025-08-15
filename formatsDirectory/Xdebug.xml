@@ -1,0 +1,12 @@
+<State>
+  <highlightingPatterns>
+    <LogHighlightingPattern pattern="^\s*ERR\s*$" formatId="6c083f50-56bc-4e71-9bde-db86a3faa90d" captureGroup="-1" action="HIGHLIGHT_LINE" fg="{&quot;lightRgb&quot;:-39836,&quot;darkRgb&quot;:-39836}" bold="true" uuid="f06c3429-5799-49cb-877a-a5bb9df5d269" />
+    <LogHighlightingPattern pattern="^\s*INFO\s*$" formatId="6c083f50-56bc-4e71-9bde-db86a3faa90d" captureGroup="-1" action="HIGHLIGHT_LINE" fg="{&quot;lightRgb&quot;:-10316203,&quot;darkRgb&quot;:-10316203}" uuid="576f17af-59dd-4d10-a860-303096e9d255" />
+    <LogHighlightingPattern pattern="^\s*WARN\s*$" formatId="6c083f50-56bc-4e71-9bde-db86a3faa90d" captureGroup="-1" action="HIGHLIGHT_LINE" fg="{&quot;lightRgb&quot;:-6329600,&quot;darkRgb&quot;:-6329600}" bold="true" uuid="ec8bb56c-a8b1-4126-8c29-56ce582edcc6" />
+    <LogHighlightingPattern pattern="^\s*CRIT\s*$" formatId="6c083f50-56bc-4e71-9bde-db86a3faa90d" captureGroup="-1" action="HIGHLIGHT_LINE" fg="{&quot;lightRgb&quot;:-39836,&quot;darkRgb&quot;:-39836}" bold="true" uuid="b18ddc2d-f7ab-4b82-82a0-9a0f6505799e" />
+  </highlightingPatterns>
+  <parsingPatterns>
+    <LogParsingPattern name="Xdebug" pattern="\[(\d+)\](?: \[([A-Za-z ]+)\] ([A-Z]+):\s)?(.+)" timePattern="yyyy-MM-dd HH:mm:ss.SSSSSS" linePattern="^\[" severityId="2" categoryId="1" uuid="6c083f50-56bc-4e71-9bde-db86a3faa90d" />
+  </parsingPatterns>
+  <settingsVersion>13</settingsVersion>
+</State>
