@@ -17,7 +17,6 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileWithId
 import com.intellij.openapi.vfs.newvfs.ManagingFS
-import com.intellij.openapi.vfs.newvfs.persistent.PersistentFS
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.impl.cache.CacheManager
@@ -188,7 +187,7 @@ class LogJumpToSourceIntention : IntentionAction {
         val filesWithCategory = cacheManager.getVirtualFilesWithWord(evt.category, UsageSearchContext.ANY, GlobalSearchScope.projectScope(project), false).toMutableSet()
         val filesWithLevel = cacheManager.getVirtualFilesWithWord(evt.level, UsageSearchContext.ANY, GlobalSearchScope.projectScope(project), false).toMutableSet()
 
-        val fs = ManagingFS.getInstance() as PersistentFS
+        val fs = ManagingFS.getInstance()
         val pfi = ProjectFileIndex.getInstance(project)
 
 
