@@ -21,7 +21,7 @@ jvm_library(
   name = "ideolog",
   module_name = "intellij.ideolog",
   visibility = ["//visibility:public"],
-  srcs = glob(["src/main/kotlin/**/*.kt", "src/main/kotlin/**/*.java"], allow_empty = True),
+  srcs = glob(["src/main/kotlin/**/*.kt", "src/main/kotlin/**/*.java", "src/main/kotlin/**/*.form"], allow_empty = True),
   kotlinc_opts = ":custom_ideolog",
   deps = [
     "@community//platform/analysis-api:analysis",

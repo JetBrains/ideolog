@@ -11,7 +11,7 @@ jvm_library(
   name = "ideolog-tests_test_lib",
   module_name = "intellij.ideolog.tests",
   visibility = ["//visibility:public"],
-  srcs = glob(["kotlin/**/*.kt", "kotlin/**/*.java"], allow_empty = True),
+  srcs = glob(["kotlin/**/*.kt", "kotlin/**/*.java", "kotlin/**/*.form"], allow_empty = True),
   deps = [
     "@community//platform/analysis-api:analysis",
     "@community//platform/core-api:core",

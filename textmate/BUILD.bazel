@@ -17,7 +17,7 @@ jvm_library(
   name = "textmate",
   module_name = "intellij.ideolog.textmate",
   visibility = ["//visibility:public"],
-  srcs = glob(["src/main/kotlin/**/*.kt", "src/main/kotlin/**/*.java"], allow_empty = True),
+  srcs = glob(["src/main/kotlin/**/*.kt", "src/main/kotlin/**/*.java", "src/main/kotlin/**/*.form"], allow_empty = True),
   deps = [
     "@lib//:kotlin-stdlib",
     "@community//platform/core-api:core",
@@ -32,7 +32,7 @@ jvm_library(
 jvm_library(
   name = "textmate_test_lib",
   visibility = ["//visibility:public"],
-  srcs = glob(["tests/**/*.kt", "tests/**/*.java"], allow_empty = True),
+  srcs = glob(["tests/**/*.kt", "tests/**/*.java", "tests/**/*.form"], allow_empty = True),
   associates = [":textmate"],
   deps = [
     "@lib//:kotlin-stdlib",
