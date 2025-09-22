@@ -46,10 +46,7 @@ jvm_library(
     "@community//platform/testFramework",
     "@community//platform/testFramework:testFramework_test_lib",
   ],
-  runtime_deps = [
-    ":textmate_resources",
-    ":textmate_test_resources",
-  ]
+  runtime_deps = [":textmate_test_resources"]
 )
 ### auto-generated section `build intellij.ideolog.textmate` end
 
