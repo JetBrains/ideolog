@@ -40,8 +40,8 @@ jvm_library(
     "@community//platform/editor-ui-ex:editor-ex",
     "@community//platform/indexing-impl",
     "@lib//:kotlin-stdlib",
-    "@lib//:kotlinx-serialization-json",
-    "@lib//:kotlinx-serialization-core",
+    "@community//libraries/kotlinx/serialization/json",
+    "@community//libraries/kotlinx/serialization/core",
   ],
   runtime_deps = [":ideolog_resources"]
 )
