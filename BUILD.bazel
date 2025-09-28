@@ -1,6 +1,6 @@
 ### auto-generated section `build intellij.ideolog` start
 load("@community//build:compiler-options.bzl", "create_kotlinc_options")
-load("@rules_jvm//:jvm.bzl", "jvm_library", "jvm_resources")
+load("@rules_jvm//:jvm.bzl", "jvm_library", "resourcegroup")
 
 create_kotlinc_options(
   name = "custom_ideolog",
@@ -11,9 +11,9 @@ create_kotlinc_options(
   ]
 )
 
-jvm_resources(
+resourcegroup(
   name = "ideolog_resources",
-  files = glob(["src/main/resources/**/*"]),
+  srcs = glob(["src/main/resources/**/*"]),
   strip_prefix = "src/main/resources"
 )
 
@@ -22,6 +22,7 @@ jvm_library(
   module_name = "intellij.ideolog",
   visibility = ["//visibility:public"],
   srcs = glob(["src/main/kotlin/**/*.kt", "src/main/kotlin/**/*.java", "src/main/kotlin/**/*.form"], allow_empty = True),
+  resources = [":ideolog_resources"],
   kotlinc_opts = ":custom_ideolog",
   deps = [
     "@community//platform/analysis-api:analysis",
@@ -42,7 +43,6 @@ jvm_library(
     "@lib//:kotlin-stdlib",
     "@community//libraries/kotlinx/serialization/json",
     "@community//libraries/kotlinx/serialization/core",
-  ],
-  runtime_deps = [":ideolog_resources"]
+  ]
 )
 ### auto-generated section `build intellij.ideolog` end

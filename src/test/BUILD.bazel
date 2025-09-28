@@ -1,9 +1,9 @@
 ### auto-generated section `build intellij.ideolog.tests` start
-load("@rules_jvm//:jvm.bzl", "jvm_library", "jvm_resources")
+load("@rules_jvm//:jvm.bzl", "jvm_library", "resourcegroup")
 
-jvm_resources(
+resourcegroup(
   name = "ideolog-tests_test_resources",
-  files = glob(["resources/**/*"]),
+  srcs = glob(["resources/**/*"]),
   strip_prefix = "resources"
 )
 
@@ -12,6 +12,7 @@ jvm_library(
   module_name = "intellij.ideolog.tests",
   visibility = ["//visibility:public"],
   srcs = glob(["kotlin/**/*.kt", "kotlin/**/*.java", "kotlin/**/*.form"], allow_empty = True),
+  resources = [":ideolog-tests_test_resources"],
   deps = [
     "@community//platform/analysis-api:analysis",
     "@community//platform/core-api:core",
@@ -28,10 +29,7 @@ jvm_library(
     "@community//platform/testFramework:testFramework_test_lib",
     "//plugins/ideolog",
   ],
-  runtime_deps = [
-    ":ideolog-tests_test_resources",
-    "//plugins/ideolog/textmate",
-  ]
+  runtime_deps = ["//plugins/ideolog/textmate"]
 )
 ### auto-generated section `build intellij.ideolog.tests` end
 

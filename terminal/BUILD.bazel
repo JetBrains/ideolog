@@ -1,9 +1,9 @@
 ### auto-generated section `build intellij.ideolog.terminal` start
-load("@rules_jvm//:jvm.bzl", "jvm_library", "jvm_resources")
+load("@rules_jvm//:jvm.bzl", "jvm_library", "resourcegroup")
 
-jvm_resources(
+resourcegroup(
   name = "terminal_resources",
-  files = glob(["resources/**/*"]),
+  srcs = glob(["resources/**/*"]),
   strip_prefix = "resources"
 )
 
@@ -12,6 +12,7 @@ jvm_library(
   module_name = "intellij.ideolog.terminal",
   visibility = ["//visibility:public"],
   srcs = glob(["src/main/kotlin/**/*.kt", "src/main/kotlin/**/*.java", "src/main/kotlin/**/*.form"], allow_empty = True),
+  resources = [":terminal_resources"],
   deps = [
     "@lib//:kotlin-stdlib",
     "@community//platform/util",
@@ -20,7 +21,6 @@ jvm_library(
     "//plugins/ideolog",
     "@community//platform/core-api:core",
     "@community//platform/statistics",
-  ],
-  runtime_deps = [":terminal_resources"]
+  ]
 )
 ### auto-generated section `build intellij.ideolog.terminal` end
