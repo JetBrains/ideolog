@@ -21,7 +21,7 @@ jvm_library(
     "@community//platform/core-ui",
     "@community//platform/projectModel-api:projectModel",
     "@community//platform/util/jdom",
-    "@lib//:miglayout-swing",
+    "@community//libraries/miglayout-swing",
     "@community//platform/editor-ui-ex:editor-ex",
     "@community//RegExpSupport:regexp",
     "@community//RegExpSupport:regexp_test_lib",
