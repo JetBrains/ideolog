@@ -278,6 +278,18 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
         newState.version = 13
         return@lambda newState
       },
+      13 to lambda@ { oldState ->
+        val newState = oldState.clone()
+
+        newState.patterns.forEach { highlightingPattern ->
+          if (highlightingPattern.uuid in DefaultSettingsStoreItems.HighlightingPatternsUUIDs) {
+            highlightingPattern.captureGroup = -1
+          }
+        }
+
+        newState.version = 14
+        return@lambda newState
+      }
     )
     private val externalSettingsUpgraders = setOf<(State) -> State> { oldState ->
       val newState = oldState.clone()
@@ -512,7 +524,7 @@ data class LogHighlightingPattern(@Attribute("enabled") var enabled: Boolean,
                                   @Attribute("uuid", converter = UUIDConverter::class) var uuid: UUID) : Cloneable {
 
   @Suppress("unused")
-  constructor() : this(true, "", null, 0, LogHighlightingAction.HIGHLIGHT_FIELD, null, null, false, false, false, UUID.randomUUID())
+  constructor() : this(true, "", null, -1, LogHighlightingAction.HIGHLIGHT_LINE, null, null, false, false, false, UUID.randomUUID())
 
   var foregroundColor: Color?
     @Transient get() = fgRgb?.toJBColor()
