@@ -67,7 +67,9 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
       cache?.clear()
     }
 
-    format = null
+    if (format?.myRegexLogParser == null) {
+      format = null
+    }
   }
 
   open fun detectLogFileFormat(startOffset: Int = 0): LogFileFormat {
