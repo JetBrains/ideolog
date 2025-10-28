@@ -8,6 +8,7 @@ import com.intellij.ideolog.lex.LogToken
 import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.ideolog.util.detectIdeologContext
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColorsScheme
@@ -15,6 +16,8 @@ import com.intellij.openapi.editor.highlighter.HighlighterIterator
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.psi.tree.IElementType
 import com.intellij.util.containers.addIfNotNull
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.awt.Color
 import java.awt.Font
 import java.util.regex.Pattern
@@ -304,10 +307,9 @@ open class LogHighlightingIterator(startOffset: Int,
     if (!settingsStore.myState.highlightLinks || !ApplicationManager.getApplication().isDispatchThread)// || event.indexOf('\n').let { it < 0 || it >= event.length - 1 })
       return
 
-    ApplicationManager.getApplication().executeOnPooledThread {
-      // Service init could be slow due to filters loading
-      val service = LogHeavyFilterService.getInstance(project)
-      ApplicationManager.getApplication().runReadAction {
+    val service = LogHeavyFilterService.getInstance(project)
+    service.cs.launch(Dispatchers.IO) {
+      readAction {
         // could be slow and requires read action
         service.enqueueHeavyFiltering(myEditor, eventOffset, event)
       }

@@ -7,19 +7,20 @@ import com.intellij.execution.impl.EditorHyperlinkSupport
 import com.intellij.ideolog.filters.BlackListFilterClassProvider
 import com.intellij.ideolog.filters.PrioritizedFilter
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-open class LogHeavyFilterService(private val project: Project, cs: CoroutineScope): Disposable {
+open class LogHeavyFilterService(private val project: Project, val cs: CoroutineScope): Disposable {
 
   companion object {
     fun getInstance(project: Project): LogHeavyFilterService {
@@ -80,9 +81,9 @@ open class LogHeavyFilterService(private val project: Project, cs: CoroutineScop
     fun consumeResult(result: Filter.Result?, addOffset: Boolean) {
       result ?: return
       if (editor.isDisposed) return
-      ApplicationManager.getApplication().invokeLater { // todo: consider MergingQueue if this generates too many events
-        if (editor.isDisposed) return@invokeLater
-        if (markupModel.getUserData(markupHighlightedExceptionsKey) !== set) return@invokeLater
+      cs.launch(Dispatchers.EDT) { // todo: consider MergingQueue if this generates too many events
+        if (editor.isDisposed) return@launch
+        if (markupModel.getUserData(markupHighlightedExceptionsKey) !== set) return@launch
         val extraOffset = if (addOffset) eventOffset else 0
         result.resultItems.forEach {
           val hyperlinkInfo = it.hyperlinkInfo
