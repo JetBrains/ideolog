@@ -2,8 +2,11 @@ package com.intellij.ideolog.largeFile.highlighting
 
 import com.intellij.ideolog.highlighting.LogHighlightingIterator
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColorsScheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class LargeLogHighlightingIterator(
   startOffset: Int,
@@ -16,9 +19,9 @@ class LargeLogHighlightingIterator(
     if (!settingsStore.myState.highlightLinks || !ApplicationManager.getApplication().isDispatchThread)
       return
 
-    ApplicationManager.getApplication().executeOnPooledThread {
-      val service = LargeLogHeavyFilterService.getInstance(project)
-      ApplicationManager.getApplication().runReadAction {
+    val service = LargeLogHeavyFilterService.getInstance(project)
+    service.cs.launch(Dispatchers.IO) {
+      readAction {
         service.enqueueHeavyFiltering(myEditor, eventOffset, event)
       }
     }
