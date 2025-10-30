@@ -134,7 +134,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
     fun getInstance(): LogHighlightingSettingsStore = getService<LogHighlightingSettingsStore>()
     private val logger = Logger.getInstance("LogHighlightingSettingsStore")
 
-    const val CURRENT_SETTINGS_VERSION: Int = 13
+    const val CURRENT_SETTINGS_VERSION: Int = 14
 
     private val cleanState = State()
 
