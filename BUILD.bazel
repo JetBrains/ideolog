@@ -44,6 +44,8 @@ jvm_library(
     "@lib//:kotlin-stdlib",
     "@community//libraries/kotlinx/serialization/json",
     "@community//libraries/kotlinx/serialization/core",
+    "@community//platform/execution",
+    "@community//platform/lang-api:lang",
   ]
 )
 ### auto-generated section `build intellij.ideolog` end
