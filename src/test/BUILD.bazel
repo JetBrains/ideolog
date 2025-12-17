@@ -10,7 +10,11 @@ resourcegroup(
 jvm_library(
   name = "ideolog-tests",
   visibility = ["//visibility:public"],
-  srcs = glob([], allow_empty = True)
+  srcs = glob([], allow_empty = True),
+  runtime_deps = [
+    "@community//platform/editor-ui-ex:editor-ex",
+    "//plugins/ideolog/textmate",
+  ]
 )
 
 jvm_library(
@@ -36,7 +40,7 @@ jvm_library(
     "@community//platform/testFramework:testFramework_test_lib",
     "//plugins/ideolog",
   ],
-  runtime_deps = ["//plugins/ideolog/textmate"]
+  runtime_deps = [":ideolog-tests"]
 )
 ### auto-generated section `build intellij.ideolog.tests` end
 
