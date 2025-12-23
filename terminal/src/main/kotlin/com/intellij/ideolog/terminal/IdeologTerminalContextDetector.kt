@@ -9,7 +9,7 @@ import org.jetbrains.plugins.terminal.block.util.TerminalDataContextUtils.isOutp
 
 private val documentContextKey = Key.create<IdeologDocumentContext>("IdeologTerminalDocumentContext")
 
-private class IdeologTerminalContextDetector : IdeologContextDetector {
+internal class IdeologTerminalContextDetector : IdeologContextDetector {
   override fun detectIdeologContext(editor: Editor): IdeologDocumentContext {
     return with(editor.document) {
       getUserData(documentContextKey) ?: run {
