@@ -12,7 +12,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.isTooLarge
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotificationProvider
-import java.util.*
+import java.util.Locale
 import java.util.function.Function
 import javax.swing.JComponent
 

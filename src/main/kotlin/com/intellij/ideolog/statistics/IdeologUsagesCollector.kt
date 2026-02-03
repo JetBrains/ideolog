@@ -5,7 +5,7 @@ import com.intellij.internal.statistic.eventLog.EventLogGroup
 import com.intellij.internal.statistic.eventLog.events.EventFields
 import com.intellij.internal.statistic.service.fus.collectors.CounterUsagesCollector
 import com.intellij.openapi.project.Project
-import java.util.*
+import java.util.Locale
 
 private enum class AllowedLogFileFormat(val value: String) {
   LARAVEL("Laravel"),

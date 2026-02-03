@@ -24,7 +24,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.intellij.lang.annotations.Language
 import java.awt.Color
-import java.util.*
+import java.util.UUID
 
 object DefaultSettingsStoreItems {
   val PipeSeparated: LogParsingPattern = LogParsingPattern(

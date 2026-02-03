@@ -8,7 +8,6 @@ import com.intellij.ideolog.psi.LogPsiFile
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import java.util.*
 
 
 class ExtendsSelection : ExtendWordSelectionHandlerBase() {

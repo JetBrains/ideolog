@@ -11,8 +11,14 @@ import com.intellij.util.ui.components.BorderLayoutPanel
 import java.awt.Component
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
-import java.util.*
-import javax.swing.*
+import java.util.UUID
+import javax.swing.DefaultListCellRenderer
+import javax.swing.JCheckBox
+import javax.swing.JComboBox
+import javax.swing.JComponent
+import javax.swing.JLabel
+import javax.swing.JList
+import javax.swing.JPanel
 
 class LogHighlightingPatternSettingsDialog(
   private val item: LogHighlightingPattern,

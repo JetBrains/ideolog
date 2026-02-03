@@ -29,7 +29,12 @@ import java.awt.BorderLayout
 import java.awt.FlowLayout
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
-import javax.swing.*
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JComponent
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JTable
 
 
 class LogHighlightingConfigurable : BaseConfigurable() {

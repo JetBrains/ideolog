@@ -5,8 +5,7 @@ import com.intellij.ideolog.lex.LogToken
 import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.text.TrigramBuilder
-import java.util.*
-import kotlin.collections.HashSet
+import java.util.Locale
 
 class LogEvent(val rawText: CharSequence, val startOffset: Int, fileType: LogFileFormat) {
   val endOffset: Int = startOffset + rawText.length

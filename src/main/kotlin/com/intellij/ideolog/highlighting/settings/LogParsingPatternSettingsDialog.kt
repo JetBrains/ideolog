@@ -16,7 +16,8 @@ import com.intellij.util.ui.update.Update
 import net.miginfocom.swing.MigLayout
 import org.intellij.lang.regexp.RegExpFileType
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.UUID
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 import javax.swing.JComponent

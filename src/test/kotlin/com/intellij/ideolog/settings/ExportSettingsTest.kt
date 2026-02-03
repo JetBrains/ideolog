@@ -1,6 +1,10 @@
 package com.intellij.ideolog.settings
 
-import com.intellij.ideolog.highlighting.settings.*
+import com.intellij.ideolog.highlighting.settings.LogFormatTableModel
+import com.intellij.ideolog.highlighting.settings.LogHighlightingConfigurable
+import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
+import com.intellij.ideolog.highlighting.settings.LogPatternActionRenderer
+import com.intellij.ideolog.highlighting.settings.LogPatternTableModel
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.JBUI

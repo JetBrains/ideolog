@@ -6,7 +6,6 @@ import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
-import java.util.*
 import kotlin.concurrent.getOrSet
 
 object LogParsingUtils {

@@ -1,7 +1,7 @@
 package com.intellij.ideolog.highlighting.settings
 
 import com.intellij.ideolog.IdeologBundle
-import java.util.*
+import java.util.UUID
 import javax.swing.table.AbstractTableModel
 
 class LogFormatTableModel(private var state: LogHighlightingSettingsStore.State) : AbstractTableModel() {

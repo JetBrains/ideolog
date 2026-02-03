@@ -5,7 +5,7 @@ import com.intellij.ideolog.util.detectIdeologContext
 import com.intellij.openapi.editor.Editor
 import java.text.DateFormat
 import java.text.ParseException
-import java.util.*
+import java.util.UUID
 import java.util.regex.Pattern
 
 data class LogToken(val startOffset: Int, var endOffset: Int, val isSeparator: Boolean) {

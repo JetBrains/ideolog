@@ -6,7 +6,7 @@ import com.intellij.ideolog.lex.LogFileFormat
 import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColorsScheme
-import java.util.*
+import java.util.TreeSet
 
 class TerminalLogHighlightingIterator(
   private val highlightingInfos: TreeSet<TerminalCommandBlockHighlighter.HighlightingInfo>,

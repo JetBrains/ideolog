@@ -14,7 +14,8 @@ import com.intellij.openapi.util.Key
 import java.awt.Color
 import java.awt.Font
 import java.awt.Point
-import java.util.*
+import java.util.Timer
+import java.util.TimerTask
 import java.util.regex.Pattern
 import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.math.ceil

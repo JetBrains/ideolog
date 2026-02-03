@@ -10,7 +10,7 @@ import com.intellij.openapi.editor.highlighter.HighlighterIterator
 import com.intellij.openapi.util.registry.Registry
 import org.jetbrains.plugins.terminal.block.output.CommandBlock
 import org.jetbrains.plugins.terminal.block.output.highlighting.TerminalCommandBlockHighlighter
-import java.util.*
+import java.util.TreeSet
 
 internal val fileReadCommands = listOf("cat", "head", "tail")
 
