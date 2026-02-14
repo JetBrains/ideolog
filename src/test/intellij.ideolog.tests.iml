@@ -22,5 +22,6 @@
     <orderEntry type="module" module-name="intellij.platform.testFramework" scope="TEST" />
     <orderEntry type="module" module-name="intellij.ideolog" scope="TEST" />
     <orderEntry type="module" module-name="intellij.ideolog.textmate" scope="RUNTIME" />
+    <orderEntry type="module" module-name="intellij.platform.images.tests" scope="TEST" />
   </component>
 </module>
