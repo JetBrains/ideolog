@@ -35,11 +35,11 @@ jvm_library(
     "@community//libraries/miglayout-swing",
     "@community//platform/editor-ui-ex:editor-ex",
     "@community//RegExpSupport:regexp",
-    "@community//RegExpSupport:regexp_test_lib",
     "@community//platform/testFramework",
     "@community//platform/testFramework:testFramework_test_lib",
     "//plugins/ideolog",
     "@community//images:images-tests_test_lib",
+    "@community//RegExpSupport:regexp-tests_test_lib",
   ],
   runtime_deps = [":ideolog-tests"]
 )
