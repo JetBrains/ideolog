@@ -11,20 +11,72 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.readAction
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.highlighter.HighlighterIterator
 import com.intellij.openapi.editor.markup.TextAttributes
+import com.intellij.openapi.util.Key
 import com.intellij.psi.tree.IElementType
 import com.intellij.util.containers.addIfNotNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.awt.Color
 import java.awt.Font
-import java.util.regex.Pattern
 import kotlin.math.abs
 import kotlin.math.min
 
 const val timeDifferenceToRed: Long = 15000
+
+internal data class EventPiece(val offsetStart: Int, val offsetEnd: Int, val textAttributes: TextAttributes, val isSeparator: Boolean)
+
+internal data class EventPieceCacheKey(
+  val eventLineRange: IntRange,
+  val prevEventLineRange: IntRange,
+  val highlightColumn: Int,
+  val highlightTimeEnabled: Boolean,
+  val highlightingSet: Set<String>,
+  val defaultBackground: Int,
+  val defaultForeground: Int,
+)
+
+private val EVENT_PIECE_CACHE_KEY = Key.create<EventPieceCache>("Ideolog.EventPieceCache")
+
+internal class EventPieceCache {
+  private val maxSize = 256
+
+  private val map = object : LinkedHashMap<EventPieceCacheKey, List<EventPiece>>(128, 0.75f, true) {
+    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<EventPieceCacheKey, List<EventPiece>>): Boolean {
+      return size > maxSize
+    }
+  }
+
+  fun get(key: EventPieceCacheKey): List<EventPiece>? {
+    return map[key]
+  }
+
+  fun put(key: EventPieceCacheKey, pieces: List<EventPiece>) {
+    map[key] = pieces
+  }
+
+  fun invalidate() {
+    map.clear()
+  }
+
+  companion object {
+    fun getOrCreate(editor: Editor): EventPieceCache {
+      return editor.getUserData(EVENT_PIECE_CACHE_KEY) ?: run {
+        editor.putUserData(EVENT_PIECE_CACHE_KEY, EventPieceCache())
+        editor.getUserData(EVENT_PIECE_CACHE_KEY)!!
+      }
+    }
+
+    fun invalidateFor(document: Document) {
+      for (editor in EditorFactory.getInstance().getEditors(document)) {
+        editor.getUserData(EVENT_PIECE_CACHE_KEY)?.invalidate()
+      }
+    }
+  }
+}
 
 open class LogHighlightingIterator(startOffset: Int,
                                    protected val myEditor: Editor,
@@ -38,6 +90,8 @@ open class LogHighlightingIterator(startOffset: Int,
 
   protected val settingsStore: LogHighlightingSettingsStore = LogHighlightingSettingsStore.getInstance()
   private val myPatterns = settingsStore.getCompiledHighlightingPatterns()
+  private val myHighlightingSet: Set<String> = myEditor.getUserData(highlightingSetUserKey)?.toSet() ?: emptySet()
+  private val eventPieceCache = EventPieceCache.getOrCreate(myEditor)
 
   private var parsedTokens = ArrayList<LogToken>()
   private val eventPieces = ArrayList<EventPiece>()
@@ -126,7 +180,28 @@ open class LogHighlightingIterator(startOffset: Int,
   }
 
   private fun reparsePiecesLines(prevEventLineRange: IntRange, lineRange: IntRange) {
+    val highlightColumn = myEditor.getUserData(highlightingUserKey) ?: -1
+    val highlightTime = myEditor.getUserData(highlightTimeKey) == true
+    val cacheKey = EventPieceCacheKey(
+      lineRange,
+      prevEventLineRange,
+      highlightColumn,
+      highlightTime,
+      myHighlightingSet,
+      myColors.defaultBackground.rgb,
+      myColors.defaultForeground.rgb,
+    )
+    val cached = eventPieceCache.get(cacheKey)
+    if (cached != null) {
+      eventPieces.clear()
+      eventPieces.addAll(cached)
+      curEvent = linesSubSequence(lineRange)
+      return
+    }
+
     reparsePieces(linesSubSequence(prevEventLineRange), linesSubSequence(lineRange), document.getLineStartOffset(lineRange.first))
+
+    eventPieceCache.put(cacheKey, ArrayList(eventPieces))
   }
 
   private fun reparsePieces(prevEvent: CharSequence, event: CharSequence, offset: Int) {
@@ -163,7 +238,6 @@ open class LogHighlightingIterator(startOffset: Int,
       val columnValue = columnValues[highlightColumn]
       lineBackground = getLineBackground(columnValue, myColors.defaultBackground) ?: lineBackground
     }
-    val highlightingSet = myEditor.getUserData(highlightingSetUserKey) ?: emptySet()
 
     for ((pattern, info) in myPatterns) {
       if (!fileFormat.validateFormatUUID(info.formatId)) {
@@ -199,7 +273,7 @@ open class LogHighlightingIterator(startOffset: Int,
     }
 
     @Suppress("LoopToCallChain")
-    for (word in highlightingSet) {
+    for (word in myHighlightingSet) {
       if (event.contains(word)) {
         lineBackground = getLineBackground(word, myColors.defaultBackground) ?: lineBackground
       }
@@ -397,22 +471,23 @@ open class LogHighlightingIterator(startOffset: Int,
     return myEditor.document
   }
 
-  private data class EventPiece(val offsetStart: Int, val offsetEnd: Int, val textAttributes: TextAttributes, val isSeparator: Boolean)
+  private val myHsbVals: FloatArray = FloatArray(3)
+
   companion object {
-    val myHsbVals: FloatArray = FloatArray(3)
     fun getLineBackground(columnValue: CharSequence?, defaultBackground: Color): Color? {
       if (columnValue == null) {
         return null
       }
       val hash = abs(columnValue.hashCode()) % 360
-      val bgHsl = Color.RGBtoHSB(defaultBackground.red, defaultBackground.green, defaultBackground.blue, myHsbVals)
-      bgHsl[0] = hash / 360.0f
-      bgHsl[1] = if (bgHsl[2] < 0.5f)
+      val hsbVals = FloatArray(3)
+      Color.RGBtoHSB(defaultBackground.red, defaultBackground.green, defaultBackground.blue, hsbVals)
+      hsbVals[0] = hash / 360.0f
+      hsbVals[1] = if (hsbVals[2] < 0.5f)
         1.0f
       else
         0.2f
-      if (bgHsl[2] < 0.5f) bgHsl[2] = 0.3f
-      return Color(Color.HSBtoRGB(bgHsl[0], bgHsl[1], bgHsl[2]))
+      if (hsbVals[2] < 0.5f) hsbVals[2] = 0.3f
+      return Color(Color.HSBtoRGB(hsbVals[0], hsbVals[1], hsbVals[2]))
     }
   }
 
