@@ -48,4 +48,35 @@ jvm_library(
     "@community//platform/lang-api:lang",
   ]
 )
+
+jvm_library(
+  name = "ideolog_test_lib",
+  module_name = "intellij.ideolog",
+  visibility = ["//visibility:public"],
+  srcs = glob([], allow_empty = True),
+  kotlinc_opts = ":custom_ideolog",
+  runtime_deps = [
+    ":ideolog",
+    "@community//platform/analysis-api:analysis_test_lib",
+    "@community//platform/core-api:core_test_lib",
+    "@community//platform/editor-ui-api:editor-ui_test_lib",
+    "@community//platform/indexing-api:indexing_test_lib",
+    "@community//platform/core-impl:core-impl_test_lib",
+    "@community//platform/lang-impl:lang-impl_test_lib",
+    "@community//platform/core-ui:core-ui_test_lib",
+    "@community//platform/platform-impl/codeinsight-inline:ide-codeinsight-inline_test_lib",
+    "@community//platform/projectModel-api:projectModel_test_lib",
+    "@community//platform/util/jdom:jdom_test_lib",
+    "@community//libraries/miglayout-swing:miglayout-swing_test_lib",
+    "@community//RegExpSupport:regexp_test_lib",
+    "@community//platform/statistics:statistics_test_lib",
+    "@community//platform/platform-impl:ide-impl_test_lib",
+    "@community//platform/editor-ui-ex:editor-ex_test_lib",
+    "@community//platform/indexing-impl:indexing-impl_test_lib",
+    "@community//libraries/kotlinx/serialization/json:json_test_lib",
+    "@community//libraries/kotlinx/serialization/core:core_test_lib",
+    "@community//platform/execution:execution_test_lib",
+    "@community//platform/lang-api:lang_test_lib",
+  ]
+)
 ### auto-generated section `build intellij.ideolog` end
