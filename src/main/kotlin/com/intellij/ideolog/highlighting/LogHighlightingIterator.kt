@@ -49,7 +49,12 @@ open class LogHighlightingIterator(startOffset: Int,
     val startLine = myEditor.document.getLineNumber(startOffset)
 
     currentEventLineRange = detectIdeologContext(myEditor).getEvent(startLine)
-    val prevEventLineRange = detectIdeologContext(myEditor).getEvent(currentEventLineRange.first - 1)
+    val prevEventLineRange = if (myEditor.getUserData(highlightTimeKey) == true) {
+      detectIdeologContext(myEditor).getEvent(currentEventLineRange.first - 1)
+    }
+    else {
+      -1..-1
+    }
 
     reparsePiecesLines(prevEventLineRange, currentEventLineRange)
 
@@ -82,7 +87,8 @@ open class LogHighlightingIterator(startOffset: Int,
 
     val nextLineRange = detectIdeologContext(myEditor).getEvent(nextStartLine)
 
-    reparsePiecesLines(currentEventLineRange, nextLineRange)
+    val prevForNext = if (myEditor.getUserData(highlightTimeKey) == true) currentEventLineRange else -1..-1
+    reparsePiecesLines(prevForNext, nextLineRange)
     currentEventLineRange = nextLineRange
 
     eventPiecePointer = 0
@@ -95,7 +101,12 @@ open class LogHighlightingIterator(startOffset: Int,
     }
 
     val prevLineRange = detectIdeologContext(myEditor).getEvent(currentEventLineRange.first - 1)
-    val prevPrevLineRange = detectIdeologContext(myEditor).getEvent(prevLineRange.first - 1)
+    val prevPrevLineRange = if (myEditor.getUserData(highlightTimeKey) == true) {
+      detectIdeologContext(myEditor).getEvent(prevLineRange.first - 1)
+    }
+    else {
+      -1..-1
+    }
 
     reparsePiecesLines(prevPrevLineRange, prevLineRange)
     currentEventLineRange = prevLineRange
@@ -124,10 +135,16 @@ open class LogHighlightingIterator(startOffset: Int,
 
     parsedTokens.clear()
     val fileFormat = detectLogFileFormatByOffset(myEditor, offset)
-    if (myEditor.getUserData(highlightTimeKey) == true) {
+    val highlightTime = myEditor.getUserData(highlightTimeKey) == true
+    val prevTime = if (highlightTime) {
       fileFormat.tokenize(prevEvent, parsedTokens)
+      val time = fileFormat.extractDate(parsedTokens)?.takeFrom(prevEvent)?.let { fileFormat.parseLogEventTimeSeconds(it) }
+      parsedTokens.clear()
+      time
     }
-    val prevTime = fileFormat.extractDate(parsedTokens)?.takeFrom(prevEvent)?.let { fileFormat.parseLogEventTimeSeconds(it) }
+    else {
+      null
+    }
 
     eventPieces.clear()
     var lineForeground = myColors.defaultForeground
@@ -135,10 +152,9 @@ open class LogHighlightingIterator(startOffset: Int,
     var bold = false
     var italic = false
 
-    parsedTokens.clear()
     fileFormat.tokenize(event, parsedTokens)
     val dateToken = fileFormat.extractDate(parsedTokens)
-    val currentTime = dateToken?.takeFrom(event)?.let { fileFormat.parseLogEventTimeSeconds(it) }
+    val currentTime = if (highlightTime) dateToken?.takeFrom(event)?.let { fileFormat.parseLogEventTimeSeconds(it) } else null
 
     val columnValues = parsedTokens.filter { !it.isSeparator }.map { it.takeFrom(event) }
     val numColumns = columnValues.size
@@ -206,7 +222,7 @@ open class LogHighlightingIterator(startOffset: Int,
       var valueBold = bold
       var valueItalic = italic
 
-      if (prevTime != null && currentTime != null && valueIndex == timeIndex && myEditor.getUserData(highlightTimeKey) == true) {
+      if (prevTime != null && currentTime != null && valueIndex == timeIndex) {
         val diff = abs(prevTime - currentTime)
 
         val diffLtd = min(timeDifferenceToRed, diff)
