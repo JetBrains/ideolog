@@ -21,7 +21,6 @@ import kotlinx.coroutines.launch
 import java.awt.Color
 import java.awt.Font
 import java.util.regex.Pattern
-import java.util.regex.PatternSyntaxException
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -38,13 +37,7 @@ open class LogHighlightingIterator(startOffset: Int,
     get() = colorGetter()
 
   protected val settingsStore: LogHighlightingSettingsStore = LogHighlightingSettingsStore.getInstance()
-  private val myPatterns = settingsStore.myState.patterns.filter { it.enabled }.mapNotNull {
-    try {
-      Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it
-    } catch(e: PatternSyntaxException) {
-      null
-    }
-  } // todo: notify user about invalid patterns
+  private val myPatterns = settingsStore.getCompiledHighlightingPatterns()
 
   private var parsedTokens = ArrayList<LogToken>()
   private val eventPieces = ArrayList<EventPiece>()
