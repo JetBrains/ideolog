@@ -81,6 +81,7 @@ open class LogEditorHighlighter(
   }
 
   override fun documentChanged(event: DocumentEvent) {
+    EventPieceCache.invalidateFor(event.document)
     setText(event.document.charsSequence)
     myEditor?.repaint(0, myText.length)
   }
