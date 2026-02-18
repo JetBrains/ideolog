@@ -1,6 +1,7 @@
 package com.intellij.ideolog.util
 
 import com.intellij.ideolog.fileType.LogFileType
+import com.intellij.ideolog.highlighting.EventPieceCache
 import com.intellij.ideolog.highlighting.LogEvent
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.largeFile.IdeologLargeFileDocumentContext
@@ -62,6 +63,7 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
     synchronized(eventParsingLock) {
       cache?.clear()
     }
+    EventPieceCache.invalidateFor(document)
 
     if (format?.myRegexLogParser == null) {
       format = null
