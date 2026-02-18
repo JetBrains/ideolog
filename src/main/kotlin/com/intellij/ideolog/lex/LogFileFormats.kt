@@ -3,6 +3,8 @@ package com.intellij.ideolog.lex
 import com.intellij.ideolog.highlighting.settings.LogParsingPattern
 import com.intellij.ideolog.util.detectIdeologContext
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.progress.ProcessCanceledException
+import com.intellij.openapi.util.text.StringUtil
 import java.text.DateFormat
 import java.text.ParseException
 import java.util.UUID
@@ -16,9 +18,17 @@ data class LogToken(val startOffset: Int, var endOffset: Int, val isSeparator: B
 
 class RegexLogParser(val uuid: UUID, val regex: Pattern, val lineRegex: Pattern, val otherParsingSettings: LogParsingPattern, val timeFormat: DateFormat)
 
+private const val LINE_EVENT_START_TIMEOUT_MS: Long = 50
+
 class LogFileFormat(val myRegexLogParser: RegexLogParser?) {
   fun isLineEventStart(line: CharSequence): Boolean {
-    return myRegexLogParser?.lineRegex?.matcher(line)?.find() ?: (line.isNotEmpty() && !line[0].isWhitespace())
+    val lineRegex = myRegexLogParser?.lineRegex ?: return line.isNotEmpty() && !line[0].isWhitespace()
+    return try {
+      lineRegex.matcher(StringUtil.newBombedCharSequence(line, LINE_EVENT_START_TIMEOUT_MS)).find()
+    }
+    catch (_: ProcessCanceledException) {
+      line.isNotEmpty() && !line[0].isWhitespace()
+    }
   }
 
   fun getTimeFieldIndex(): Int {

@@ -3,6 +3,8 @@ package com.intellij.ideolog.lex
 import com.intellij.ideolog.highlighting.LOG_TOKEN_SEPARATOR
 import com.intellij.ideolog.highlighting.LogTokenElementType
 import com.intellij.lexer.LexerBase
+import com.intellij.openapi.progress.ProcessCanceledException
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.tree.IElementType
 
 private const val MAX_PARSING_LENGTH = 10000
@@ -73,42 +75,59 @@ class LogFileLexer(private val tokenCache: MutableList<IElementType>, private va
   }
 
   companion object {
+    private const val REGEX_TIMEOUT_MS: Long = 200
+
     fun lexRegex(event: CharSequence, output: MutableList<LogToken>, onlyValues: Boolean, parser: RegexLogParser) {
       val endOfLineIndex = if (event.length > MAX_PARSING_LENGTH) MAX_PARSING_LENGTH else event.indexOf('\n')
       val eventIsMultiline = endOfLineIndex != -1
       val dataToMatch = if (!eventIsMultiline) event else event.subSequence(0, endOfLineIndex)
+      val bombedData = StringUtil.newBombedCharSequence(dataToMatch, REGEX_TIMEOUT_MS)
 
-      val matcher = parser.regex.matcher(dataToMatch)
-      if (!matcher.find() || matcher.groupCount() == 0) {
+      val matcher = try {
+        val m = parser.regex.matcher(bombedData)
+        if (!m.find() || m.groupCount() == 0) {
+          output.add(LogToken(0, event.length, false))
+          return
+        }
+        m
+      }
+      catch (_: ProcessCanceledException) {
         output.add(LogToken(0, event.length, false))
         return
       }
 
-      var lastGroupEnd = 0
-      for(i in 1 .. matcher.groupCount()) {
-        val start = matcher.start(i)
-        if (start < lastGroupEnd) continue
+      try {
+        var lastGroupEnd = 0
+        for (i in 1..matcher.groupCount()) {
+          val start = matcher.start(i)
+          if (start < lastGroupEnd) continue
 
-        val end = matcher.end(i)
+          val end = matcher.end(i)
 
-        if(end < 0)
-          continue
+          if (end < 0)
+            continue
 
-        if(start > lastGroupEnd) {
-          if(!onlyValues)
-            output.add(LogToken(lastGroupEnd, start, true))
+          if (start > lastGroupEnd) {
+            if (!onlyValues)
+              output.add(LogToken(lastGroupEnd, start, true))
+          }
+
+          output.add(LogToken(start, end, false))
+
+          lastGroupEnd = end
         }
 
-        output.add(LogToken(start, end, false))
-
-        lastGroupEnd = end
+        if (eventIsMultiline) {
+          val lastToken = output.removeAt(output.lastIndex)
+          output.add(LogToken(lastToken.startOffset, event.length, false))
+        }
+        else if (lastGroupEnd < matcher.end() && !onlyValues) {
+          output.add(LogToken(lastGroupEnd, matcher.end(), true))
+        }
       }
-
-      if (eventIsMultiline) {
-        val lastToken = output.removeAt(output.lastIndex)
-        output.add(LogToken(lastToken.startOffset, event.length, false))
-      } else if(lastGroupEnd < matcher.end() && !onlyValues) {
-        output.add(LogToken(lastGroupEnd, matcher.end(), true))
+      catch (_: ProcessCanceledException) {
+        output.clear()
+        output.add(LogToken(0, event.length, false))
       }
     }
 
