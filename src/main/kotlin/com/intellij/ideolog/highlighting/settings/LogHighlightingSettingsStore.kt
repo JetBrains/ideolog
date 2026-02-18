@@ -1,6 +1,7 @@
 package com.intellij.ideolog.highlighting.settings
 
 import com.intellij.ideolog.IdeologBundle
+import com.intellij.ideolog.lex.RegexLogParser
 import com.intellij.ideolog.util.getService
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.PersistentStateComponent
@@ -12,6 +13,9 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.ui.JBColor
 import com.intellij.util.concurrency.annotations.RequiresEdt
+import java.text.SimpleDateFormat
+import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
 import com.intellij.util.xmlb.Converter
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.util.xmlb.annotations.Attribute
@@ -341,6 +345,52 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   var myState: LogHighlightingSettingsStore.State = cleanState.clone()
   private val myListeners = HashSet<LogHighlightingSettingsListener>()
 
+  @Volatile
+  private var compiledHighlightingPatterns: List<Pair<Pattern, LogHighlightingPattern>>? = null
+
+  @Volatile
+  private var compiledParsingPatterns: List<RegexLogParser>? = null
+
+  fun getCompiledHighlightingPatterns(): List<Pair<Pattern, LogHighlightingPattern>> {
+    compiledHighlightingPatterns?.let { return it }
+    val result = myState.patterns.filter { it.enabled }.mapNotNull {
+      try {
+        Pattern.compile(it.pattern, Pattern.CASE_INSENSITIVE) to it
+      }
+      catch (_: PatternSyntaxException) {
+        null
+      }
+    }
+    compiledHighlightingPatterns = result
+    return result
+  }
+
+  fun getCompiledParsingPatterns(): List<RegexLogParser> {
+    compiledParsingPatterns?.let { return it }
+    val result = myState.parsingPatterns.mapNotNull {
+      if (!it.enabled) return@mapNotNull null
+      try {
+        RegexLogParser(
+          it.uuid,
+          Pattern.compile(it.pattern, Pattern.DOTALL),
+          Pattern.compile(it.lineStartPattern),
+          it,
+          SimpleDateFormat(it.timePattern)
+        )
+      }
+      catch (_: PatternSyntaxException) {
+        null
+      }
+    }
+    compiledParsingPatterns = result
+    return result
+  }
+
+  private fun invalidateCompiledPatterns() {
+    compiledHighlightingPatterns = null
+    compiledParsingPatterns = null
+  }
+
   @RequiresEdt
   fun addSettingsListener(disposable: Disposable, listener: LogHighlightingSettingsListener) {
     myListeners.add(listener)
@@ -351,6 +401,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
 
   @RequiresEdt
   private fun fireListeners() {
+    invalidateCompiledPatterns()
     myListeners.forEach { it() }
   }
 
