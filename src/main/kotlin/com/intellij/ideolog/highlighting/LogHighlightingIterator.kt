@@ -227,16 +227,20 @@ open class LogHighlightingIterator(startOffset: Int,
         }
       }
 
-      // find all matches for every patttern
-      val matchedPieces = partHighlighters.filter{
-          (_, info) -> acceptHighlighter(info, fileFormat, captureGroup)
-      }.flatMap { (pattern, info) ->
-        pattern.toRegex().findAll(value).flatMap {
-          it.groups.drop(1).mapNotNull { matchGroup ->
-            matchGroup?.let {
+      // find all matches for every pattern
+      val matchedPieces = mutableListOf<EventPiece>()
+      for ((pattern, info) in partHighlighters) {
+        if (!acceptHighlighter(info, fileFormat, captureGroup)) continue
+        val matcher = pattern.matcher(value)
+        while (matcher.find()) {
+          for (g in 1..matcher.groupCount()) {
+            val start = matcher.start(g)
+            val end = matcher.end(g)
+            if (start < 0 || end < 0) continue
+            matchedPieces.add(
               EventPiece(
-                token.startOffset + offset + matchGroup.range.first,
-                token.startOffset + offset + matchGroup.range.last + 1,
+                token.startOffset + offset + start,
+                token.startOffset + offset + end,
                 TextAttributes(
                   info.foregroundColor ?: valueForeground,
                   info.backgroundColor ?: valueBackground,
@@ -246,11 +250,10 @@ open class LogHighlightingIterator(startOffset: Int,
                 ),
                 false
               )
-
-            }
+            )
           }
         }
-      }.toMutableList()
+      }
 
       // add default background
       matchedPieces.add(
