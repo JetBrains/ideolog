@@ -4,7 +4,6 @@ import com.intellij.ideolog.highlighting.LogFileMapRenderer
 import com.intellij.ideolog.highlighting.LogHeavyFilterService
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.util.ideologContext
-import com.intellij.openapi.application.EDT
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.ex.EditorMarkupModel
@@ -14,21 +13,12 @@ import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
 class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorProvider) : PsiAwareTextEditorImpl(project, file, provider) {
-  private var resetJob: Job? = null
-
   private val documentListener = object : DocumentListener {
     override fun documentChanged(event: DocumentEvent) {
       if (event.oldLength != 0 || event.newLength - event.oldLength > 1 || event.offset != event.document.textLength - event.newLength) {
-        resetJob?.cancel()
-        resetJob = asyncLoader.coroutineScope.launch(Dispatchers.EDT) {
-          resetIdeologStoredData()
-          resetJob = null
-        }
+        resetIdeologStoredData()
       }
     }
   }
@@ -46,7 +36,6 @@ class LogFileEditor(project: Project, file: VirtualFile, provider: TextEditorPro
   override fun dispose() {
     editor.document.removeDocumentListener(documentListener)
     editor.document.ideologContext.clear()
-    LogFileMapRenderer.LogFileMapRendererKey.get(editor)?.detachFromEditor()
     super.dispose()
   }
 
