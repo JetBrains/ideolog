@@ -56,6 +56,8 @@ jvm_library(
     "@community//RegExpSupport:regexp-tests_test_lib",
     "@community//platform/xdebugger-impl:debugger-impl-tests",
     "@community//platform/xdebugger-impl:debugger-impl-tests_test_lib",
+    "//plugins/ideolog/textmate:textmate-tests",
+    "//plugins/ideolog/textmate:textmate-tests_test_lib",
   ],
   runtime_deps = [
     ":ideolog-tests",
