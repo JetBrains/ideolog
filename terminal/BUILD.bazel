@@ -40,3 +40,9 @@ jvm_library(
   ]
 )
 ### auto-generated section `build intellij.ideolog.terminal` end
+
+### auto-generated section `iml intellij.ideolog.terminal` start
+exports_files([
+  "intellij.ideolog.terminal.iml",
+], visibility = ["//visibility:public"])
+### auto-generated section `iml intellij.ideolog.terminal` end

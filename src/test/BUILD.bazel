@@ -64,6 +64,12 @@ jvm_library(
 )
 ### auto-generated section `build intellij.ideolog.tests` end
 
+### auto-generated section `iml intellij.ideolog.tests` start
+exports_files([
+  "intellij.ideolog.tests.iml",
+], visibility = ["//visibility:public"])
+### auto-generated section `iml intellij.ideolog.tests` end
+
 ### auto-generated section `test intellij.ideolog.tests` start
 load("@community//build:tests-options.bzl", "jps_test")
 
