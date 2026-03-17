@@ -10,6 +10,7 @@ import com.intellij.ideolog.lex.RegexLogParser
 import com.intellij.ideolog.statistics.IdeologUsagesCollector
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.FoldingModel
@@ -17,6 +18,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
+import java.text.SimpleDateFormat
+import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
 
 private val documentContextKey = Key.create<IdeologDocumentContext>("IdeologDocumentContext")
 
@@ -80,7 +84,23 @@ open class IdeologDocumentContext(val document: Document, private val cache: Eve
       clear()
     }
 
-    val regexMatchers = LogHighlightingSettingsStore.getInstance().getCompiledParsingPatterns()
+    val regexMatchers = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.mapNotNull {
+      if (!it.enabled)
+        return@mapNotNull null
+
+      try {
+        return@mapNotNull RegexLogParser(
+          it.uuid,
+          Pattern.compile(it.pattern, Pattern.DOTALL),
+          Pattern.compile(it.lineStartPattern),
+          it,
+          SimpleDateFormat(it.timePattern)
+        )
+      } catch (e: PatternSyntaxException) {
+        thisLogger().info(e)
+        return@mapNotNull null
+      }
+    }
 
     val documentAfterOffset = document.charsSequence.drop(logFileOffset)
     val firstLinesAfterOffset = documentAfterOffset.lineSequence().take(numberFirstLines)
