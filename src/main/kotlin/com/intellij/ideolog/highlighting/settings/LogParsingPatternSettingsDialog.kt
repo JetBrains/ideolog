@@ -1,6 +1,7 @@
 package com.intellij.ideolog.highlighting.settings
 
 import com.intellij.ideolog.IdeologBundle
+import com.intellij.openapi.application.UI
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.project.ProjectManager
@@ -11,8 +12,8 @@ import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBIntSpinner
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
-import com.intellij.util.ui.update.MergingUpdateQueue
-import com.intellij.util.ui.update.Update
+import com.intellij.util.ui.update.DebouncedUpdates
+import kotlinx.coroutines.Dispatchers
 import net.miginfocom.swing.MigLayout
 import org.intellij.lang.regexp.RegExpFileType
 import java.text.SimpleDateFormat
@@ -23,6 +24,7 @@ import java.util.regex.PatternSyntaxException
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
+import kotlin.time.Duration.Companion.milliseconds
 
 class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : DialogWrapper(null, true, IdeModalityType.IDE) {
   private var myNameText: EditorTextField? = null
@@ -75,14 +77,12 @@ class LogParsingPatternSettingsDialog(private val item: LogParsingPattern) : Dia
       }
     )
     val timeFormatPreviewLabel = JLabel(getDatePreviewText(item.timePattern))
-    val queue = MergingUpdateQueue("TimePreview", 500, true, MergingUpdateQueue.ANY_COMPONENT, myDisposable)
+    val queue = DebouncedUpdates.forComponent<DocumentEvent>(timeFormatPreviewLabel, "TimePreview", 500.milliseconds)
+      .withContext(Dispatchers.UI)
+      .runLatest { event -> timeFormatPreviewLabel.text = getDatePreviewText(event.document.text) }
     timeFormatText.document.addDocumentListener(object : DocumentListener {
       override fun documentChanged(event: DocumentEvent) {
-        queue.queue(object : Update("typingTime") {
-          override fun run() {
-            timeFormatPreviewLabel.text = getDatePreviewText(event.document.text)
-          }
-        })
+        queue.queue(event)
       }
     }, myDisposable)
     panel.add(timeFormatPreviewLabel)
