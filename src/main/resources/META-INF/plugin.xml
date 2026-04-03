@@ -137,6 +137,7 @@
     <registryKey key="ideolog.large.file.editor.enabled" defaultValue="false"
                  description="Enable ideolog highlighting inside the large file editor for log files"/>
     <statistics.counterUsagesCollector implementationClass="com.intellij.ideolog.statistics.IdeologUsagesCollector"/>
+    <applicationSettings service="com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore"/>
   </extensions>
 
   <extensionPoints>
