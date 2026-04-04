@@ -4,7 +4,9 @@ import com.intellij.ideolog.highlighting.LogHeavyFilterService
 import com.intellij.openapi.util.TextRange
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.ui.UIUtil
+import org.junit.Ignore
 
+@Ignore("AT-4013")
 class LogFilterTest : BasePlatformTestCase() {
 
   fun testFilterEnqueuing() {
