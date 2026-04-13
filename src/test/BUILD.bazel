@@ -7,6 +7,12 @@ resourcegroup(
   strip_prefix = "resources"
 )
 
+resourcegroup(
+  name = "ideolog-tests_test_resources_1",
+  srcs = glob(["testResources/**/*"]),
+  strip_prefix = "testResources"
+)
+
 jvm_library(
   name = "ideolog-tests",
   module_name = "intellij.ideolog.tests",
@@ -23,7 +29,10 @@ jvm_library(
   module_name = "intellij.ideolog.tests",
   visibility = ["//visibility:public"],
   srcs = glob(["kotlin/**/*.kt", "kotlin/**/*.java", "kotlin/**/*.form"], allow_empty = True),
-  resources = [":ideolog-tests_test_resources"],
+  resources = [
+    ":ideolog-tests_test_resources",
+    ":ideolog-tests_test_resources_1",
+  ],
   deps = [
     "@community//platform/analysis-api:analysis",
     "@community//platform/analysis-api:analysis_test_lib",
