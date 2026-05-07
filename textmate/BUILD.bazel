@@ -1,18 +1,13 @@
 ### auto-generated section `build intellij.ideolog.textmate` start
-load("@rules_jvm//:jvm.bzl", "jvm_library", "resourcegroup")
-
-resourcegroup(
-  name = "textmate_resources",
-  srcs = glob(["resources/**/*"]),
-  strip_prefix = "resources"
-)
+load("@rules_jvm//:jvm.bzl", "jvm_library")
 
 jvm_library(
   name = "textmate",
   module_name = "intellij.ideolog.textmate",
   visibility = ["//visibility:public"],
   srcs = glob(["src/main/kotlin/**/*.kt", "src/main/kotlin/**/*.java", "src/main/kotlin/**/*.form"], allow_empty = True),
-  resources = [":textmate_resources"],
+  resources = glob(["resources/**/*"]),
+  resource_strip_prefix = "resources",
   deps = [
     "@lib//:kotlin-stdlib",
     "@community//platform/core-api:core",
@@ -53,12 +48,6 @@ exports_files([
 ### auto-generated section `iml intellij.ideolog.textmate` end
 
 ### auto-generated section `build intellij.ideolog.textmate.tests` start
-resourcegroup(
-  name = "textmate-tests_test_resources",
-  srcs = glob(["testResources/**/*"]),
-  strip_prefix = "testResources"
-)
-
 jvm_library(
   name = "textmate-tests",
   module_name = "intellij.ideolog.textmate.tests",
@@ -71,7 +60,8 @@ jvm_library(
   testonly = True,
   visibility = ["//visibility:public"],
   srcs = glob(["tests/**/*.kt", "tests/**/*.java", "tests/**/*.form"], allow_empty = True),
-  resources = [":textmate-tests_test_resources"],
+  resources = glob(["testResources/**/*"]),
+  resource_strip_prefix = "testResources",
   associates = [
     "//plugins/ideolog/textmate",
     "//plugins/ideolog/textmate:textmate_test_lib",

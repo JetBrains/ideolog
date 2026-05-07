@@ -3,12 +3,6 @@ load("@rules_jvm//:jvm.bzl", "jvm_library", "resourcegroup")
 
 resourcegroup(
   name = "ideolog-tests_test_resources",
-  srcs = glob(["resources/**/*"]),
-  strip_prefix = "resources"
-)
-
-resourcegroup(
-  name = "ideolog-tests_test_resources_1",
   srcs = glob(["testResources/**/*"]),
   strip_prefix = "testResources"
 )
@@ -30,10 +24,9 @@ jvm_library(
   module_name = "intellij.ideolog.tests",
   visibility = ["//visibility:public"],
   srcs = glob(["kotlin/**/*.kt", "kotlin/**/*.java", "kotlin/**/*.form"], allow_empty = True),
-  resources = [
-    ":ideolog-tests_test_resources",
-    ":ideolog-tests_test_resources_1",
-  ],
+  resources = glob(["resources/**/*"]),
+  resource_strip_prefix = "resources",
+  resource_jars = [":ideolog-tests_test_resources"],
   deps = [
     "@community//platform/analysis-api:analysis",
     "@community//platform/analysis-api:analysis_test_lib",
