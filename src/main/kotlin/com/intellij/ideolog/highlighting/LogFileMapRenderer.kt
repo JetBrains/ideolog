@@ -4,6 +4,7 @@ import com.intellij.ideolog.file.LogFileEditor
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.lex.detectLogFileFormat
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.runReadActionBlocking
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.ex.MarkupModelEx
 import com.intellij.openapi.editor.markup.EffectType
@@ -59,7 +60,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
         timer!!.cancel()
       else {
         ApplicationManager.getApplication().invokeLater {
-          ApplicationManager.getApplication().runReadAction {
+          runReadActionBlocking {
             if ((myIsEnabledBreadcrumbs) && (!myLogFileEditor.editor.isDisposed && !detachedFromEditor) && (myLogFileEditor.editor.component.isVisible) && (myLogFileEditor.editor.caretModel.isUpToDate)) {
               // Get buckets hit by visible range
               val area = myLogFileEditor.editor.scrollingModel.visibleAreaOnScrollingFinished
@@ -258,10 +259,11 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
 
   private fun beginInvokeComposeBuckets() {
     ApplicationManager.getApplication().invokeLater {
-      ApplicationManager.getApplication().runReadAction {
+      runReadActionBlocking {
         if ((!myLogFileEditor.editor.isDisposed && !detachedFromEditor)
           && (myLogFileEditor.editor.component.isVisible)
-          && (myLogFileEditor.editor.caretModel.isUpToDate))
+          && (myLogFileEditor.editor.caretModel.isUpToDate)
+        )
           composeBuckets()
       }
     }

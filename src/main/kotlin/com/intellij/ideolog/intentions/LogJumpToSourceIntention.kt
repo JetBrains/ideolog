@@ -7,6 +7,7 @@ import com.intellij.ideolog.fileType.LogFileType
 import com.intellij.ideolog.highlighting.LogEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.application.runReadActionBlocking
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.progress.ProgressIndicator
@@ -169,7 +170,7 @@ class LogJumpToSourceIntention : IntentionAction {
     private fun getFilesToMatch(project: Project, evt: LogEvent): List<FileMatch> {
       val filtered = ArrayList<FileMatch>()
 
-      ApplicationManager.getApplication().runReadAction {
+      runReadActionBlocking {
         val cacheManager = CacheManager.getInstance(project)
         val fileIdMap = HashMap<Int, FileMatch>()
         val indexManager = FileBasedIndex.getInstance() as FileBasedIndex
@@ -190,7 +191,6 @@ class LogJumpToSourceIntention : IntentionAction {
         val fs = ManagingFS.getInstance()
         val pfi = ProjectFileIndex.getInstance(project)
 
-
         fileIdMap.entries.forEach { (fileId, match) ->
           val vf = fs.findFileById(fileId)
           if (vf == null
@@ -199,8 +199,6 @@ class LogJumpToSourceIntention : IntentionAction {
             ) {
             return@forEach
           }
-
-
 
           match.virtualFile = vf
 
