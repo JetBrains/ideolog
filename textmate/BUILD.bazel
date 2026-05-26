@@ -46,12 +46,6 @@ jvm_library(
         "@community//platform/editor-ui-api:editor-ui_test_lib",
         "//plugins/ideolog:ideolog_test_lib",
         "@community//plugins/textmate:textmate_test_lib",
-        "@community//plugins/textmate/plugin",
-        "@community//plugins/textmate/plugin:plugin_test_lib",
-        "@community//plugins/textmate/backend",
-        "@community//plugins/textmate/backend:backend_test_lib",
-        "@community//platform/testFramework",
-        "@community//platform/testFramework:testFramework_test_lib",
     ],
 )
 ### auto-generated section `build intellij.ideolog.textmate` end
