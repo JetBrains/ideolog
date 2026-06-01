@@ -78,9 +78,8 @@ private class FileMatch(private val evt: LogEvent) {
     val m = Array(LIMIT) { IntArray(LIMIT) }
   }
 
-
   fun processFileOffset(psiManager: PsiManager) {
-    val text = ReadAction.compute<String, Throwable> {
+    val text = runReadActionBlocking {
       psiManager.findFile(virtualFile)?.text
     } ?: return
     val strForSubstring = evt.message.take(LIMIT)
@@ -240,12 +239,11 @@ class LogJumpToSourceIntention : IntentionAction {
           indicator.text = IdeologBundle.message("progress.text.finding.source")
           indicator.isIndeterminate = true
 
-          val event = ReadAction.compute<LogEvent, Throwable> {
+          val event = runReadActionBlocking {
             LogEvent.fromEditor(editor)
           }
           event.prepareTrigrams()
           println(event)
-
 
           if (event.message.isBlank()) return
 
