@@ -1,105 +1,143 @@
-### auto-generated section `build intellij.ideolog.textmate` start
+load("@community//build:tests-options.bzl", "jps_test")
 load("@rules_jvm//:jvm.bzl", "jvm_library")
 
+### auto-generated section `build intellij.ideolog.textmate` start
+
 jvm_library(
-  name = "textmate",
-  module_name = "intellij.ideolog.textmate",
-  visibility = ["//visibility:public"],
-  srcs = glob(["src/main/kotlin/**/*.kt", "src/main/kotlin/**/*.java", "src/main/kotlin/**/*.form"], allow_empty = True),
-  resources = glob(["resources/**/*"]),
-  resource_strip_prefix = "resources",
-  deps = [
-    "@lib//:kotlin-stdlib",
-    "@community//platform/core-api:core",
-    "@community//platform/editor-ui-ex:editor-ex",
-    "@community//platform/editor-ui-api:editor-ui",
-    "//plugins/ideolog",
-    "@community//plugins/textmate",
-  ]
+    name = "textmate",
+    srcs = glob(
+        [
+            "src/main/kotlin/**/*.kt",
+            "src/main/kotlin/**/*.java",
+            "src/main/kotlin/**/*.form",
+        ],
+        allow_empty = True,
+    ),
+    module_name = "intellij.ideolog.textmate",
+    resource_strip_prefix = "resources",
+    resources = glob(
+        ["resources/**/*"],
+    ),
+    visibility = ["//visibility:public"],
+    deps = [
+        # do not sort,
+        "@lib//:kotlin-stdlib",
+        "@community//platform/core-api:core",
+        "@community//platform/editor-ui-ex:editor-ex",
+        "@community//platform/editor-ui-api:editor-ui",
+        "//plugins/ideolog",
+        "@community//plugins/textmate",
+    ],
 )
 
 jvm_library(
-  name = "textmate_test_lib",
-  testonly = True,
-  module_name = "intellij.ideolog.textmate",
-  visibility = ["//visibility:public"],
-  srcs = glob([], allow_empty = True),
-  runtime_deps = [
-    ":textmate",
-    "@community//platform/core-api:core_test_lib",
-    "@community//platform/editor-ui-ex:editor-ex_test_lib",
-    "@community//platform/editor-ui-api:editor-ui_test_lib",
-    "//plugins/ideolog:ideolog_test_lib",
-    "@community//plugins/textmate:textmate_test_lib",
-    "@community//plugins/textmate/plugin",
-    "@community//plugins/textmate/plugin:plugin_test_lib",
-    "@community//plugins/textmate/backend",
-    "@community//plugins/textmate/backend:backend_test_lib",
-    "@community//platform/testFramework",
-    "@community//platform/testFramework:testFramework_test_lib",
-  ]
+    name = "textmate_test_lib",
+    testonly = True,
+    srcs = glob(
+        [],
+        allow_empty = True,
+    ),
+    module_name = "intellij.ideolog.textmate",
+    visibility = ["//visibility:public"],
+    runtime_deps = [
+        # do not sort,
+        ":textmate",
+        "@community//platform/core-api:core_test_lib",
+        "@community//platform/editor-ui-ex:editor-ex_test_lib",
+        "@community//platform/editor-ui-api:editor-ui_test_lib",
+        "//plugins/ideolog:ideolog_test_lib",
+        "@community//plugins/textmate:textmate_test_lib",
+        "@community//plugins/textmate/plugin",
+        "@community//plugins/textmate/plugin:plugin_test_lib",
+        "@community//plugins/textmate/backend",
+        "@community//plugins/textmate/backend:backend_test_lib",
+        "@community//platform/testFramework",
+        "@community//platform/testFramework:testFramework_test_lib",
+    ],
 )
 ### auto-generated section `build intellij.ideolog.textmate` end
 
 ### auto-generated section `iml intellij.ideolog.textmate` start
-exports_files([
-  "intellij.ideolog.textmate.iml",
-], visibility = ["//visibility:public"])
+exports_files(
+    [
+        "intellij.ideolog.textmate.iml",
+    ],
+    visibility = ["//visibility:public"],
+)
 ### auto-generated section `iml intellij.ideolog.textmate` end
 
 ### auto-generated section `build intellij.ideolog.textmate.tests` start
+
 jvm_library(
-  name = "textmate-tests",
-  module_name = "intellij.ideolog.textmate.tests",
-  visibility = ["//visibility:public"],
-  srcs = glob([], allow_empty = True)
+    name = "textmate-tests",
+    srcs = glob(
+        [],
+        allow_empty = True,
+    ),
+    module_name = "intellij.ideolog.textmate.tests",
+    visibility = ["//visibility:public"],
 )
 
 jvm_library(
-  name = "textmate-tests_test_lib",
-  testonly = True,
-  visibility = ["//visibility:public"],
-  srcs = glob(["tests/**/*.kt", "tests/**/*.java", "tests/**/*.form"], allow_empty = True),
-  resources = glob(["testResources/**/*"]),
-  resource_strip_prefix = "testResources",
-  associates = [
-    "//plugins/ideolog/textmate",
-    "//plugins/ideolog/textmate:textmate_test_lib",
-  ],
-  deps = [
-    "@lib//:kotlin-stdlib",
-    "@community//platform/core-api:core",
-    "@community//platform/core-api:core_test_lib",
-    "@community//platform/editor-ui-ex:editor-ex",
-    "@community//platform/editor-ui-ex:editor-ex_test_lib",
-    "@community//platform/editor-ui-api:editor-ui",
-    "@community//platform/editor-ui-api:editor-ui_test_lib",
-    "//plugins/ideolog",
-    "//plugins/ideolog:ideolog_test_lib",
-    "@community//plugins/textmate",
-    "@community//plugins/textmate:textmate_test_lib",
-    "@community//plugins/textmate/plugin",
-    "@community//plugins/textmate/plugin:plugin_test_lib",
-    "@community//plugins/textmate/backend",
-    "@community//plugins/textmate/backend:backend_test_lib",
-    "@community//platform/testFramework",
-    "@community//platform/testFramework:testFramework_test_lib",
-  ],
-  runtime_deps = [":textmate-tests"]
+    name = "textmate-tests_test_lib",
+    testonly = True,
+    srcs = glob(
+        [
+            "tests/**/*.kt",
+            "tests/**/*.java",
+            "tests/**/*.form",
+        ],
+        allow_empty = True,
+    ),
+    associates = [
+        "//plugins/ideolog/textmate",
+        "//plugins/ideolog/textmate:textmate_test_lib",
+    ],
+    resource_strip_prefix = "testResources",
+    resources = glob(
+        ["testResources/**/*"],
+    ),
+    visibility = ["//visibility:public"],
+    runtime_deps = [
+        # do not sort,
+        ":textmate-tests",
+    ],
+    deps = [
+        # do not sort,
+        "@lib//:kotlin-stdlib",
+        "@community//platform/core-api:core",
+        "@community//platform/core-api:core_test_lib",
+        "@community//platform/editor-ui-ex:editor-ex",
+        "@community//platform/editor-ui-ex:editor-ex_test_lib",
+        "@community//platform/editor-ui-api:editor-ui",
+        "@community//platform/editor-ui-api:editor-ui_test_lib",
+        "//plugins/ideolog",
+        "//plugins/ideolog:ideolog_test_lib",
+        "@community//plugins/textmate",
+        "@community//plugins/textmate:textmate_test_lib",
+        "@community//plugins/textmate/plugin",
+        "@community//plugins/textmate/plugin:plugin_test_lib",
+        "@community//plugins/textmate/backend",
+        "@community//plugins/textmate/backend:backend_test_lib",
+        "@community//platform/testFramework",
+        "@community//platform/testFramework:testFramework_test_lib",
+    ],
 )
 ### auto-generated section `build intellij.ideolog.textmate.tests` end
 
 ### auto-generated section `iml intellij.ideolog.textmate.tests` start
-exports_files([
-  "intellij.ideolog.textmate.tests.iml",
-], visibility = ["//visibility:public"])
+exports_files(
+    [
+        "intellij.ideolog.textmate.tests.iml",
+    ],
+    visibility = ["//visibility:public"],
+)
 ### auto-generated section `iml intellij.ideolog.textmate.tests` end
 
 ### auto-generated section `test intellij.ideolog.textmate.tests` start
-load("@community//build:tests-options.bzl", "jps_test")
 
 jps_test(
-  name = "textmate-tests_test",
-  runtime_deps = [":textmate-tests_test_lib"]
+    name = "textmate-tests_test",
+    runtime_deps = [":textmate-tests_test_lib"],
 )
 ### auto-generated section `test intellij.ideolog.textmate.tests` end
