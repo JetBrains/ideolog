@@ -89,6 +89,8 @@ jvm_library(
         "@community//platform/ide-core",
         "//plugins/ideolog/textmate:textmate-tests",
         "//plugins/ideolog/textmate:textmate-tests_test_lib",
+        "@community//libraries/junit4",
+        "@community//libraries/junit4:junit4_test_lib",
     ],
 )
 ### auto-generated section `build intellij.ideolog.tests` end

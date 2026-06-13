@@ -118,6 +118,8 @@ jvm_library(
         "@community//plugins/textmate/backend:backend_test_lib",
         "@community//platform/testFramework",
         "@community//platform/testFramework:testFramework_test_lib",
+        "@community//libraries/junit4",
+        "@community//libraries/junit4:junit4_test_lib",
     ],
 )
 ### auto-generated section `build intellij.ideolog.textmate.tests` end
