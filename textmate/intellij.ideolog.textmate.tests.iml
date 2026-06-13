@@ -20,6 +20,7 @@
     <orderEntry type="module" module-name="intellij.textmate.backend" scope="TEST" />
     <orderEntry type="module" module-name="intellij.platform.testFramework" scope="TEST" />
     <orderEntry type="module" module-name="intellij.ideolog.textmate" scope="TEST" />
+    <orderEntry type="module" module-name="intellij.libraries.junit4" scope="TEST" />
   </component>
   <component name="TestModuleProperties" production-module="intellij.ideolog.textmate" />
 </module>
