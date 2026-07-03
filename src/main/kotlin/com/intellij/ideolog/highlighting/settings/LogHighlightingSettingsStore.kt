@@ -20,7 +20,6 @@ import com.intellij.util.xmlb.annotations.Tag
 import com.intellij.util.xmlb.annotations.Transient
 import com.intellij.util.xmlb.annotations.XCollection
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.intellij.lang.annotations.Language
 import java.awt.Color
@@ -591,7 +590,7 @@ private class LogColorConverter : Converter<LogColor>() {
   override fun fromString(value: String): LogColor? = try {
     Json.decodeFromString(value)
   }
-  catch (_: SerializationException) {
+  catch (_: Exception) {
     val rgb = value.toIntOrNull()
     rgb?.let { LogColor(it, it) }
   }
