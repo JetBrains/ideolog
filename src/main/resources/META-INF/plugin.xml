@@ -51,9 +51,11 @@
     <!-- endregion -->
   </dependencies>
 
-  <content>
+  <content namespace="jetbrains">
     <module name="intellij.php.ideolog"/>
     <module name="intellij.ideolog.terminal"/>
+  </content>
+  <content>
     <module name="intellij.ideolog.textmate"/>
   </content>
 
