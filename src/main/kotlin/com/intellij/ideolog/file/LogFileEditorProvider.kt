@@ -33,5 +33,5 @@ class LogFileEditorProvider @NonInjectable internal constructor(private val base
   override fun writeState(state: FileEditorState, project: Project, targetElement: Element): Unit = base.writeState(state, project, targetElement)
   override fun acceptRequiresReadAction(): Boolean = base.acceptRequiresReadAction()
   override fun disposeEditor(editor: FileEditor): Unit = base.disposeEditor(editor)
-  override fun readState(sourceElement: Element, project: Project, file: VirtualFile): FileEditorState = base.readState(sourceElement, project, file)
+  override fun readState(sourceElement: Element, project: Project, file: Lazy<VirtualFile?>): FileEditorState = base.readState(sourceElement, project, file)
 }
