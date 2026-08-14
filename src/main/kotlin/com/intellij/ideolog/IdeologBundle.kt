@@ -8,8 +8,9 @@ import org.jetbrains.annotations.PropertyKey
 @NonNls
 private const val BUNDLE = "messages.IdeologBundle"
 
-object IdeologBundle : DynamicBundle(IdeologBundle::class.java, BUNDLE) {
+object IdeologBundle {
+  private val instance = DynamicBundle(IdeologBundle::class.java, BUNDLE)
   @JvmStatic
   @Nls
-  fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any): String = getMessage(key, *params)
+  fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any): String = instance.getMessage(key, *params)
 }
