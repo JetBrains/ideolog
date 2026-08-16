@@ -101,6 +101,7 @@ jvm_library(
 exports_files(
     [
         "intellij.ideolog.iml",
+        "src/main/resources/META-INF/plugin.xml",
     ],
     visibility = ["//visibility:public"],
 )

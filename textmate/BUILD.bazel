@@ -60,6 +60,7 @@ jvm_library(
 exports_files(
     [
         "intellij.ideolog.textmate.iml",
+        "resources/intellij.ideolog.textmate.xml",
     ],
     visibility = ["//visibility:public"],
 )

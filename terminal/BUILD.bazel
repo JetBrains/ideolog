@@ -55,6 +55,7 @@ jvm_library(
 exports_files(
     [
         "intellij.ideolog.terminal.iml",
+        "resources/intellij.ideolog.terminal.xml",
     ],
     visibility = ["//visibility:public"],
 )
