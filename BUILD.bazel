@@ -111,14 +111,11 @@ exports_files(
 
 ### auto-generated section `dev content intellij.ideolog` start
 dev_dist_plugin_content(
-    name = "ideolog_dev_content",
     content_modules = [
         "//phpstorm/ideolog",
         "//plugins/ideolog/terminal",
         "//plugins/ideolog/textmate",
     ],
     descriptor_module = ":ideolog",
-    libraries = ["@lib//:kotlin-stdlib"],
-    visibility = ["//visibility:public"],
 )
 ### auto-generated section `dev content intellij.ideolog` end
