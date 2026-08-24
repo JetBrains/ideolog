@@ -1,0 +1,11 @@
+<State>
+  <highlightingPatterns>
+    <LogHighlightingPattern enabled="true" pattern="^\s*(e(rror)?|severe?|fatal)\s*$" captureGroup="-1" action="HIGHLIGHT_LINE" fg="{&quot;lightRgb&quot;:-2088928,&quot;darkRgb&quot;:-39836}" bold="true" italic="false" stripe="false" uuid="529945c3-7565-4ca4-b7f8-f4f2c42bb918" />
+    <LogHighlightingPattern enabled="true" pattern="^\s*(i(nfo)?|debug)\s*$" captureGroup="-1" action="HIGHLIGHT_LINE" fg="{&quot;lightRgb&quot;:-16744448,&quot;darkRgb&quot;:-10316203}" bold="false" italic="false" stripe="false" uuid="d46887a1-4dd9-47a7-b122-63a4ae5a98c5" />
+  </highlightingPatterns>
+  <hiddenSubstrings />
+  <parsingPatterns>
+    <LogParsingPattern enabled="true" name="MinecraftLog" pattern="^\[([^\]]+)]\s+\[([^\/]+)\/(\w+)]\s+\[([^\/]+)(?:\/([\w\.\- ]*))?]:\s*(.+)$" timePattern="MMdd yyyy HH:mm:ss.SSS" linePattern="^\[\d" timeId="0" severityId="2" categoryId="3" fullmatch="false" uuid="e9a0b9e0-fcfd-48bf-a084-cc7779d5e82e" />
+  </parsingPatterns>
+  <settingsVersion>11</settingsVersion>
+</State>
