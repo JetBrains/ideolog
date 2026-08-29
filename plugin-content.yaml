@@ -1,7 +1,0 @@
-- name: lib/ideolog.jar
-  modules:
-  - name: intellij.ideolog
-  contentModules:
-  - name: intellij.php.ideolog
-  - name: intellij.ideolog.terminal
-  - name: intellij.ideolog.textmate
