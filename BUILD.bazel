@@ -1,5 +1,6 @@
 load("@community//build:compiler-options.bzl", "create_kotlinc_options")
 load("@community//platform/build-scripts/bazel-rules:dev_dist_content.bzl", "dev_dist_plugin_content")
+load("@community//platform/build-scripts/bazel-rules:dev_dist_plugin.bzl", "dev_dist_plugin")
 load("@rules_jvm//:jvm.bzl", "jvm_library")
 
 ### auto-generated section `build intellij.ideolog` start
@@ -109,8 +110,8 @@ exports_files(
 )
 ### auto-generated section `iml intellij.ideolog` end
 
-### auto-generated section `dev content intellij.ideolog` start
-dev_dist_plugin_content(
+### auto-generated section `dev intellij.ideolog` start
+dev_dist_plugin(
     content_modules = [
         "//phpstorm/ideolog",
         "//plugins/ideolog/terminal",
@@ -118,4 +119,4 @@ dev_dist_plugin_content(
     ],
     descriptor_module = ":ideolog",
 )
-### auto-generated section `dev content intellij.ideolog` end
+### auto-generated section `dev intellij.ideolog` end
