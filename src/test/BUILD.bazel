@@ -22,6 +22,7 @@ jvm_library(
         # do not sort,
         "@community//platform/editor-ui-ex:editor-ex",
         "//plugins/ideolog/textmate",
+        "@community//xml/plugin",
     ],
 )
 
@@ -47,6 +48,7 @@ jvm_library(
         # do not sort,
         ":ideolog-tests",
         "//plugins/ideolog/textmate:textmate_test_lib",
+        "@community//xml/plugin:plugin_test_lib",
         "@community//platform/ide-core:ide-core_test_lib",
     ],
     deps = [
