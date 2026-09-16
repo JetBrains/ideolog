@@ -1,6 +1,5 @@
 load("@community//build:compiler-options.bzl", "create_kotlinc_options")
-load("@community//platform/build-scripts/bazel-rules:dev_dist_plugin.bzl", "dev_dist_plugin")
-load("@jps_dynamic_deps_ultimate//:targets.bzl", "MODULE_TARGETS")
+load("@jps_dynamic_deps_ultimate//:targets.bzl", "dev_dist_plugin")
 load("@rules_jvm//:jvm.bzl", "jvm_library")
 
 ### auto-generated section `dev intellij.ideolog` start
@@ -12,7 +11,6 @@ dev_dist_plugin(
         "intellij.ideolog.textmate",
     ],
     main_module = "intellij.ideolog",
-    module_targets = MODULE_TARGETS,
 )
 ### auto-generated section `dev intellij.ideolog` end
 
