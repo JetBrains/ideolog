@@ -10,6 +10,20 @@ dev_dist_plugin(
         "intellij.ideolog.terminal",
         "intellij.ideolog.textmate",
     ],
+    descriptor = "src/main/resources/META-INF/plugin.xml",
+    descriptor_modules = [
+        "intellij.ideolog.terminal",
+        "intellij.ideolog.textmate",
+        "intellij.php.ideolog",
+    ],
+    jars = {
+        "lib/ideolog.jar": [
+            "intellij.ideolog",
+            "intellij.php.ideolog",
+            "intellij.ideolog.terminal",
+            "intellij.ideolog.textmate",
+        ],
+    },
     main_module = "intellij.ideolog",
 )
 ### auto-generated section `dev intellij.ideolog` end
