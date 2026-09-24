@@ -12,6 +12,7 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.Key
+import org.jetbrains.annotations.TestOnly
 import java.awt.Color
 import java.awt.Font
 import java.awt.Point
@@ -304,4 +305,11 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
   fun invalidateHighlighters() {
     synchronized(mySync) { myIsPendingEventMap = true }
   }
+
+  /**
+   * Returns true when the event map timer has no pending or running computation.
+   * The composition of the buckets can still wait in the EDT queue.
+   */
+  @TestOnly
+  fun isEventMapComputed(): Boolean = synchronized(mySync) { !myIsPendingEventMap && !myIsRunningEventMap }
 }

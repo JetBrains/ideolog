@@ -7,6 +7,7 @@ import com.intellij.ideolog.highlighting.settings.LogHighlightingPattern
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.application.impl.NonBlockingReadActionImpl
+import com.intellij.openapi.editor.ex.EditorMarkupModel
 import com.intellij.openapi.editor.markup.MarkupModel
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.util.Disposer
@@ -38,9 +39,14 @@ class ErrorStripeTest : BasePlatformTestCase() {
 
   override fun tearDown() {
     try {
-      LogHighlightingSettingsStore.getInstance().myState.patterns.clear()
-      LogHighlightingSettingsStore.getInstance().myState.patterns.addAll(highlightingPatternsBackup)
-      LogHighlightingSettingsStore.getInstance().myState.errorStripeMode = errorStripeModeBackup
+      // setUp can fail before the backups are made; then the store must stay as it is
+      if (::highlightingPatternsBackup.isInitialized) {
+        LogHighlightingSettingsStore.getInstance().myState.patterns.clear()
+        LogHighlightingSettingsStore.getInstance().myState.patterns.addAll(highlightingPatternsBackup)
+      }
+      if (::errorStripeModeBackup.isInitialized) {
+        LogHighlightingSettingsStore.getInstance().myState.errorStripeMode = errorStripeModeBackup
+      }
       if (::editor.isInitialized) {
         Disposer.dispose(editor)
       }
@@ -124,12 +130,15 @@ class ErrorStripeTest : BasePlatformTestCase() {
   private fun createMarkupModel(): MarkupModel {
     val file = myFixture.copyFileToProject(getTestName(false) + ".log")
     editor = LogFileEditorProvider().createEditor(project, file) as LogFileEditor
+    // The platform creates a TrafficLightRenderer asynchronously for a visible error stripe. It can outlive the test and fail the setUp of
+    // the next one. The test checks only the highlighters of the markup model, so the stripe can stay hidden.
+    (editor.editor.markupModel as EditorMarkupModel).isErrorStripeVisible = false
     val mapRenderer = LogFileMapRenderer.getLogFileMapRenderer(editor.editor)
-    Thread.sleep(1000)
+    assertNotNull(mapRenderer)
+    PlatformTestUtil.waitWithEventsDispatching("The event map was not computed", { mapRenderer!!.isEventMapComputed() }, 10)
     NonBlockingReadActionImpl.waitForAsyncTaskCompletion()
     UIUtil.dispatchAllInvocationEvents()
     PlatformTestUtil.dispatchAllEventsInIdeEventQueue()
-    assertNotNull(mapRenderer)
     val markupModel = editor.editor.markupModel
     assertEquals(1024, markupModel.allHighlighters.size)
     return markupModel
