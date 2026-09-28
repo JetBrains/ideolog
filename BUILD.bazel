@@ -25,6 +25,9 @@ dev_dist_plugin(
         ],
     },
     main_module = "intellij.ideolog",
+    mode_refused_content_modules = {
+        "frontend": ["intellij.php.ideolog"],
+    },
 )
 ### auto-generated section `dev intellij.ideolog` end
 
