@@ -78,6 +78,8 @@ jvm_library(
         "@community//libraries/kotlinx/serialization/json",
         "@community//libraries/kotlinx/serialization/core",
         "@community//platform/execution",
+        "@community//platform/consoleView",
+        "@community//platform/consoleView/impl",
         "@community//platform/lang-api:lang",
     ],
 )
@@ -117,6 +119,8 @@ jvm_library(
         "@community//libraries/kotlinx/serialization/json:json_test_lib",
         "@community//libraries/kotlinx/serialization/core:core_test_lib",
         "@community//platform/execution:execution_test_lib",
+        "@community//platform/consoleView:consoleView_test_lib",
+        "@community//platform/consoleView/impl:impl_test_lib",
         "@community//platform/lang-api:lang_test_lib",
     ],
 )
