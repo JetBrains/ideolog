@@ -30,6 +30,9 @@
     <orderEntry type="module" module-name="intellij.platform.debugger.impl.tests" scope="TEST" />
     <orderEntry type="module" module-name="intellij.platform.ide.core" scope="TEST" />
     <orderEntry type="module" module-name="intellij.ideolog.textmate.tests" scope="TEST" />
-    <orderEntry type="module" module-name="intellij.libraries.junit4" scope="TEST" />
+    <orderEntry type="module" module-name="intellij.platform.testFramework.junit5" scope="TEST" />
+    <orderEntry type="module" module-name="intellij.platform.testFramework.junit5.codeInsight" scope="TEST" />
+    <orderEntry type="module" module-name="intellij.libraries.junit6" scope="TEST" />
+    <orderEntry type="module" module-name="intellij.libraries.kotlinx.coroutines.core" scope="TEST" />
   </component>
 </module>

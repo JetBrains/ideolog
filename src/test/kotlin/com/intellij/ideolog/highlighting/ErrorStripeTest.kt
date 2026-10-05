@@ -6,27 +6,49 @@ import com.intellij.ideolog.highlighting.settings.DefaultSettingsStoreItems
 import com.intellij.ideolog.highlighting.settings.LogHighlightingPattern
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.util.ideologContext
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.application.impl.NonBlockingReadActionImpl
 import com.intellij.openapi.editor.ex.EditorMarkupModel
 import com.intellij.openapi.editor.markup.MarkupModel
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.util.Disposer
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightFixture
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightProjectFixture
 import com.intellij.testFramework.PlatformTestUtil
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import com.intellij.testFramework.fixtures.IdeaTestExecutionPolicy
+import com.intellij.testFramework.TestDataPath
+import com.intellij.testFramework.common.timeoutRunBlocking
+import com.intellij.testFramework.junit5.TestApplication
 import com.intellij.util.ui.UIUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInfo
 import java.awt.Color
-import java.nio.file.Path
-import kotlin.io.path.pathString
 import kotlin.math.abs
 
-class ErrorStripeTest : BasePlatformTestCase() {
+@TestApplication
+@TestDataPath($$"$PROJECT_ROOT/plugins/ideolog/src/test/resources/highlighting/errorStripe")
+class ErrorStripeTest {
+  companion object {
+    private val projectFixture = codeInsightProjectFixture()
+  }
+
+  private val myFixture by codeInsightFixture(projectFixture)
+  private val project get() = myFixture.project
   private lateinit var editor: LogFileEditor
   private lateinit var highlightingPatternsBackup: List<LogHighlightingPattern>
   private lateinit var errorStripeModeBackup: String
+  private lateinit var testName: String
 
-  override fun setUp() {
-    super.setUp()
+  @BeforeEach
+  fun setUp(testInfo: TestInfo) {
+    testName = testInfo.testMethod.get().name.removePrefix("test")
     highlightingPatternsBackup = LogHighlightingSettingsStore.getInstance().myState.patterns.map { it.copy() }
     errorStripeModeBackup = LogHighlightingSettingsStore.getInstance().myState.errorStripeMode
     LogHighlightingSettingsStore.getInstance().myState.patterns.forEach { highlightingPattern ->
@@ -37,37 +59,20 @@ class ErrorStripeTest : BasePlatformTestCase() {
     LogHighlightingSettingsStore.getInstance().myState.errorStripeMode = "heatmap"
   }
 
-  override fun tearDown() {
-    try {
-      // setUp can fail before the backups are made; then the store must stay as it is
-      if (::highlightingPatternsBackup.isInitialized) {
-        LogHighlightingSettingsStore.getInstance().myState.patterns.clear()
-        LogHighlightingSettingsStore.getInstance().myState.patterns.addAll(highlightingPatternsBackup)
-      }
-      if (::errorStripeModeBackup.isInitialized) {
-        LogHighlightingSettingsStore.getInstance().myState.errorStripeMode = errorStripeModeBackup
-      }
-      if (::editor.isInitialized) {
-        Disposer.dispose(editor)
-      }
+  @AfterEach
+  fun tearDown() {
+    // setUp can fail before the backups are made; then the store must stay as it is
+    if (::highlightingPatternsBackup.isInitialized) {
+      LogHighlightingSettingsStore.getInstance().myState.patterns.clear()
+      LogHighlightingSettingsStore.getInstance().myState.patterns.addAll(highlightingPatternsBackup)
     }
-    catch (e: Throwable) {
-      addSuppressedException(e)
-    }
-    finally {
-      super.tearDown()
+    if (::errorStripeModeBackup.isInitialized) {
+      LogHighlightingSettingsStore.getInstance().myState.errorStripeMode = errorStripeModeBackup
     }
   }
 
-  override fun getTestDataPath(): String {
-    val platformTestDataPath = Path.of(IdeaTestExecutionPolicy.getHomePathWithPolicy(), "plugins/ideolog/src/test/resources/highlighting/errorStripe")
-    if (platformTestDataPath.toFile().exists()) {
-      return platformTestDataPath.pathString
-    }
-    return "src/test/resources/highlighting/errorStripe"
-  }
-
-  fun testUndetectedFormat() {
+  @Test
+  fun testUndetectedFormat(): Unit = onEdt {
     val markupModel = createMarkupModel()
     val format = markupModel.document.ideologContext.detectLogFileFormat()
     assertNull(format.myRegexLogParser?.uuid)
@@ -75,44 +80,62 @@ class ErrorStripeTest : BasePlatformTestCase() {
     val highlighters = markupModel.allHighlighters.map { highlighter ->
       highlighter.getTextAttributes(editor.editor.colorsScheme)?.errorStripeColor?.toTimeIndependent()
     }.toSet()
-    assertSize(1, highlighters)
+    assertEquals(1, highlighters.size)
   }
 
-  fun testFirstNonStripedEventLineNotOnStripe() {
+  @Test
+  fun testFirstNonStripedEventLineNotOnStripe(): Unit = onEdt {
     val highlighters = calculateHighlighters()
     val endOfFirstLine = editor.editor.document.getLineEndOffset(0)
     val visibleHighlighters = highlighters.filter { it.startOffset > endOfFirstLine + 1 }.mapNotNull { highlighter ->
       highlighter.getTextAttributes(editor.editor.colorsScheme)?.errorStripeColor?.toTimeIndependent()
     }.toSet()
-    assertSize(1, visibleHighlighters)
+    assertEquals(1, visibleHighlighters.size)
   }
 
-  fun testFirstStripedEventLineNotOnStripe() {
+  @Test
+  fun testFirstStripedEventLineNotOnStripe(): Unit = onEdt {
     val highlighters = calculateHighlighters()
     val endOfFirstLine = editor.editor.document.getLineEndOffset(0)
     val visibleHighlighters = highlighters.filter { it.startOffset > endOfFirstLine + 1 }.mapNotNull { highlighter ->
       highlighter.getTextAttributes(editor.editor.colorsScheme)?.errorStripeColor?.toTimeIndependent()
     }.toSet()
-    assertSize(1, visibleHighlighters)
+    assertEquals(1, visibleHighlighters.size)
   }
 
-  fun testNoStripedEvents() {
+  @Test
+  fun testNoStripedEvents(): Unit = onEdt {
     val highlighters = calculateUniqueHighlighters()
-    assertSize(1, highlighters)
+    assertEquals(1, highlighters.size)
   }
 
-  fun testDefaultErrorStripedEvents() {
+  @Test
+  fun testDefaultErrorStripedEvents(): Unit = onEdt {
     val highlighters = calculateUniqueHighlighters()
-    assertSize(2, highlighters)
+    assertEquals(2, highlighters.size)
   }
 
-  fun testCustomStripedEvents() {
+  @Test
+  fun testCustomStripedEvents(): Unit = onEdt {
     assertTrue(LogHighlightingSettingsStore.getInstance().myState.patterns.removeIf {
       it.uuid.toString() == "11ff1574-2118-4722-905a-61bec89b079e"
     })
     LogHighlightingSettingsStore.getInstance().myState.patterns.add(DefaultSettingsStoreItems.Warning.copy(showOnStripe = true))
     val highlighters = calculateUniqueHighlighters()
-    assertSize(2, highlighters)
+    assertEquals(2, highlighters.size)
+  }
+
+  private fun onEdt(block: () -> Unit): Unit = timeoutRunBlocking {
+    withContext(Dispatchers.EDT) {
+      try {
+        block()
+      }
+      finally {
+        if (::editor.isInitialized) {
+          Disposer.dispose(editor)
+        }
+      }
+    }
   }
 
   private fun calculateHighlighters(): Array<out RangeHighlighter> {
@@ -128,7 +151,7 @@ class ErrorStripeTest : BasePlatformTestCase() {
   }
 
   private fun createMarkupModel(): MarkupModel {
-    val file = myFixture.copyFileToProject(getTestName(false) + ".log")
+    val file = myFixture.copyFileToProject("$testName.log")
     editor = LogFileEditorProvider().createEditor(project, file) as LogFileEditor
     // The platform creates a TrafficLightRenderer asynchronously for a visible error stripe. It can outlive the test and fail the setUp of
     // the next one. The test checks only the highlighters of the markup model, so the stripe can stay hidden.

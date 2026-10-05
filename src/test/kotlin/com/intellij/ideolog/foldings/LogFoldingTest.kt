@@ -3,29 +3,45 @@ package com.intellij.ideolog.foldings
 import com.intellij.ideolog.file.LogFileEditor
 import com.intellij.ideolog.file.LogFileEditorProvider
 import com.intellij.ideolog.util.ideologContext
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.editor.FoldRegion
 import com.intellij.openapi.util.Disposer
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightFixture
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightProjectFixture
+import com.intellij.testFramework.common.timeoutRunBlocking
+import com.intellij.testFramework.junit5.TestApplication
 import com.intellij.util.ui.UIUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
-class LogFoldingTest : BasePlatformTestCase() {
+@TestApplication
+class LogFoldingTest {
+  companion object {
+    private val projectFixture = codeInsightProjectFixture()
+  }
+
+  private val myFixture by codeInsightFixture(projectFixture)
+  private val project get() = myFixture.project
   private lateinit var editor: LogFileEditor
 
-  override fun tearDown() {
-    try {
-      if (::editor.isInitialized) {
-        Disposer.dispose(editor)
+  @Test
+  fun testFoldingCalculation(): Unit = timeoutRunBlocking {
+    withContext(Dispatchers.EDT) {
+      try {
+        doTestFoldingCalculation()
       }
-    }
-    catch (e: Throwable) {
-      addSuppressedException(e)
-    }
-    finally {
-      super.tearDown()
+      finally {
+        if (::editor.isInitialized) {
+          Disposer.dispose(editor)
+        }
+      }
     }
   }
 
-  fun testFoldingCalculation() {
+  private fun doTestFoldingCalculation() {
     val logContent = """
             2023-05-02 23:09:07,110 [    142]   INFO - #c.i.i.StartupUtil - JVM: 17.0.3+7-b469.32 (OpenJDK 64-Bit Server VM)
             2023-05-02 23:09:07,118 [    150]   INFO - #c.i.i.StartupUtil - PID: 15672
@@ -48,13 +64,13 @@ class LogFoldingTest : BasePlatformTestCase() {
     UIUtil.dispatchAllInvocationEvents()
 
     val foldRegions = editor.editor.foldingModel.allFoldRegions
-    assertFalse("Fold regions should be created", foldRegions.isEmpty())
+    assertFalse(foldRegions.isEmpty(), "Fold regions should be created")
 
     val foldedText = getFoldedText(foldRegions)
-    assertTrue("Folded text should contain INFO lines", foldedText.contains("INFO"))
+    assertTrue(foldedText.contains("INFO"), "Folded text should contain INFO lines")
 
     val visibleText = getVisibleText(editor.editor.document.text, foldRegions)
-    assertTrue("Visible text should contain ERROR lines", visibleText.contains("ERROR"))
+    assertTrue(visibleText.contains("ERROR"), "Visible text should contain ERROR lines")
   }
 
   private fun getFoldedText(foldRegions: Array<FoldRegion>): String {

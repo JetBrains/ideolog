@@ -1,40 +1,47 @@
 package com.intellij.ideolog.highlighting.settings
 
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.testFramework.junit5.TestApplication
 import com.intellij.ui.JBColor
 import com.intellij.util.xmlb.XmlSerializer
 import java.awt.Color
 import org.jdom.Element
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Test
 
-class LogColorTest : BasePlatformTestCase() {
-
+@TestApplication
+class LogColorTest {
+  @Test
   fun testFromColor() {
     val testColor = Color(123, 45, 67)
 
     val logColor = LogColor.fromColor(testColor)
-    assertNotNull("LogColor should not be null", logColor)
-    assertEquals("Light RGB value should match the test color", testColor.rgb, logColor!!.lightRgb)
-    assertEquals("Dark RGB value should match the test color", testColor.rgb, logColor.darkRgb)
+    assertNotNull(logColor, "LogColor should not be null")
+    assertEquals(testColor.rgb, logColor!!.lightRgb, "Light RGB value should match the test color")
+    assertEquals(testColor.rgb, logColor.darkRgb, "Dark RGB value should match the test color")
 
     val nullLogColor = LogColor.fromColor(null)
-    assertNull("LogColor should be null when created from null color", nullLogColor)
+    assertNull(nullLogColor, "LogColor should be null when created from null color")
   }
 
+  @Test
   fun testToJBColor() {
     val lightRgb = Color(123, 45, 67).rgb
     val darkRgb = Color(89, 101, 112).rgb
     val logColor = LogColor(lightRgb, darkRgb)
 
     val jbColor = logColor.toJBColor()
-    assertNotNull("JBColor should not be null", jbColor)
+    assertNotNull(jbColor, "JBColor should not be null")
 
     val expectedColor = JBColor(lightRgb, darkRgb)
     assertEquals(
-      "JBColor should be created with the correct RGB values",
-      expectedColor.toString(), jbColor.toString()
+      expectedColor.toString(), jbColor.toString(),
+      "JBColor should be created with the correct RGB values"
     )
   }
 
+  @Test
   fun testUpdateWithColor() {
     val lightRgb = Color(123, 45, 67).rgb
     val darkRgb = Color(89, 101, 112).rgb
@@ -42,20 +49,21 @@ class LogColorTest : BasePlatformTestCase() {
     val newColor = Color(210, 220, 230)
 
     val updatedLogColor = logColor.updateWithColor(newColor)
-    assertNotNull("Updated LogColor should not be null", updatedLogColor)
+    assertNotNull(updatedLogColor, "Updated LogColor should not be null")
 
     if (JBColor.isBright()) {
-      assertEquals("Light RGB should be updated", newColor.rgb, updatedLogColor!!.lightRgb)
-      assertEquals("Dark RGB should remain the same", darkRgb, updatedLogColor.darkRgb)
+      assertEquals(newColor.rgb, updatedLogColor!!.lightRgb, "Light RGB should be updated")
+      assertEquals(darkRgb, updatedLogColor.darkRgb, "Dark RGB should remain the same")
     } else {
-      assertEquals("Light RGB should remain the same", lightRgb, updatedLogColor!!.lightRgb)
-      assertEquals("Dark RGB should be updated", newColor.rgb, updatedLogColor.darkRgb)
+      assertEquals(lightRgb, updatedLogColor!!.lightRgb, "Light RGB should remain the same")
+      assertEquals(newColor.rgb, updatedLogColor.darkRgb, "Dark RGB should be updated")
     }
 
     val nullUpdatedLogColor = logColor.updateWithColor(null)
-    assertNull("LogColor should be null when updated with null color", nullUpdatedLogColor)
+    assertNull(nullUpdatedLogColor, "LogColor should be null when updated with null color")
   }
 
+  @Test
   fun testDeserializeCurrentJsonColorFormat() {
     val element = Element("LogHighlightingPattern").apply {
       setAttribute("fg", """{"lightRgb":-65536,"darkRgb":-65536}""")
@@ -68,6 +76,7 @@ class LogColorTest : BasePlatformTestCase() {
     assertEquals(LogColor(-39836, -39836), pattern.bgRgb)
   }
 
+  @Test
   fun testDeserializeLegacyIntColorFormat() {
     val element = Element("LogHighlightingPattern").apply {
       setAttribute("fg", "-65536")
@@ -80,6 +89,7 @@ class LogColorTest : BasePlatformTestCase() {
     assertEquals(LogColor(-39836, -39836), pattern.bgRgb)
   }
 
+  @Test
   fun testDeserializeMalformedColorDoesNotThrow() {
     val element = Element("LogHighlightingPattern").apply {
       setAttribute("fg", "not-a-color")
@@ -90,6 +100,7 @@ class LogColorTest : BasePlatformTestCase() {
     assertNull(pattern.fgRgb)
   }
 
+  @Test
   fun testColorSerializationRoundTrip() {
     val pattern = LogHighlightingPattern().apply {
       fgRgb = LogColor(lightRgb = -65536, darkRgb = -12345)

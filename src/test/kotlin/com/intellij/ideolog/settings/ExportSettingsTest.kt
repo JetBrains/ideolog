@@ -5,12 +5,17 @@ import com.intellij.ideolog.highlighting.settings.LogHighlightingConfigurable
 import com.intellij.ideolog.highlighting.settings.LogHighlightingSettingsStore
 import com.intellij.ideolog.highlighting.settings.LogPatternActionRenderer
 import com.intellij.ideolog.highlighting.settings.LogPatternTableModel
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.testFramework.junit5.TestApplication
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.JBUI
 import org.jdom.Element
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
 
-class ExportSettingsTest : BasePlatformTestCase() {
+@TestApplication
+class ExportSettingsTest {
+  @Test
   fun testExportParsingPattern() = doTest(parsingPatternSelectionIndices = listOf(0)) { element ->
     assertEquals(
       LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.first().uuid.toString(),
@@ -18,6 +23,7 @@ class ExportSettingsTest : BasePlatformTestCase() {
     )
   }
 
+  @Test
   fun testExportParsingPatterns() = doTest(parsingPatternSelectionIndices = listOf(0, 2)) { element ->
     assertEquals(
       LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.first().uuid.toString(),
@@ -29,6 +35,7 @@ class ExportSettingsTest : BasePlatformTestCase() {
     )
   }
 
+  @Test
   fun testExportHighlightingPattern() = doTest(highlightingPatternSelectionIndices = listOf(0)) { element ->
     assertEquals(
       LogHighlightingSettingsStore.getInstance().myState.patterns.first().uuid.toString(),
@@ -36,6 +43,7 @@ class ExportSettingsTest : BasePlatformTestCase() {
     )
   }
 
+  @Test
   fun testExportHighlightingPatterns() = doTest(highlightingPatternSelectionIndices = listOf(0, 2)) { element ->
     assertEquals(
       LogHighlightingSettingsStore.getInstance().myState.patterns.first().uuid.toString(),
@@ -47,6 +55,7 @@ class ExportSettingsTest : BasePlatformTestCase() {
     )
   }
 
+  @Test
   fun testExportParsingAndHighlightingPatterns() = doTest(parsingPatternSelectionIndices = listOf(0, 2),
                                                           highlightingPatternSelectionIndices = listOf(0, 2)) { element ->
     assertEquals(

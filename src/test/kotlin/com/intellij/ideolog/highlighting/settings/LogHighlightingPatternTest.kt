@@ -1,24 +1,31 @@
 package com.intellij.ideolog.highlighting.settings
 
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.testFramework.junit5.TestApplication
 import com.intellij.ui.JBColor
 import java.awt.Color
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertNotSame
+import org.junit.jupiter.api.Test
 
-class LogHighlightingPatternTest : BasePlatformTestCase() {
-
+@TestApplication
+class LogHighlightingPatternTest {
+  @Test
   fun testSetLogColorWithNullLogColor() {
     val pattern = LogHighlightingPattern()
     val testColor = Color(123, 45, 67)
 
     pattern.foregroundColor = testColor
-    assertNotNull("Foreground color should not be null", pattern.foregroundColor)
-    assertEquals("Light RGB value should match the test color", testColor.rgb, (pattern.foregroundColor as JBColor).rgb)
+    assertNotNull(pattern.foregroundColor, "Foreground color should not be null")
+    assertEquals(testColor.rgb, (pattern.foregroundColor as JBColor).rgb, "Light RGB value should match the test color")
 
     pattern.backgroundColor = testColor
-    assertNotNull("Background color should not be null", pattern.backgroundColor)
-    assertEquals("Light RGB value should match the test color", testColor.rgb, (pattern.backgroundColor as JBColor).rgb)
+    assertNotNull(pattern.backgroundColor, "Background color should not be null")
+    assertEquals(testColor.rgb, (pattern.backgroundColor as JBColor).rgb, "Light RGB value should match the test color")
   }
 
+  @Test
   fun testSetLogColorWithExistingLogColor() {
     val pattern = LogHighlightingPattern()
     val initialColor = Color(123, 45, 67)
@@ -28,15 +35,16 @@ class LogHighlightingPatternTest : BasePlatformTestCase() {
     pattern.backgroundColor = initialColor
 
     pattern.foregroundColor = newColor
-    assertNotNull("Foreground color should not be null", pattern.foregroundColor)
+    assertNotNull(pattern.foregroundColor, "Foreground color should not be null")
 
-    assertNotSame("Foreground color should be updated", initialColor.rgb, (pattern.foregroundColor as JBColor).rgb)
+    assertNotSame(initialColor.rgb, (pattern.foregroundColor as JBColor).rgb, "Foreground color should be updated")
 
     pattern.backgroundColor = newColor
-    assertNotNull("Background color should not be null", pattern.backgroundColor)
-    assertNotSame("Background color should be updated", initialColor.rgb, (pattern.backgroundColor as JBColor).rgb)
+    assertNotNull(pattern.backgroundColor, "Background color should not be null")
+    assertNotSame(initialColor.rgb, (pattern.backgroundColor as JBColor).rgb, "Background color should be updated")
   }
 
+  @Test
   fun testSetLogColorWithNullColor() {
     val pattern = LogHighlightingPattern()
     val initialColor = Color(123, 45, 67)
@@ -45,9 +53,9 @@ class LogHighlightingPatternTest : BasePlatformTestCase() {
     pattern.backgroundColor = initialColor
 
     pattern.foregroundColor = null
-    assertNull("Foreground color should be null", pattern.foregroundColor)
+    assertNull(pattern.foregroundColor, "Foreground color should be null")
 
     pattern.backgroundColor = null
-    assertNull("Background color should be null", pattern.backgroundColor)
+    assertNull(pattern.backgroundColor, "Background color should be null")
   }
 }

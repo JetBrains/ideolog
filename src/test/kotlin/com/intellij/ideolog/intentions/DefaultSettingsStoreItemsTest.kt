@@ -9,38 +9,47 @@ import com.intellij.ideolog.highlighting.settings.LogParsingPattern
 import com.intellij.ideolog.lex.LogFileFormat
 import com.intellij.ideolog.lex.RegexLogParser
 import com.intellij.ideolog.util.ideologContext
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.util.Disposer
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightFixture
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightProjectFixture
 import com.intellij.psi.PsiFile
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.testFramework.common.timeoutRunBlocking
+import com.intellij.testFramework.junit5.TestApplication
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
 
-class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
+@TestApplication
+class DefaultSettingsStoreItemsTest {
+  companion object {
+    private val projectFixture = codeInsightProjectFixture()
+  }
+
+  private val myFixture by codeInsightFixture(projectFixture)
+  private val project get() = myFixture.project
   private lateinit var parsingPatternsBackup: List<LogParsingPattern>
   private lateinit var editor: LogFileEditor
 
-  override fun setUp() {
-    super.setUp()
+  @BeforeEach
+  fun setUp() {
     parsingPatternsBackup = LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.map { it.copy() }
   }
 
-  override fun tearDown() {
-    try {
-      LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.clear()
-      LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.addAll(parsingPatternsBackup)
-      if (::editor.isInitialized) {
-        Disposer.dispose(editor)
-      }
-    }
-    catch (e: Throwable) {
-      addSuppressedException(e)
-    }
-    finally {
-      super.tearDown()
-    }
+  @AfterEach
+  fun tearDown() {
+    LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.clear()
+    LogHighlightingSettingsStore.getInstance().myState.parsingPatterns.addAll(parsingPatternsBackup)
   }
 
+  @Test
   fun testMatchInfoLogCategory() {
     val event = LogEvent(
       "2023-05-02 23:09:07,110 [    142]   INFO - #c.i.i.StartupUtil - JVM: 17.0.3+7-b469.32 (OpenJDK 64-Bit Server VM)",
@@ -60,6 +69,7 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     assertEquals("#c.i.i.StartupUtil", event.category)
     assertEquals("JVM: 17.0.3+7-b469.32 (OpenJDK 64-Bit Server VM)", event.message)
   }
+  @Test
   fun testMatchSevereLogCategory() {
     val event = LogEvent(
       "2023-05-03 20:02:44,311 [  49719] SEVERE - #c.i.o.u.ObjectTree - Memory leak detected: 'newDisposable' of class com.intellij.openapi.util.Disposer$1 is registered in Disposer but wasn't disposed.",
@@ -80,7 +90,8 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     assertEquals("Memory leak detected: 'newDisposable' of class com.intellij.openapi.util.Disposer\$1 is registered in Disposer but wasn't disposed.", event.message)
   }
 
-  fun testShouldDetectIntelliJPattern() {
+  @Test
+  fun testShouldDetectIntelliJPattern(): Unit = onEdt {
     val document = configureLogFileDocument(
       "2023-05-02 23:09:06,970 [      2]   INFO - #c.i.i.StartupUtil - ------------------------------------------------------ IDE STARTED ------------------------------------------------------\n" +
         "2023-05-02 23:09:07,029 [     61]   INFO - #c.i.i.p.PluginManager - Using broken plugins file from IDE distribution\n" +
@@ -112,7 +123,8 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     assertEquals(DefaultSettingsStoreItems.IntelliJIDEA.uuid, format.myRegexLogParser?.uuid)
   }
 
-  fun testShouldDetectPipeSeparatedPattern() {
+  @Test
+  fun testShouldDetectPipeSeparatedPattern(): Unit = onEdt {
     val document = configureLogFileDocument(
       "03:17:00.000|INFO|Log started|This is info message\n" +
         "03:17:00.000|INFO|Log started|This is multiline\n" +
@@ -124,7 +136,8 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     assertEquals(DefaultSettingsStoreItems.PipeSeparated.uuid, format.myRegexLogParser?.uuid)
   }
 
-  fun testShouldDetectTeamCityPattern() {
+  @Test
+  fun testShouldDetectTeamCityPattern(): Unit = onEdt {
     val document = configureLogFileDocument(
       "[23:54:03]i: TeamCity server version is 9.1.5 (build 37377)\n" +
         "[23:54:03]W: bt4 (2m:17s)\n" +
@@ -144,7 +157,8 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
   }
 
-  fun testShouldDetectLogcatFormat() {
+  @Test
+  fun testShouldDetectLogcatFormat(): Unit = onEdt {
     val document = configureLogFileDocument(
       "01-01 10:00:01.123  1234  5678 D MyAppTag: Starting app\n" +
         "01-01 10:00:02.456  1234  5678 I MyAppTag: Initializing user interface\n" +
@@ -156,7 +170,8 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     assertEquals(DefaultSettingsStoreItems.Logcat.uuid, format.myRegexLogParser?.uuid)
   }
 
-  fun testShouldDetectLoguruFormat() {
+  @Test
+  fun testShouldDetectLoguruFormat(): Unit = onEdt {
     val document = configureLogFileDocument(
       "2023-07-08 16:30:13.780 | SUCCESS | __main__:login:64 - \n" +
         "    User authentication successful\n" +
@@ -183,7 +198,8 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     assertEquals(DefaultSettingsStoreItems.Loguru.uuid, format.myRegexLogParser?.uuid)
   }
 
-  fun testRemoveFormatWithoutRestarting() {
+  @Test
+  fun testRemoveFormatWithoutRestarting(): Unit = onEdt {
     val document = configureLogFileDocument(
       "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}"
     )
@@ -194,7 +210,8 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     assertNull(unknownFormat.myRegexLogParser)
   }
 
-  fun testDisableFormatWithoutRestarting() {
+  @Test
+  fun testDisableFormatWithoutRestarting(): Unit = onEdt {
     val document = configureLogFileDocument(
       "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}"
     )
@@ -205,7 +222,8 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     assertNull(unknownFormat.myRegexLogParser)
   }
 
-  fun testEnableFormatWithoutRestarting() {
+  @Test
+  fun testEnableFormatWithoutRestarting(): Unit = onEdt {
     val document = configureLogFileDocument(
       "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}"
     )
@@ -218,7 +236,8 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
   }
 
-  fun testAddFormatWithoutRestarting() {
+  @Test
+  fun testAddFormatWithoutRestarting(): Unit = onEdt {
     val document = configureLogFileDocument(
       "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}"
     )
@@ -231,7 +250,8 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, format.myRegexLogParser?.uuid)
   }
 
-  fun testOpenFileDisableFormatCloseFileEnableFormatOpenFile() {
+  @Test
+  fun testOpenFileDisableFormatCloseFileEnableFormatOpenFile(): Unit = onEdt {
     val file = configureLogFile(
       "[03:48:03] :    [VCS Root details] \"IntelliJ (241.12345)\" {instance id=12345, parent internal id=123456, parent id=parentid, description: \"ssh://git@address/git#refs/heads/241.12345\"}"
     )
@@ -248,6 +268,19 @@ class DefaultSettingsStoreItemsTest: BasePlatformTestCase() {
     editor = LogFileEditorProvider().createEditor(project, file.virtualFile) as LogFileEditor
     val formatOnReopenedFileAfterEnabling = file.fileDocument.ideologContext.detectLogFileFormat()
     assertEquals(DefaultSettingsStoreItems.TeamCityBuildLog.uuid, formatOnReopenedFileAfterEnabling.myRegexLogParser?.uuid)
+  }
+
+  private fun onEdt(block: () -> Unit): Unit = timeoutRunBlocking {
+    withContext(Dispatchers.EDT) {
+      try {
+        block()
+      }
+      finally {
+        if (::editor.isInitialized) {
+          Disposer.dispose(editor)
+        }
+      }
+    }
   }
 
   private fun configureLogFile(text: String): PsiFile {
