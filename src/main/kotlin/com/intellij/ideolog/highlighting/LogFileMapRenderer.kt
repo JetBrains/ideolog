@@ -12,14 +12,14 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.Key
+import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.annotations.TestOnly
 import java.awt.Color
 import java.awt.Font
 import java.awt.Point
-import java.util.Timer
-import java.util.TimerTask
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
-import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
@@ -38,6 +38,12 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
 
   private var detachedFromEditor = false
 
+  @Volatile
+  private var breadcrumbsFuture: ScheduledFuture<*>? = null
+
+  @Volatile
+  private var eventMapFuture: ScheduledFuture<*>? = null
+
   private val myMarkupModel: MarkupModelEx = myLogFileEditor.editor.markupModel
 
   init {
@@ -54,11 +60,9 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
     val glowSize = 4
     val minSize = 4
 
-    var timer: TimerTask? = null
-    timer = Timer().scheduleAtFixedRate(1000.toLong(), (interval * 1000).toLong()
-    ) {
+    breadcrumbsFuture = AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({
       if (myLogFileEditor.editor.isDisposed || detachedFromEditor)
-        timer!!.cancel()
+        breadcrumbsFuture?.cancel(false)
       else {
         ApplicationManager.getApplication().invokeLater {
           runReadActionBlocking {
@@ -105,7 +109,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
           }
         }
       }
-    }
+    }, 1000, (interval * 1000).toLong(), TimeUnit.MILLISECONDS)
   }
 
   private fun getBucketForOffset(offsStart: Int) = (offsStart.toDouble() / (myLogFileEditor.editor.document.textLength) * (numBuckets - 1)).toInt()
@@ -116,19 +120,17 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
   private val mySync = Object()
   private fun initEventMaps() {
     val interval = 1.0
-    var timer: TimerTask? = null
-    timer = Timer().scheduleAtFixedRate(1000.toLong(), (interval * 1000).toLong()
-    ) {
+    eventMapFuture = AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({
       if (myLogFileEditor.editor.isDisposed || detachedFromEditor)
-        timer!!.cancel()
+        eventMapFuture?.cancel(false)
       else {
         try {
           synchronized(mySync)
           {
             if (!myIsPendingEventMap)
-              return@scheduleAtFixedRate
+              return@scheduleWithFixedDelay
             if (myIsRunningEventMap)
-              return@scheduleAtFixedRate
+              return@scheduleWithFixedDelay
             myIsRunningEventMap = true
             myIsPendingEventMap = false
           }
@@ -213,7 +215,7 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
           }
         }
       }
-    }
+    }, 1000, (interval * 1000).toLong(), TimeUnit.MILLISECONDS)
   }
 
   companion object {
@@ -256,6 +258,8 @@ class LogFileMapRenderer(private val myLogFileEditor: LogFileEditor) {
     }
     myLogFileEditor.editor.putUserData(LogFileMapRendererKey, null)
     detachedFromEditor = true
+    breadcrumbsFuture?.cancel(false)
+    eventMapFuture?.cancel(false)
   }
 
   private fun beginInvokeComposeBuckets() {
