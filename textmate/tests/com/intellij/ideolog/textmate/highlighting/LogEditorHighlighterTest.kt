@@ -2,38 +2,61 @@ package com.intellij.ideolog.textmate.highlighting
 
 import com.intellij.ideolog.highlighting.CUSTOM_DEFAULT_LOG_HIGHLIGHTER_SIZE_CONSTRAINT
 import com.intellij.ideolog.highlighting.LogEditorHighlighter
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.editor.ex.util.LexerEditorHighlighter
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightFixture
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightProjectFixture
 import com.intellij.psi.PsiFile
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import com.intellij.testFramework.fixtures.IdeaTestExecutionPolicy
-import java.nio.file.Path
-import kotlin.io.path.pathString
+import com.intellij.testFramework.TestDataPath
+import com.intellij.testFramework.common.timeoutRunBlocking
+import com.intellij.testFramework.junit5.TestApplication
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInfo
 
-class LogEditorHighlighterTest: BasePlatformTestCase() {
-  override fun getTestDataPath(): String =
-    Path.of(IdeaTestExecutionPolicy.getHomePathWithPolicy(), "plugins/ideolog/textmate/testResources/highlighting").pathString
+@TestApplication
+@TestDataPath($$"$PROJECT_ROOT/plugins/ideolog/textmate/testResources/highlighting")
+class LogEditorHighlighterTest {
+  companion object {
+    private val projectFixture = codeInsightProjectFixture()
+  }
 
-  fun testLogFileNonExistingFormat() {
-    configureByFile()
-    val highlighter = myFixture.editor.highlighter
-    assertInstanceOf(highlighter, LogEditorHighlighter::class.java)
-    assertInstanceOf((highlighter as LogEditorHighlighter).createIterator(0),
-                     LexerEditorHighlighter.HighlighterIteratorImpl::class.java)
+  private val myFixture by codeInsightFixture(projectFixture)
+  private lateinit var testName: String
+
+  @BeforeEach
+  fun setUp(testInfo: TestInfo) {
+    testName = testInfo.testMethod.get().name.removePrefix("test")
+  }
+
+  @Test
+  fun testLogFileNonExistingFormat(): Unit = timeoutRunBlocking {
+    withContext(Dispatchers.EDT) {
+      configureByFile()
+      val highlighter = assertInstanceOf(LogEditorHighlighter::class.java, myFixture.editor.highlighter)
+      assertInstanceOf(LexerEditorHighlighter.HighlighterIteratorImpl::class.java, highlighter.createIterator(0))
+    }
   }
 
 
-  fun testBigLogFileNonExistingFormat() {
-    configureByText("a".repeat(CUSTOM_DEFAULT_LOG_HIGHLIGHTER_SIZE_CONSTRAINT) + 1)
-    val highlighter = myFixture.editor.highlighter
-    assertInstanceOf(highlighter, LogEditorHighlighter::class.java)
-    assertFalse((highlighter as LogEditorHighlighter).createIterator(0) is LexerEditorHighlighter.HighlighterIteratorImpl)
+  @Test
+  fun testBigLogFileNonExistingFormat(): Unit = timeoutRunBlocking {
+    withContext(Dispatchers.EDT) {
+      configureByText("a".repeat(CUSTOM_DEFAULT_LOG_HIGHLIGHTER_SIZE_CONSTRAINT) + 1)
+      val highlighter = assertInstanceOf(LogEditorHighlighter::class.java, myFixture.editor.highlighter)
+      assertFalse(highlighter.createIterator(0) is LexerEditorHighlighter.HighlighterIteratorImpl)
+    }
   }
 
   private fun configureByFile(): PsiFile {
-    return myFixture.configureByFile(getTestName(false) + ".log")
+    return myFixture.configureByFile("$testName.log")
   }
 
   private fun configureByText(text: String): PsiFile {
-    return myFixture.configureByText(getTestName(false) + ".log", text)
+    return myFixture.configureByText("$testName.log", text)
   }
 }
