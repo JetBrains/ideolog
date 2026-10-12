@@ -11,11 +11,9 @@ import com.intellij.util.ui.UIUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 @TestApplication
-@Disabled("AT-4013")
 class LogFilterTest {
   companion object {
     private val projectFixture = projectFixture(openAfterCreation = true)
