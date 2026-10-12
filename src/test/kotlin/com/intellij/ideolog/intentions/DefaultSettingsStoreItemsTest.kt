@@ -12,11 +12,11 @@ import com.intellij.ideolog.util.ideologContext
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.util.Disposer
-import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightFixture
-import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightProjectFixture
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightModuleFixture
 import com.intellij.psi.PsiFile
 import com.intellij.testFramework.common.timeoutRunBlocking
 import com.intellij.testFramework.junit5.TestApplication
+import com.intellij.testFramework.junit5.fixture.projectFixture
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.junit.jupiter.api.AfterEach
@@ -30,10 +30,10 @@ import java.util.regex.Pattern
 @TestApplication
 class DefaultSettingsStoreItemsTest {
   companion object {
-    private val projectFixture = codeInsightProjectFixture()
+    private val projectFixture = projectFixture(openAfterCreation = true)
   }
 
-  private val myFixture by codeInsightFixture(projectFixture)
+  private val myFixture by codeInsightModuleFixture(projectFixture)
   private val project get() = myFixture.project
   private lateinit var parsingPatternsBackup: List<LogParsingPattern>
   private lateinit var editor: LogFileEditor

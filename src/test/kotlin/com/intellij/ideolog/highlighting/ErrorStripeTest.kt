@@ -12,12 +12,12 @@ import com.intellij.openapi.editor.ex.EditorMarkupModel
 import com.intellij.openapi.editor.markup.MarkupModel
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.util.Disposer
-import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightFixture
-import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightProjectFixture
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightModuleFixture
 import com.intellij.testFramework.PlatformTestUtil
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.common.timeoutRunBlocking
 import com.intellij.testFramework.junit5.TestApplication
+import com.intellij.testFramework.junit5.fixture.projectFixture
 import com.intellij.util.ui.UIUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -36,10 +36,10 @@ import kotlin.math.abs
 @TestDataPath($$"$PROJECT_ROOT/plugins/ideolog/src/test/resources/highlighting/errorStripe")
 class ErrorStripeTest {
   companion object {
-    private val projectFixture = codeInsightProjectFixture()
+    private val projectFixture = projectFixture(openAfterCreation = true)
   }
 
-  private val myFixture by codeInsightFixture(projectFixture)
+  private val myFixture by codeInsightModuleFixture(projectFixture)
   private val project get() = myFixture.project
   private lateinit var editor: LogFileEditor
   private lateinit var highlightingPatternsBackup: List<LogHighlightingPattern>

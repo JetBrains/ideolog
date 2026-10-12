@@ -6,11 +6,11 @@ import com.intellij.openapi.fileEditor.impl.FileEditorProviderManagerImpl
 import com.intellij.openapi.util.registry.Registry
 import com.intellij.openapi.util.registry.withValue
 import com.intellij.openapi.vfs.limits.FileSizeLimit
-import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightFixture
-import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightProjectFixture
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightModuleFixture
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.common.timeoutRunBlocking
 import com.intellij.testFramework.junit5.TestApplication
+import com.intellij.testFramework.junit5.fixture.projectFixture
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,10 +22,10 @@ import org.junit.jupiter.api.Test
 @TestDataPath($$"$PROJECT_ROOT/plugins/ideolog/src/test/resources/highlighting")
 class LogFileEditorTest {
   companion object {
-    private val projectFixture = codeInsightProjectFixture()
+    private val projectFixture = projectFixture(openAfterCreation = true)
   }
 
-  private val myFixture by codeInsightFixture(projectFixture)
+  private val myFixture by codeInsightModuleFixture(projectFixture)
   private val project get() = myFixture.project
 
   @Test

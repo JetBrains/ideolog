@@ -1,12 +1,12 @@
 package com.intellij.ideolog.highlighting
 
 import com.intellij.openapi.application.EDT
-import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightFixture
-import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightProjectFixture
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightModuleFixture
 import com.intellij.psi.PsiFile
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.common.timeoutRunBlocking
 import com.intellij.testFramework.junit5.TestApplication
+import com.intellij.testFramework.junit5.fixture.projectFixture
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.junit.jupiter.api.Assertions.assertInstanceOf
@@ -16,10 +16,10 @@ import org.junit.jupiter.api.Test
 @TestDataPath($$"$PROJECT_ROOT/plugins/ideolog/src/test/resources/highlighting")
 class LogEditorHighlighterTest {
   companion object {
-    private val projectFixture = codeInsightProjectFixture()
+    private val projectFixture = projectFixture(openAfterCreation = true)
   }
 
-  private val myFixture by codeInsightFixture(projectFixture)
+  private val myFixture by codeInsightModuleFixture(projectFixture)
 
   @Test
   fun testDetectHighlighterForLogFile(): Unit = timeoutRunBlocking {

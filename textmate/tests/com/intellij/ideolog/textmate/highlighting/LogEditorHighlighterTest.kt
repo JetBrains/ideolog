@@ -4,12 +4,12 @@ import com.intellij.ideolog.highlighting.CUSTOM_DEFAULT_LOG_HIGHLIGHTER_SIZE_CON
 import com.intellij.ideolog.highlighting.LogEditorHighlighter
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.editor.ex.util.LexerEditorHighlighter
-import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightFixture
-import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightProjectFixture
+import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightModuleFixture
 import com.intellij.psi.PsiFile
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.common.timeoutRunBlocking
 import com.intellij.testFramework.junit5.TestApplication
+import com.intellij.testFramework.junit5.fixture.projectFixture
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -22,10 +22,10 @@ import org.junit.jupiter.api.TestInfo
 @TestDataPath($$"$PROJECT_ROOT/plugins/ideolog/textmate/testResources/highlighting")
 class LogEditorHighlighterTest {
   companion object {
-    private val projectFixture = codeInsightProjectFixture()
+    private val projectFixture = projectFixture(openAfterCreation = true)
   }
 
-  private val myFixture by codeInsightFixture(projectFixture)
+  private val myFixture by codeInsightModuleFixture(projectFixture)
   private lateinit var testName: String
 
   @BeforeEach
