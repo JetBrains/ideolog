@@ -340,7 +340,7 @@ class LogHighlightingSettingsStore : PersistentStateComponent<LogHighlightingSet
   var myState: LogHighlightingSettingsStore.State = cleanState.clone()
   private val myListeners = HashSet<LogHighlightingSettingsListener>()
 
-  @RequiresEdt(generateAssertion = false /* IJPL-115548 */)
+  @RequiresEdt
   fun addSettingsListener(disposable: Disposable, listener: LogHighlightingSettingsListener) {
     myListeners.add(listener)
     Disposer.register(disposable) {
