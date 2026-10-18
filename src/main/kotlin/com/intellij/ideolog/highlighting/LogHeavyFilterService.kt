@@ -76,7 +76,7 @@ open class LogHeavyFilterService(private val project: Project, val cs: Coroutine
     }
 
     val hyperlinkSupport = markupModel.getUserData(markupHyperlinkSupportKey)
-      ?: EditorHyperlinkSupport(editor, editor.project!!).also { markupModel.putUserData(markupHyperlinkSupportKey, it) }
+      ?: EditorHyperlinkSupport.get(editor).also { markupModel.putUserData(markupHyperlinkSupportKey, it) }
 
     fun consumeResult(result: Filter.Result?, addOffset: Boolean) {
       result ?: return
