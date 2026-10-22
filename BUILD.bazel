@@ -1,4 +1,5 @@
 load("@community//build:compiler-options.bzl", "create_kotlinc_options")
+load("@community//platform/build-scripts/bazel-rules:ij_plugin.bzl", "ij_plugin")
 load("@jps_dynamic_deps_ultimate//:targets.bzl", "dev_dist_plugin")
 load("@rules_jvm//:jvm.bzl", "jvm_library")
 
@@ -86,6 +87,20 @@ jvm_library(
     ],
 )
 ### auto-generated section `build intellij.ideolog` end
+
+### auto-generated section `plugin intellij.ideolog` start
+ij_plugin(
+    name = "ideolog_plugin",
+    descriptor_module = ":ideolog",
+    content_modules = [
+        # do not sort,
+        "//phpstorm/ideolog",
+        "//plugins/ideolog/terminal",
+        "//plugins/ideolog/textmate",
+    ],
+    visibility = ["//visibility:public"],
+)
+### auto-generated section `plugin intellij.ideolog` end
 
 ### auto-generated section `iml intellij.ideolog` start
 exports_files(
