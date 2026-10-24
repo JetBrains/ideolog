@@ -103,8 +103,6 @@ jvm_library(
         "@community//platform/editor-ui-api:editor-ui_test_lib",
         "//plugins/ideolog",
         "//plugins/ideolog:ideolog_test_lib",
-        "@community//plugins/textmate",
-        "@community//plugins/textmate:textmate_test_lib",
         "@community//plugins/textmate/plugin",
         "@community//plugins/textmate/plugin:plugin_test_lib",
         "@community//plugins/textmate/backend",
