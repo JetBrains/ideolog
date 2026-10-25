@@ -69,6 +69,7 @@ jvm_library(
     ),
     module_name = "intellij.ideolog.textmate.tests",
     visibility = ["//visibility:public"],
+    runtime_deps = ["//plugins/ideolog/textmate"],
 )
 
 jvm_library(
@@ -88,7 +89,11 @@ jvm_library(
         ["testResources/**/*"],
     ),
     visibility = ["//visibility:public"],
-    runtime_deps = [":textmate-tests"],
+    runtime_deps = [
+        # do not sort,
+        ":textmate-tests",
+        "//plugins/ideolog/textmate:textmate_test_lib",
+    ],
     deps = [
         # do not sort,
         "@lib//:kotlin-stdlib",
@@ -106,8 +111,6 @@ jvm_library(
         "@community//plugins/textmate/backend:backend_test_lib",
         "@community//platform/testFramework",
         "@community//platform/testFramework:testFramework_test_lib",
-        "//plugins/ideolog/textmate",
-        "//plugins/ideolog/textmate:textmate_test_lib",
         "@community//platform/testFramework/junit5",
         "@community//platform/testFramework/junit5:junit5_test_lib",
         "@community//platform/testFramework/junit5/codeInsight",
