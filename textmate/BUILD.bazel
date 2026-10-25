@@ -82,10 +82,7 @@ jvm_library(
         ],
         allow_empty = True,
     ),
-    associates = [
-        "//plugins/ideolog/textmate",
-        "//plugins/ideolog/textmate:textmate_test_lib",
-    ],
+    module_name = "intellij.ideolog.textmate.tests",
     resource_strip_prefix = "testResources",
     resources = glob(
         ["testResources/**/*"],
@@ -109,6 +106,8 @@ jvm_library(
         "@community//plugins/textmate/backend:backend_test_lib",
         "@community//platform/testFramework",
         "@community//platform/testFramework:testFramework_test_lib",
+        "//plugins/ideolog/textmate",
+        "//plugins/ideolog/textmate:textmate_test_lib",
         "@community//platform/testFramework/junit5",
         "@community//platform/testFramework/junit5:junit5_test_lib",
         "@community//platform/testFramework/junit5/codeInsight",
