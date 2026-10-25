@@ -69,7 +69,12 @@ jvm_library(
     ),
     module_name = "intellij.ideolog.textmate.tests",
     visibility = ["//visibility:public"],
-    runtime_deps = ["//plugins/ideolog/textmate"],
+    runtime_deps = [
+        # do not sort,
+        "//plugins/ideolog/textmate",
+        "@community//platform/main/intellij.platform.monolith.main:monolith-main",
+        "@community//community-resources:customization",
+    ],
 )
 
 jvm_library(
@@ -93,6 +98,8 @@ jvm_library(
         # do not sort,
         ":textmate-tests",
         "//plugins/ideolog/textmate:textmate_test_lib",
+        "@community//platform/main/intellij.platform.monolith.main:monolith-main_test_lib",
+        "@community//community-resources:customization_test_lib",
     ],
     deps = [
         # do not sort,
