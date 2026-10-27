@@ -2,12 +2,13 @@ package com.intellij.ideolog.filters
 
 import com.intellij.ideolog.highlighting.LogHeavyFilterService
 import com.intellij.openapi.application.EDT
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import com.intellij.platform.testFramework.junit5.codeInsight.fixture.codeInsightModuleFixture
 import com.intellij.testFramework.common.timeoutRunBlocking
+import com.intellij.testFramework.common.waitUntil
 import com.intellij.testFramework.junit5.TestApplication
 import com.intellij.testFramework.junit5.fixture.projectFixture
-import com.intellij.util.ui.UIUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,12 +25,19 @@ class LogFilterTest {
 
   @Test
   fun testFilterEnqueuing(): Unit = timeoutRunBlocking {
+    val editor = withContext(Dispatchers.EDT) {
+      enqueueFirstLine()
+    }
+    // The service adds the highlighter in a later EDT coroutine. A pending background write action delays that coroutine.
+    waitUntil("The highlighter did not appear") {
+      withContext(Dispatchers.EDT) { editor.markupModel.allHighlighters.isNotEmpty() }
+    }
     withContext(Dispatchers.EDT) {
-      doTestFilterEnqueuing()
+      assertEquals(1, editor.markupModel.allHighlighters.size)
     }
   }
 
-  private fun doTestFilterEnqueuing() {
+  private fun enqueueFirstLine(): Editor {
     val logContent = """
             2023-05-02 23:09:07,110 [    142]   INFO - #c.i.i.StartupUtil - Check out https://www.jetbrains.com for more information
             2023-05-02 23:09:07,118 [    150]   INFO - #c.i.i.StartupUtil - File path: C:\Users\user\path\to\file.txt
@@ -49,7 +57,6 @@ class LogFilterTest {
     ))
 
     service.enqueueHeavyFiltering(editor, 0, firstLine)
-    UIUtil.dispatchAllInvocationEvents()
-    assertEquals(1, editor.markupModel.allHighlighters.size)
+    return editor
   }
 }
