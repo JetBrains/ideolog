@@ -85,8 +85,6 @@ jvm_library(
         "@community//platform/testFramework:testFramework_test_lib",
         "//plugins/ideolog",
         "//plugins/ideolog:ideolog_test_lib",
-        "@community//images:images-tests",
-        "@community//images:images-tests_test_lib",
         "@community//RegExpSupport:regexp-tests",
         "@community//RegExpSupport:regexp-tests_test_lib",
         "@community//platform/ide-core",
