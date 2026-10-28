@@ -28,27 +28,6 @@ jvm_library(
         "@community//platform/statistics",
     ],
 )
-
-jvm_library(
-    name = "terminal_test_lib",
-    testonly = True,
-    srcs = glob(
-        [],
-        allow_empty = True,
-    ),
-    module_name = "intellij.ideolog.terminal",
-    visibility = ["//visibility:public"],
-    runtime_deps = [
-        # do not sort,
-        ":terminal",
-        "@community//platform/util:util_test_lib",
-        "@community//platform/editor-ui-api:editor-ui_test_lib",
-        "@community//plugins/terminal:terminal_test_lib",
-        "//plugins/ideolog:ideolog_test_lib",
-        "@community//platform/core-api:core_test_lib",
-        "@community//platform/statistics:statistics_test_lib",
-    ],
-)
 ### auto-generated section `build intellij.ideolog.terminal` end
 
 ### auto-generated section `iml intellij.ideolog.terminal` start
