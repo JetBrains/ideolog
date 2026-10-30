@@ -7,7 +7,6 @@ import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.highlighter.HighlighterClient
 import com.intellij.openapi.editor.highlighter.HighlighterIterator
-import com.intellij.openapi.util.registry.Registry
 import org.jetbrains.plugins.terminal.block.output.CommandBlock
 import org.jetbrains.plugins.terminal.block.output.highlighting.TerminalCommandBlockHighlighter
 import java.util.TreeSet
@@ -22,7 +21,6 @@ class TerminalCommandBlockHighlighter(
   private lateinit var editor: HighlighterClient
 
   override fun shouldHighlight(startOffset: Int): Boolean {
-    if (!Registry.`is`("ideolog.terminal.enabled")) return false
     if (!::editor.isInitialized) return false
     val document = editor.document
     val lineNumber = document.getLineNumber(startOffset)
