@@ -22,11 +22,6 @@ dist_plugin(
     },
     main_module = "intellij.ideolog",
     mode_refused_content_modules = {"frontend": ["intellij.php.ideolog"]},
-    module_descriptors = [
-        "//phpstorm/ideolog:resources/intellij.php.ideolog.xml",
-        "//plugins/ideolog/terminal:resources/intellij.ideolog.terminal.xml",
-        "//plugins/ideolog/textmate:resources/intellij.ideolog.textmate.xml",
-    ],
     module_labels = {"intellij.ideolog": "//plugins/ideolog"},
 )
 ### auto-generated section `dev intellij.ideolog` end
