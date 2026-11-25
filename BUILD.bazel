@@ -6,18 +6,12 @@ load("@rules_jvm//:jvm.bzl", "jvm_library")
 
 ### auto-generated section `dev intellij.ideolog` start
 dist_plugin(
-    content_modules = [
-        # do not sort,
-        "intellij.php.ideolog",
-        "intellij.ideolog.terminal",
-        "intellij.ideolog.textmate",
-    ],
-    descriptor = "src/main/resources/META-INF/plugin.xml",
-    descriptors = {
-        "//phpstorm/ideolog:resources/intellij.php.ideolog.xml": "intellij.php.ideolog.xml",
-        "//plugins/ideolog/terminal:resources/intellij.ideolog.terminal.xml": "intellij.ideolog.terminal.xml",
-        "//plugins/ideolog/textmate:resources/intellij.ideolog.textmate.xml": "intellij.ideolog.textmate.xml",
+    content_modules = {
+        "intellij.php.ideolog": "//phpstorm/ideolog",
+        "intellij.ideolog.terminal": "//plugins/ideolog/terminal",
+        "intellij.ideolog.textmate": "//plugins/ideolog/textmate",
     },
+    descriptor = "src/main/resources/META-INF/plugin.xml",
     jars = {
         "lib/ideolog.jar": [
             "intellij.ideolog",
@@ -27,15 +21,13 @@ dist_plugin(
         ],
     },
     main_module = "intellij.ideolog",
-    mode_refused_content_modules = {
-        "frontend": ["intellij.php.ideolog"],
-    },
-    module_labels = {
-        "intellij.ideolog": "//plugins/ideolog:ideolog",
-        "intellij.ideolog.terminal": "//plugins/ideolog/terminal:terminal",
-        "intellij.ideolog.textmate": "//plugins/ideolog/textmate:textmate",
-        "intellij.php.ideolog": "//phpstorm/ideolog:ideolog",
-    },
+    mode_refused_content_modules = {"frontend": ["intellij.php.ideolog"]},
+    module_descriptors = [
+        "//phpstorm/ideolog:resources/intellij.php.ideolog.xml",
+        "//plugins/ideolog/terminal:resources/intellij.ideolog.terminal.xml",
+        "//plugins/ideolog/textmate:resources/intellij.ideolog.textmate.xml",
+    ],
+    module_labels = {"intellij.ideolog": "//plugins/ideolog"},
 )
 ### auto-generated section `dev intellij.ideolog` end
 
