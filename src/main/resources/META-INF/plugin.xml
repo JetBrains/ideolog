@@ -71,13 +71,13 @@
     <applicationConfigurable key="configurable.name.log.highlighting.ideolog" instance="com.intellij.ideolog.highlighting.settings.LogHighlightingConfigurable" id="LogHighlighting" groupId="editor"/>
     <editorHighlighterProvider filetype="Log" implementationClass="com.intellij.ideolog.highlighting.LogFileEditorHighlighterProvider" />
     <extendWordSelectionHandler implementation="com.intellij.ideolog.editorActions.ExtendsSelection"/>
-    <fileEditorProvider implementation="com.intellij.ideolog.file.LogFileEditorProvider" />
+    <fileEditorProvider id="LogFileEditorProvider" implementation="com.intellij.ideolog.file.LogFileEditorProvider" />
     <lang.parserDefinition language="LOG" implementationClass="com.intellij.ideolog.psi.LogFileParserDefinition"/>
     <fileType name="Log" language="LOG" implementationClass="com.intellij.ideolog.fileType.LogFileType" extensions="log" fieldName="INSTANCE"/>
     <editorNotificationProvider implementation="com.intellij.ideolog.file.LogLargeFileNotificationProvider"/>
     <editorNotificationProvider implementation="com.intellij.ideolog.file.LogFileFormatNotificationProvider"/>
 
-    <fileEditorProvider implementation="com.intellij.ideolog.largeFile.LargeLogFileEditorProvider"/>
+    <fileEditorProvider id="LargeLogFileEditorProvider" implementation="com.intellij.ideolog.largeFile.LargeLogFileEditorProvider"/>
     <editorHighlighterProvider filetype="LargeLog" implementationClass="com.intellij.ideolog.largeFile.highlighting.LargeLogFileEditorHighlighterProvider"/>
     <fileType name="LargeLog" implementationClass="com.intellij.ideolog.largeFile.fileType.LargeLogFileType" fieldName="INSTANCE"/>
     <ideolog.ideologContextDetector implementation="com.intellij.ideolog.largeFile.IdeologLargeFileContextDetector"/>
