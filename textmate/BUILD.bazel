@@ -1,3 +1,4 @@
+load("@community//build:jps_module.bzl", "jps_module")
 load("@community//build:tests-options.bzl", "jps_test")
 load("@rules_jvm//:jvm.bzl", "jvm_library")
 
@@ -31,12 +32,10 @@ jvm_library(
 ### auto-generated section `build intellij.ideolog.textmate` end
 
 ### auto-generated section `iml intellij.ideolog.textmate` start
-exports_files(
-    [
-        "intellij.ideolog.textmate.iml",
-        "resources/intellij.ideolog.textmate.xml",
-    ],
-    visibility = ["//visibility:public"],
+jps_module(
+    name = "intellij.ideolog.textmate",
+    descriptors = ["resources/intellij.ideolog.textmate.xml"],
+    target = "textmate",
 )
 ### auto-generated section `iml intellij.ideolog.textmate` end
 
@@ -83,11 +82,9 @@ jvm_library(
 ### auto-generated section `build intellij.ideolog.textmate.tests` end
 
 ### auto-generated section `iml intellij.ideolog.textmate.tests` start
-exports_files(
-    [
-        "intellij.ideolog.textmate.tests.iml",
-    ],
-    visibility = ["//visibility:public"],
+jps_module(
+    name = "intellij.ideolog.textmate.tests",
+    target = "textmate-tests_test_lib",
 )
 ### auto-generated section `iml intellij.ideolog.textmate.tests` end
 

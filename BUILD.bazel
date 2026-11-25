@@ -1,6 +1,7 @@
 load("@community//build:compiler-options.bzl", "create_kotlinc_options")
+load("@community//build:jps_module.bzl", "jps_module")
+load("@community//platform/build-scripts/bazel-rules:dist_plugin.bzl", "dist_plugin")
 load("@community//platform/build-scripts/bazel-rules:ij_plugin.bzl", "ij_plugin")
-load("@jps_dynamic_deps_ultimate//:targets.bzl", "dist_plugin")
 load("@rules_jvm//:jvm.bzl", "jvm_library")
 
 ### auto-generated section `dev intellij.ideolog` start
@@ -12,6 +13,11 @@ dist_plugin(
         "intellij.ideolog.textmate",
     ],
     descriptor = "src/main/resources/META-INF/plugin.xml",
+    descriptors = {
+        "//phpstorm/ideolog:resources/intellij.php.ideolog.xml": "intellij.php.ideolog.xml",
+        "//plugins/ideolog/terminal:resources/intellij.ideolog.terminal.xml": "intellij.ideolog.terminal.xml",
+        "//plugins/ideolog/textmate:resources/intellij.ideolog.textmate.xml": "intellij.ideolog.textmate.xml",
+    },
     jars = {
         "lib/ideolog.jar": [
             "intellij.ideolog",
@@ -23,6 +29,12 @@ dist_plugin(
     main_module = "intellij.ideolog",
     mode_refused_content_modules = {
         "frontend": ["intellij.php.ideolog"],
+    },
+    module_labels = {
+        "intellij.ideolog": "//plugins/ideolog:ideolog",
+        "intellij.ideolog.terminal": "//plugins/ideolog/terminal:terminal",
+        "intellij.ideolog.textmate": "//plugins/ideolog/textmate:textmate",
+        "intellij.php.ideolog": "//phpstorm/ideolog:ideolog",
     },
 )
 ### auto-generated section `dev intellij.ideolog` end
@@ -106,11 +118,10 @@ ij_plugin(
 ### auto-generated section `plugin intellij.ideolog` end
 
 ### auto-generated section `iml intellij.ideolog` start
-exports_files(
-    [
-        "intellij.ideolog.iml",
-        "src/main/resources/META-INF/plugin.xml",
-    ],
-    visibility = ["//visibility:public"],
+jps_module(
+    name = "intellij.ideolog",
+    descriptors = ["src/main/resources/META-INF/plugin.xml"],
+    plugin = True,
+    target = "ideolog",
 )
 ### auto-generated section `iml intellij.ideolog` end
